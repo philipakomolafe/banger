@@ -8,7 +8,7 @@ import google.generativeai as genai
 from dotenv import load_dotenv
 from email.message import EmailMessage
 
-load_dotenv(".env")
+load_dotenv()
 
 ROTATION = ["music_insight", "product_philosophy", "minimalism_in_building"]
 
