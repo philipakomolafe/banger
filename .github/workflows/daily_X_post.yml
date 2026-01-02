@@ -40,6 +40,6 @@ jobs:
           SMTP_PASS: ${{ secrets.SMTP_PASS }}
           TO_EMAIL: ${{ secrets.TO_EMAIL }}
 
-          SMTP_DEBUG: "0"
+          SMTP_DEBUG: "1"
         run: |
           python main.py
