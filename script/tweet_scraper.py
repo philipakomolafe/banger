@@ -29,17 +29,36 @@ def get_client() -> tweepy.Client:
         wait_on_rate_limit=True,
     )
 
-
-def fetch_my_tweets(
-    username: str,
-    max_tweets: int = 300,
-    include_replies: bool = False,
-    include_retweets: bool = False,
-) -> list[dict]:
+                     
+def fetch_my_tweets(username: str, max_tweets: int = 300, include_replies: bool = False, include_retweets: bool = False,) -> list[dict]:
+    """
+    Fetch recent tweets authored by a given Twitter/X user.
+    Uses the Twitter API v2 (via Tweepy) to page through a user's timeline, optionally
+    excluding replies and/or retweets, cleans tweet text, filters out short tweets,
+    and returns up to `max_tweets` items as dictionaries.
+    Args:
+        username: The screen name/handle to fetch tweets for (without "@").
+        max_tweets: Maximum number of tweets to return.
+        include_replies: If False, replies are excluded from results.
+        include_retweets: If False, retweets are excluded from results.
+    Returns:
+        A list of dictionaries, each with:
+            - "id": Tweet ID as a string.
+            - "created_at": ISO-8601 timestamp string, or None if unavailable.
+            - "text": Cleaned tweet text.
+    Notes:
+        The function should add one tweet dictionary per tweet. For that, `list.append(...)`
+        is the correct method.
+        Using `list.extend({...})` with a dict is typically a bug: `extend` expects an
+        iterable of items, and iterating a dict yields its keys, so it would add the
+        strings "id", "created_at", and "text" to the list rather than a single dict.
+        Prefer:
+            out.append({"id": ..., "created_at": ..., "text": ...})
+    """
     client = get_client()
 
-    me = client.get_user(username=username)
-    user_id = me.data.id
+    user = client.get_user(username=username)
+    user_id = user.data.id
 
     exclude = []
     if not include_replies:
@@ -66,13 +85,12 @@ def fetch_my_tweets(
             if len(text) < 40:
                 continue
 
-            out.append(
+            out.append( 
                 {
                     "id": str(t.id),
                     "created_at": t.created_at.isoformat() if t.created_at else None,
                     "text": text,
-                }
-            )
+                })
 
             if len(out) >= max_tweets:
                 return out
