@@ -61,12 +61,30 @@ def pick_mode_for_today() -> str:
 
 def build_prompt(mode: str) -> str:
     seed = random.choice(TOPIC_SEEDS_PER_MODE[mode])
+
+    try:
+        with open("training_tweets.json") as file:
+            tweet_examples = json.load(file)
+
+            # Ensures the maximum k-th samples selected would not exceed 5
+            sample_tweets = random.sample(tweet_examples, min(5, len(tweet_examples)))
+            texts = "/n".join(f"- {t}" for t in sample_tweets)
+
+    except FileNotFoundError:
+        texts = ""
+
     mode_line = {
         "music_insight": f"Mode: Music insight. Seed: {seed}.",
         "product_philosophy": f"Mode: Product philosophy. Seed: {seed}.",
         "minimalism_in_building": f"Mode: Minimalism in building. Seed: {seed}.",
     }[mode]
-    return f"{PROMPT_RULES}\n\n{mode_line}\n\nWrite the post now."
+
+    few_shot = f"""
+    Here are examples of the TONE to match (real human tweets): {texts}
+
+Write in this exact style: casual, specific, grounded observations. Not promotional or polished.
+"""
+    return f"{PROMPT_RULES}\n\n{few_shot}\n\n{mode_line}\n\nWrite the post now."
 
 def is_ad_like(text: str) -> bool:
     t = text.strip().lower()
@@ -97,7 +115,7 @@ def generate_with_gemini(prompt: str, temperature: float = 0.4) -> str:
 def generate_human_post(prompt: str) -> str:
     # Try a few times; slightly lower temperature helps reduce “ad voice”.
     for temp in (0.4, 0.3, 0.2):
-        post = generate_with_gemini(prompt, temperature=temp)
+        post = generate_with_gemini(prompt, temperature=temp) 
 
         if not is_ad_like(post):
             return post
@@ -154,3 +172,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+ 
