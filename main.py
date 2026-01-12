@@ -5,6 +5,7 @@ import random
 import urllib.request
 from datetime import datetime, timezone
 import google.generativeai as genai
+import google.genai as gen
 from dotenv import load_dotenv
 from email.message import EmailMessage
 
@@ -46,24 +47,20 @@ AD_LIKE_PHRASES = [
     "game-changer", "revolutionary", "ultimate", "secret", "unlock",
 ]
 
-TOPIC_SEEDS = [
-    "anxiety",
-    "focus",
-    "overwhelm",
-    "late-night work",
-    "starting over",
-    "quiet confidence",
-    "state of mind",
-    "attention",
-]
+TOPIC_SEEDS_PER_MODE = {
+    "music_insight": ["focus", "overwhelm"],
+    "product_philosophy": ["attention", "starting over"],
+    "minimalism_in_building": ["attention", "overwhelm"],
+}
 
 def pick_mode_for_today() -> str:
     # Stable daily rotation based on UTC date (keeps GitHub Actions consistent)
-    day_index = int(datetime.now(timezone.utc).strftime("%Y%m%d")) % len(ROTATION)
+    # Also it output an integer value based off the modulus of 3 applied on the Date integer value.
+    day_index = int(datetime.now(timezone.utc).strftime("%Y%m%d")) % len(ROTATION) 
     return ROTATION[day_index]
 
 def build_prompt(mode: str) -> str:
-    seed = random.choice(TOPIC_SEEDS)
+    seed = random.choice(TOPIC_SEEDS_PER_MODE[mode])
     mode_line = {
         "music_insight": f"Mode: Music insight. Seed: {seed}.",
         "product_philosophy": f"Mode: Product philosophy. Seed: {seed}.",
@@ -101,6 +98,7 @@ def generate_human_post(prompt: str) -> str:
     # Try a few times; slightly lower temperature helps reduce “ad voice”.
     for temp in (0.4, 0.3, 0.2):
         post = generate_with_gemini(prompt, temperature=temp)
+
         if not is_ad_like(post):
             return post
 
@@ -151,6 +149,7 @@ def main():
     body = post
 
     send_email(subject, body)
+
 
 
 if __name__ == "__main__":
