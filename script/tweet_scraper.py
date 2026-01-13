@@ -2,15 +2,12 @@ import os
 import json
 import re
 from pathlib import Path
-
-import tweepy
-from dotenv import load_dotenv
-
-
-load_dotenv()
+from urllib.request import Request, urlopen
+from xml.etree import ElementTree as ET
 
 URL_RE = re.compile(r"https?://\S+")
 WS_RE = re.compile(r"\s+")
+SENT_SPLIT_RE = re.compile(r"[.!?]+")
 
 
 def clean_text(text: str) -> str:
@@ -19,99 +16,175 @@ def clean_text(text: str) -> str:
     return text
 
 
-def get_client() -> tweepy.Client:
-    return tweepy.Client(
-        bearer_token=os.environ["X_BEARER_TOKEN"],
-        consumer_key=os.environ["X_API_KEY"],
-        consumer_secret=os.environ["X_API_KEY_SECRET"],
-        access_token=os.environ["X_ACCESS_TOKEN"],
-        access_token_secret=os.environ["X_ACCESS_TOKEN_SECRET"],
-        wait_on_rate_limit=True,
+def fetch_rss(rss_url: str, timeout: int = 30) -> str:
+    req = Request(
+        url=rss_url,
+        headers={
+            "User-Agent": "Mozilla/5.0 (compatible; banger-style-profiler/1.0)",
+            "Accept": "application/rss+xml, application/xml;q=0.9, */*;q=0.8",
+        },
+        method="GET",
     )
+    with urlopen(req, timeout=timeout) as resp:
+        return resp.read().decode("utf-8", errors="replace")
 
-                     
-def fetch_my_tweets(username: str, max_tweets: int = 300, include_replies: bool = False, include_retweets: bool = False,) -> list[dict]:
+
+def parse_rss_items(xml_text: str, max_items: int) -> list[str]:
     """
-    Fetch recent tweets authored by a given Twitter/X user.
-    Uses the Twitter API v2 (via Tweepy) to page through a user's timeline, optionally
-    excluding replies and/or retweets, cleans tweet text, filters out short tweets,
-    and returns up to `max_tweets` items as dictionaries.
-    Args:
-        username: The screen name/handle to fetch tweets for (without "@").
-        max_tweets: Maximum number of tweets to return.
-        include_replies: If False, replies are excluded from results.
-        include_retweets: If False, retweets are excluded from results.
-    Returns:
-        A list of dictionaries, each with:
-            - "id": Tweet ID as a string.
-            - "created_at": ISO-8601 timestamp string, or None if unavailable.
-            - "text": Cleaned tweet text.
-    Notes:
-        The function should add one tweet dictionary per tweet. For that, `list.append(...)`
-        is the correct method.
-        Using `list.extend({...})` with a dict is typically a bug: `extend` expects an
-        iterable of items, and iterating a dict yields its keys, so it would add the
-        strings "id", "created_at", and "text" to the list rather than a single dict.
-        Prefer:
-            out.append({"id": ..., "created_at": ..., "text": ...})
+    Returns a list of item titles (tweet text usually appears in <title> for Nitter RSS).
+    We will immediately transform to metrics and never persist these strings.
     """
-    client = get_client()
+    root = ET.fromstring(xml_text)
+    channel = root.find("channel")
+    if channel is None:
+        return []
 
-    user = client.get_user(username=username)
-    user_id = user.data.id
-
-    exclude = []
-    if not include_replies:
-        exclude.append("replies")
-    if not include_retweets:
-        exclude.append("retweets")
-
-    out: list[dict] = []
-
-    paginator = tweepy.Paginator(
-        client.get_users_tweets,
-        id=user_id,
-        tweet_fields=["created_at", "lang", "text"],
-        exclude=exclude if exclude else None,
-        max_results=100,
-    )
-
-    for page in paginator:
-        if not page.data:
+    titles: list[str] = []
+    for item in channel.findall("item"):
+        title = (item.findtext("title") or "").strip()
+        if not title:
             continue
+        titles.append(title)
+        if len(titles) >= max_items:
+            break
 
-        for t in page.data:
-            text = clean_text(t.text or "")
-            if len(text) < 40:
-                continue
+    return titles
 
-            out.append( 
-                {
-                    "id": str(t.id),
-                    "created_at": t.created_at.isoformat() if t.created_at else None,
-                    "text": text,
-                })
 
-            if len(out) >= max_tweets:
-                return out
-    return out
+def percentile(sorted_vals: list[int], p: float) -> int:
+    if not sorted_vals:
+        return 0
+    # p in [0, 1]
+    idx = int(round((len(sorted_vals) - 1) * p))
+    return sorted_vals[max(0, min(idx, len(sorted_vals) - 1))]
+
+
+def text_metrics(text: str) -> dict:
+    t = clean_text(text)
+
+    char_len = len(t)
+    words = [w for w in t.split(" ") if w]
+    word_count = len(words)
+
+    # Very rough sentence count (good enough for style)
+    sentences = [s.strip() for s in SENT_SPLIT_RE.split(t) if s.strip()]
+    sentence_count = max(1, len(sentences)) if t else 0
+
+    has_question = "?" in t
+    has_colon = ":" in t
+    has_dash = "—" in t or "-" in t
+    has_quotes = '"' in t or "“" in t or "”" in t or "'" in t
+    starts_with_but = t.lower().startswith("but ")
+    contains_contrast = any(x in t.lower() for x in (" but ", " however ", " instead ", " rather "))
+
+    return {
+        "char_len": char_len,
+        "word_count": word_count,
+        "sentence_count": sentence_count,
+        "has_question": has_question,
+        "has_colon": has_colon,
+        "has_dash": has_dash,
+        "has_quotes": has_quotes,
+        "starts_with_but": starts_with_but,
+        "contains_contrast": contains_contrast,
+    }
+
+
+def aggregate(metrics: list[dict]) -> dict:
+    if not metrics:
+        return {"count": 0}
+
+    chars = sorted(m["char_len"] for m in metrics)
+    words = sorted(m["word_count"] for m in metrics)
+    sentences = sorted(m["sentence_count"] for m in metrics)
+
+    def rate(key: str) -> float:
+        return sum(1 for m in metrics if m.get(key)) / len(metrics)
+
+    profile = {
+        "count": len(metrics),
+        "char_len": {
+            "p25": percentile(chars, 0.25),
+            "p50": percentile(chars, 0.50),
+            "p75": percentile(chars, 0.75),
+        },
+        "word_count": {
+            "p25": percentile(words, 0.25),
+            "p50": percentile(words, 0.50),
+            "p75": percentile(words, 0.75),
+        },
+        "sentence_count": {
+            "p25": percentile(sentences, 0.25),
+            "p50": percentile(sentences, 0.50),
+            "p75": percentile(sentences, 0.75),
+        },
+        "rates": {
+            "question": round(rate("has_question"), 3),
+            "colon": round(rate("has_colon"), 3),
+            "dash": round(rate("has_dash"), 3),
+            "quotes": round(rate("has_quotes"), 3),
+            "starts_with_but": round(rate("starts_with_but"), 3),
+            "contrast_language": round(rate("contains_contrast"), 3),
+        },
+    }
+
+    # Turn stats into prompt-friendly guidance (still no copying)
+    profile["guidance"] = {
+        "recommended_char_range": [max(80, profile["char_len"]["p25"]), min(260, profile["char_len"]["p75"])],
+        "recommended_sentence_range": [max(1, profile["sentence_count"]["p25"]), min(5, profile["sentence_count"]["p75"])],
+        "notes": [
+            "Prefer short punchy sentences.",
+            "Use contrast sparingly (but/however/instead) when it clarifies a point.",
+            "Questions are optional; use when it feels natural.",
+        ],
+    }
+
+    return profile
 
 
 def main():
-    username = os.environ["X_USERNAME"]
-    tweets = fetch_my_tweets(
-        username=username,
-        max_tweets=int(os.environ.get("MAX_TWEETS", "300")),
-        include_replies=os.environ.get("INCLUDE_REPLIES", "0") == "1",
-        include_retweets=os.environ.get("INCLUDE_RETWEETS", "0") == "1",
-    )
+    # Inputs
+    nitter_base = os.environ.get("NITTER_BASE", "https://nitter.net").rstrip("/")
+    # Comma-separated list: "patio11,levelsio,naval"
+    users_raw = os.environ.get("TARGET_USERS", "jackfriks,patio11,levelsio,naval")
+    per_user = int(os.environ.get("MAX_PER_USER", "100"))
 
-    out_path = Path("my_tweets.jsonl")
-    with out_path.open("w", encoding="utf-8") as f:
-        for row in tweets:
-            f.write(json.dumps(row, ensure_ascii=False) + "\n")
+    usernames = [u.strip().lstrip("@") for u in users_raw.split(",") if u.strip()]
+    if not usernames:
+        raise RuntimeError("TARGET_USERS is empty. Provide comma-separated usernames.")
 
-    print(f"Saved {len(tweets)} tweets -> {out_path.resolve()}")
+    all_metrics: list[dict] = []
+    per_user_counts: dict[str, int] = {}
+
+    for username in usernames:
+        rss_url = f"{nitter_base}/{username}/rss"
+        xml_text = fetch_rss(rss_url)
+        titles = parse_rss_items(xml_text, max_items=per_user)
+
+        # Convert to metrics and discard text (do not persist titles)
+        count_added = 0
+        for title in titles:
+            m = text_metrics(title)
+            # Skip tiny items / empty
+            if m["char_len"] < 40:
+                continue
+            all_metrics.append(m)
+            count_added += 1
+
+        per_user_counts[username] = count_added
+
+    profile = aggregate(all_metrics)
+    profile["source"] = {
+        "nitter_base": nitter_base,
+        "usernames": usernames,
+        "per_user_counts": per_user_counts,
+        "generated_at_utc": __import__("datetime").datetime.utcnow().isoformat() + "Z",
+    }
+
+    out_path = Path("style_profile.json")
+    out_path.write_text(json.dumps(profile, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"Saved style profile -> {out_path.resolve()}")
+    print(f"Counted items: {profile.get('count', 0)}")
 
 
 if __name__ == "__main__":
