@@ -5,7 +5,6 @@ import random
 import urllib.request
 from datetime import datetime, timezone
 import google.generativeai as genai
-import google.genai as gen
 from dotenv import load_dotenv
 from email.message import EmailMessage
 
