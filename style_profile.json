@@ -15,11 +15,13 @@
     "recommended_char_range": [120, 235],
     "recommended_sentence_range": [2, 4],
     "notes": [
-      "Write like a builder: tradeoffs, constraints, and outcomes (not features).",
-      "Prefer concrete nouns (users, attention, habits, timing) over abstractions.",
-      "Use a contrarian opener sometimes, then a grounded second line.",
-      "Avoid motivational quotes; keep it observational and specific.",
-      "One tight idea per post. End clean—no CTA."
+      "Write like a bold builder: eager, action-oriented, committed to the craft.",
+      "Speak broadly about building while staying grounded in real tradeoffs and constraints.",
+      "Show enthusiasm for creation balanced with awareness of what it takes (persistence, focus, commitment).",
+      "Emphasize long-term thinking, sticking to a path, watching for results over time.",
+      "Use concrete language (build, ship, create, commit) with a forward-looking energy.",
+      "Avoid generic motivation; stay specific to the building journey and its lessons.",
+      "One clear insight per post. End with conviction, not a call-to-action."
     ]
   },
   "source": {
