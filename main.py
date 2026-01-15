@@ -1,14 +1,9 @@
 import os
 import json
-import smtplib
 import random
-import urllib.request
-import webbrowser
 from datetime import datetime, timezone
 import google.generativeai as genai
 from dotenv import load_dotenv
-from email.message import EmailMessage
-from api import post_to_x, build_intent_url, remaining_posts_this_month
 
 load_dotenv()
 
@@ -285,37 +280,6 @@ def generate_multiple_options(prompt: str, mode: str, count=3):
 
 
 
-def send_email(subject: str, body: str) -> None:
-    smtp_host = os.environ["SMTP_HOST"]
-    smtp_port = int(os.environ.get("SMTP_PORT", "587"))
-    smtp_user = os.environ["SMTP_USER"]
-    smtp_pass = os.environ["SMTP_PASS"]
-    to_email = os.environ["TO_EMAIL"]
-
-    smtp_debug = os.environ.get("SMTP_DEBUG", "0") == "1"
-
-    msg = EmailMessage()
-    msg["From"] = smtp_user
-    msg["To"] = to_email
-    msg["Subject"] = subject
-    msg.set_content(body)
-
-    if smtp_port == 465:
-        with smtplib.SMTP_SSL(smtp_host, smtp_port) as server:
-            if smtp_debug:
-                server.set_debuglevel(1)
-            server.login(smtp_user, smtp_pass)
-            server.send_message(msg)
-    else:
-        with smtplib.SMTP(smtp_host, smtp_port) as server:
-            if smtp_debug:
-                server.set_debuglevel(1)
-            server.ehlo()
-            server.starttls()
-            server.ehlo()
-            server.login(smtp_user, smtp_pass)
-            server.send_message(msg)
-
 def main():
     mode = pick_mode_for_today()
     
@@ -329,35 +293,6 @@ def main():
     for i, option in enumerate(options, 1):
         print(f"{i}. {option}\n")
 
-    print(f"Remaining X API writes this month: {remaining_posts_this_month()}")
-    print("Actions:")
-    print("  1-3 = Post via X API (uses 1 write)")
-    print("  i   = Open selected in X composer (no API usage)")
-    print("  e   = Email all options")
-    choice = input("Pick an action: ").strip().lower()
-
-    if choice in {"1", "2", "3"}:
-        selected = options[int(choice) - 1]
-        result = post_to_x(selected)
-        if result["success"]:
-            print(f"✓ Posted to X. Tweet ID: {result['tweet_id']} | Remaining writes: {result['remaining']}")
-        else:
-            print(f"✗ API post failed: {result['error']}. Remaining writes: {result['remaining']}")
-            fallback = input("Open in X composer instead? (y/n): ").strip().lower()
-            if fallback == "y":
-                webbrowser.open(build_intent_url(selected))
-                print("Opened in browser. Review and post manually.")
-    elif choice == "i":
-        idx = input("Which option to open (1-3)?: ").strip()
-        selected = options[int(idx) - 1]
-        webbrowser.open(build_intent_url(selected))
-        print("Opened in browser. Review and post manually.")
-    elif choice == "e":
-        body = "\n\n---\n\n".join(options)
-        send_email(f"Post Options - {mode}", body)
-        print("✓ Sent to email")
-    else:
-        print("No action taken.")
     
 
 if __name__ == "__main__":
