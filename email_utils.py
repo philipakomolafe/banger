@@ -7,8 +7,8 @@ def send_email(subject: str, body: str) -> bool:
     port = int(os.environ.get("SMTP_PORT", "587"))
     user = os.environ.get("SMTP_USER")
     pwd = os.environ.get("SMTP_PASS")
-    to_addr = os.environ.get("EMAIL_TO")
-    from_addr = os.environ.get("EMAIL_FROM", to_addr)
+    to_addr = os.environ.get("TO_EMAIL")
+    from_addr = os.environ.get("SMTP_USER", to_addr)
 
     if not all([host, port, user, pwd, to_addr, from_addr]):
         return False

@@ -1,9 +1,13 @@
 import os
+import traceback
+import logging
 from typing import List, Optional
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from dotenv import load_dotenv
+from pathlib import Path
 
 # Local imports
 from api import post_to_x, build_intent_url, remaining_posts_this_month
@@ -12,8 +16,17 @@ from email_utils import send_email
 
 load_dotenv()
 
+# Setup logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
 # Try to import your generation pipeline from main.py
-gen = importlib.import_module("main")
+try:
+    gen = importlib.import_module("main")
+    logger.info("✓ Imported main.py")
+except Exception as e:
+    logger.error(f"✗ Failed to import main.py: {e}")
+    raise
 
 app = FastAPI(title="Banger API", version="0.1.0")
 app.add_middleware(
@@ -23,6 +36,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Mount static files.
+web_path = Path(__file__).parent / "web"
+if web_path.exists():
+    app.mount("/web", StaticFiles(directory=web_path, html=True), name="web")
 
 class GenerateRequest(BaseModel):
     today_context: Optional[str] = None
@@ -62,37 +80,53 @@ def generate(req: GenerateRequest):
         if not hasattr(gen, fn):
             raise HTTPException(status_code=500, detail=f"Missing function in main.py: {fn}")
 
-    mode = gen.pick_mode_for_today()
-    # Build the prompt with explicit context
-    daily_context = {
-        "today_context": (req.today_context or "").strip() or None,
-        "current_mood": (req.current_mood or "").strip() or None,
-        "optional_angle": (req.optional_angle or "").strip() or None,
-    }
-    prompt = gen.build_prompt(mode, daily_context)
+    try:
+        mode = gen.pick_mode_for_today()
+        logger.info(f"Mode selected: {mode}")
+        
+        # Build the prompt with explicit context
+        daily_context = {
+            "today_context": (req.today_context or "").strip() or None,
+            "current_mood": (req.current_mood or "").strip() or None,
+            "optional_angle": (req.optional_angle or "").strip() or None,
+        }
+        logger.info(f"Daily context: {daily_context}")
+        
+        prompt = gen.build_prompt(mode, daily_context)
+        logger.info(f"Prompt built, length: {len(prompt)}")
 
-    # Generate up to 3 options, allow duplicates filtering
-    options = []
-    seen = set()
-    for _ in range(6):  # try up to 6 to collect 3 decent ones
-        try:
-            post = gen.generate_human_post(prompt, mode).strip()
-            if post and post not in seen:
-                seen.add(post)
-                options.append(post)
-            if len(options) >= 3:
-                break
-        except Exception:
-            continue
+        # Generate up to 3 options, allow duplicates filtering
+        options = []
+        seen = set()
+        for attempt in range(6):  # try up to 6 to collect 3 decent ones
+            try:
+                post = gen.generate_human_post(prompt, mode).strip()
+                logger.info(f"Attempt {attempt + 1}: Generated {len(post)} chars")
+                if post and post not in seen:
+                    seen.add(post)
+                    options.append(post)
+                if len(options) >= 3:
+                    break
+            except Exception as e:
+                logger.warning(f"Attempt {attempt + 1} failed: {e}\n{traceback.format_exc()}")
+                continue
 
-    if not options:
-        raise HTTPException(status_code=500, detail="Generation failed")
+        if not options:
+            logger.error("No options generated after 6 attempts")
+            raise HTTPException(status_code=500, detail="Generation failed after 6 attempts")
 
-    return GenerateResponse(
-        mode=mode,
-        remaining_writes=remaining_posts_this_month(),
-        options=options
-    )
+        logger.info(f"✓ Generated {len(options)} options")
+        return GenerateResponse(
+            mode=mode,
+            remaining_writes=remaining_posts_this_month(),
+            options=options
+        )
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error in /api/generate: {e}\n{traceback.format_exc()}")
+        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
 
 @app.post("/api/post", response_model=PostResponse)
 def post_to_x_api(req: PostRequest):

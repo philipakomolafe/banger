@@ -1,0 +1,128 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Banger</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: system-ui, Arial; margin: 24px; }
+    .row { display: flex; gap: 16px; flex-wrap: wrap; }
+    .card { border: 1px solid #ddd; border-radius: 8px; padding: 12px; width: 360px; display: flex; flex-direction: column; gap: 8px; }
+    textarea { width: 100%; height: 90px; }
+    button { cursor: pointer; }
+    .muted { color: #666; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h2>Banger</h2>
+  <div>
+    <label>Today's context</label><br/>
+    <textarea id="today_context" placeholder="Added 3-field input because X archive isn't ready..."></textarea><br/><br/>
+    <label>Current mood</label><br/>
+    <input id="current_mood" placeholder="building" /><br/><br/>
+    <label>Angle</label><br/>
+    <input id="optional_angle" placeholder="constraints" /><br/><br/>
+    <button id="generate">Generate 3 options</button>
+    <span id="quota" class="muted"></span>
+  </div>
+
+  <h3>Options</h3>
+  <div class="row" id="options"></div>
+
+  <script>
+    async function fetchConfig() {
+      const res = await fetch('/api/config');
+      const cfg = await res.json();
+      const quota = document.getElementById('quota');
+      quota.textContent = `Remaining X API writes this month: ${cfg.remaining_writes || 0}`;
+      window.COMMUNITY_URL = cfg.community_url || null;
+    }
+
+    function card(text) {
+      const div = document.createElement('div');
+      div.className = 'card';
+      const txt = document.createElement('div');
+      txt.textContent = text;
+      const row = document.createElement('div');
+      row.style.display = 'flex';
+      row.style.gap = '8px';
+
+      const btnPost = document.createElement('button');
+      btnPost.textContent = 'Post via API';
+      btnPost.onclick = async () => {
+        const res = await fetch('/api/post', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ text })});
+        const data = await res.json();
+        if (data.success) {
+          alert(`Posted! Tweet ID: ${data.tweet_id}`);
+          fetchConfig();
+        } else {
+          if (data.intent_url) {
+            const go = confirm(`API failed: ${data.error}\nOpen in X composer instead?`);
+            if (go) window.open(data.intent_url, '_blank');
+          } else {
+            alert(`API failed: ${data.error}`);
+          }
+        }
+      };
+
+      const btnIntent = document.createElement('button');
+      btnIntent.textContent = 'Open in X';
+      btnIntent.onclick = async () => {
+        // get composer link from server (returns same text-safe URL)
+        const res = await fetch('/api/post', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ text })});
+        const data = await res.json();
+        if (data.intent_url) window.open(data.intent_url, '_blank');
+      };
+
+      const btnCommunity = document.createElement('button');
+      btnCommunity.textContent = 'Post to Community';
+      btnCommunity.onclick = async () => {
+        if (!window.COMMUNITY_URL) {
+          alert('Set X_COMMUNITY_URL in your environment.');
+          return;
+        }
+        try {
+          await navigator.clipboard.writeText(text);
+          window.open(window.COMMUNITY_URL, '_blank');
+          alert('Copied to clipboard. Paste in the Community composer.');
+        } catch (e) {
+          window.open(window.COMMUNITY_URL, '_blank');
+          alert('Clipboard failed. Copy manually from the card.');
+        }
+      };
+
+      row.appendChild(btnPost);
+      row.appendChild(btnIntent);
+      row.appendChild(btnCommunity);
+
+      div.appendChild(txt);
+      div.appendChild(row);
+      return div;
+    }
+
+    document.getElementById('generate').onclick = async () => {
+      const today_context = document.getElementById('today_context').value;
+      const current_mood = document.getElementById('current_mood').value;
+      const optional_angle = document.getElementById('optional_angle').value;
+
+      const res = await fetch('/api/generate', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ today_context, current_mood, optional_angle })
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        alert(`Generate failed: ${err.detail || res.statusText}`);
+        return;
+      }
+      const data = await res.json();
+      const container = document.getElementById('options');
+      container.innerHTML = '';
+      data.options.forEach(o => container.appendChild(card(o)));
+      fetchConfig();
+    };
+
+    fetchConfig();
+  </script>
+</body>
+</html>
