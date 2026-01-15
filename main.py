@@ -3,45 +3,57 @@ import json
 import smtplib
 import random
 import urllib.request
+import webbrowser
 from datetime import datetime, timezone
 import google.generativeai as genai
 from dotenv import load_dotenv
 from email.message import EmailMessage
+from api import post_to_x, build_intent_url, remaining_posts_this_month
 
 load_dotenv()
 
-ROTATION = ["music_insight", "product_philosophy", "minimalism_in_building"]
+ROTATION = ["music_testing", "product_building", "feature_cutting"]
 
 PROMPT_RULES = """
 You are writing ONE post for X (Twitter).
-Goal: grow a following by posting consistently about music + product thinking, without revealing what is being built.
+Goal: Say what you ACTUALLY DID today. Not what you think about doing things.
 
 Hard rules (must follow):
 - Output exactly ONE post. No title, no bullets, no thread markers.
 - Max 235 characters (no more than 4 sentences).
 - No hashtags. No emojis.
 - Do not say: "I'm building X", "feature", "architecture", "API", "pipeline", "LLM", "model", "database", "workflow".
-- No step-by-step instructions. No blueprints. No implementation detail.
-- Write observations, not implementations. Signal without blueprint.
-- Tone: calm, precise, contrarian when helpful.
+- Write like you're texting a friend who asked "what'd you do today?"
+- Tone: direct, specific, casual. Real update, not content.
 
-Anti-ad rules (must follow):
-- Do NOT sound like an ad, pitch, or announcement.
-- No calls-to-action (no “try”, “sign up”, “join”, “DM me”, “link in bio”, “subscribe”).
-- No hype words (no “game-changer”, “revolutionary”, “unlocked”, “secret”, “ultimate”).
-- Write like a real person thinking out loud: specific, grounded, slightly imperfect, not promotional.
+BANNED phrases (auto-fail if used):
+- "the urge to", "the key is", "the real X is Y", "X isn't Y it's Z"
+- "I'm convinced", "I believe", "I think", "in my experience"
+- "stripping it down", "tack on more", "chasing every idea"
+- Any sentence that could work in a productivity blog post
 
-Builder-voice rules (must follow):
-- Avoid generic neuroscience framing (do NOT start with “The brain…”, avoid “dopamine”, “neuroscience”, “psychology says”).
-- Include at least ONE builder lens cue: constraint, tradeoff, default, edge case, friction, timing, outcome, intent.
-- Use concrete nouns. No foggy abstractions.
+REQUIRED structure:
+- Start with what you DID (past tense action): "Removed X", "Shipped Y", "Tested Z with N users"
+- Say what happened as a result: "It worked/broke/surprised me because..."
+- End with what's next: "Trying X tomorrow" or "Sticking with Y for now"
+
+Examples of GOOD posts (structure, not content to copy):
+- "Removed the playlist shuffle button. 80% of users never clicked it anyway. Keeping the state transition flow clean."
+- "Tested one-click post generation with 3 people. Two said it didn't sound like them. Adding voice calibration tomorrow."
+- "Shipped mood transition paths using tempo gradients. First user said it actually worked. Running it for 7 more days."
+
+Examples of BAD posts (do NOT sound like this):
+- "The key to building is focus." ❌ (Generic wisdom)
+- "I'm convinced persistence matters." ❌ (Opinion, not action)
+- "Today I was tempted to add more features but resisted." ❌ (Talking about building, not building)
 
 Content pillars (rotate daily):
-1) Music insight: music as timing/intent/state regulation (calm, focus, cope, reset).
-2) Product philosophy: taste, restraint, "one is enough", outcomes over engagement.
-3) Minimalism in building: delete noise, find truth, avoid feature-chasing.
+1) Music insight: what happened when you tested music for state transitions
+2) Product philosophy: what you removed/kept and why (with data/feedback)
+3) Minimalism in building: what you deleted today and what broke/improved
 
-If someone could copy a product from this post, you failed.
+If this could be in a Medium article about productivity, you failed.
+If you didn't say what you ACTUALLY DID, you failed.
 """
 
 AD_LIKE_PHRASES = [
@@ -67,9 +79,9 @@ GENERIC_ABSTRACT = [
 ]
 
 TOPIC_SEEDS_PER_MODE = {
-    "music_insight": ["focus", "overwhelm"],
-    "product_philosophy": ["attention", "starting over"],
-    "minimalism_in_building": ["attention", "overwhelm"],
+    "music_testing": ["state transition test", "tempo gradient experiment"],
+    "product_building": ["feature removed", "user feedback"],
+    "feature_cutting": ["deleted feature", "constraint added"],
 }
 
 def pick_mode_for_today() -> str:
@@ -123,7 +135,25 @@ def _coerce_tweet_text(item) -> str:
         return str(item.get("text", "")).strip()
     return str(item).strip()
 
-def build_prompt(mode: str) -> str:
+def get_daily_context() -> dict:
+    """
+    Get today's context from user input.
+    Returns dict with: today_context, current_mood, optional_angle
+    """
+    print("\n=== Daily Context Input ===")
+    print("(Press Enter to skip any field)\n")
+    
+    today_context = input("What's happening today? (e.g., 'shipped MoodFM beta'): ").strip()
+    current_mood = input("Current mood/state: (e.g., 'building', 'reflecting', 'shipping'): ").strip()
+    optional_angle = input("Optional angle: (e.g., 'persistence', 'constraints', 'tradeoffs'): ").strip()
+    
+    return {
+        "today_context": today_context or None,
+        "current_mood": current_mood or None,
+        "optional_angle": optional_angle or None
+    }
+
+def build_prompt(mode: str, daily_context: dict = None) -> str:
     seed = random.choice(TOPIC_SEEDS_PER_MODE[mode])
 
     texts = ""
@@ -142,9 +172,9 @@ def build_prompt(mode: str) -> str:
         texts = ""
 
     mode_line = {
-        "music_insight": f"Mode: Music insight. Seed: {seed}. Include 1 concrete music detail (tempo/loop/track/etc.) + 1 builder lens cue (constraint/tradeoff/default/friction/etc.).",
-        "product_philosophy": f"Mode: Product philosophy. Seed: {seed}. Include 1 builder lens cue (constraint/tradeoff/default/friction/etc.).",
-        "minimalism_in_building": f"Mode: Minimalism in building. Seed: {seed}. Include 1 builder lens cue (constraint/tradeoff/default/friction/etc.).",
+        "music_testing": f"Mode: What you tested with music today. Seed: {seed}.",
+        "product_building": f"Mode: What you shipped/broke/learned building today. Seed: {seed}.",
+        "feature_cutting": f"Mode: What you deleted and what happened. Seed: {seed}.",
     }[mode]
 
     few_shot = ""
@@ -159,7 +189,21 @@ Write in this style: casual, specific, grounded observations. Not promotional or
     style = load_style_guidance()
     style_block = f"\n\n{style}\n" if style else ""
 
-    tail = "\n\n".join(x for x in [few_shot, mode_line, "Write the post now."] if x)
+    # Add daily context if provided - make it VERY explicit
+    context_injection = ""
+    if daily_context and daily_context.get("today_context"):
+        context_injection = f"""
+
+            TODAY'S ACTUAL WORK (use this, don't invent):
+            {daily_context['today_context']}
+
+            Current state: {daily_context.get('current_mood', 'building')}
+            Angle: {daily_context.get('optional_angle', 'persistence')}
+
+            Write about THIS SPECIFIC WORK. If you mention deleting/shipping/testing something, it must be related to what's written above. Do not invent actions that didn't happen.
+            """
+    
+    tail = "\n\n".join(x for x in [few_shot, mode_line, context_injection, "Write the post now."] if x)
     return f"{PROMPT_RULES}{style_block}\n\n{tail}"
 
 def is_ad_like(text: str) -> bool:
@@ -175,18 +219,14 @@ def is_builder_feel(text: str, mode: str) -> bool:
     if not t:
         return False
 
-    # Avoid the “generic smart quote” vibe
+    # Avoid the "generic smart quote" vibe
     if t.startswith("the brain"):
         return False
     if any(x in t for x in ("neuroscience", "dopamine", "psychology says")):
         return False
 
-    has_builder = any(cue in t for cue in BUILDER_CUES)
-    if not has_builder:
-        return False
-
     # Music mode should actually mention music concretely
-    if mode == "music_insight":
+    if mode == "music_testing":
         has_music = any(w in t for w in MUSIC_CONCRETE)
         if not has_music:
             return False
@@ -227,6 +267,24 @@ def generate_human_post(prompt: str, mode: str) -> str:
     )
     return generate_with_gemini(rewrite_prompt, temperature=0.2)
 
+def generate_multiple_options(prompt: str, mode: str, count=3):
+    """
+    Generate multiple post options for user to choose from.
+    """
+    options = []
+
+    for _ in range(count):
+        try:
+            post = generate_human_post(prompt, mode)
+            options.append(post)
+        except Exception as e:
+            print(f"Error generating post option: {e}")
+            continue
+    
+    return options
+
+
+
 def send_email(subject: str, body: str) -> None:
     smtp_host = os.environ["SMTP_HOST"]
     smtp_port = int(os.environ.get("SMTP_PORT", "587"))
@@ -260,14 +318,47 @@ def send_email(subject: str, body: str) -> None:
 
 def main():
     mode = pick_mode_for_today()
-    prompt = build_prompt(mode)
-    post = generate_human_post(prompt, mode)
+    
+    # Get daily context from user
+    daily_context = get_daily_context()
+    
+    prompt = build_prompt(mode, daily_context)
+    options = generate_multiple_options(prompt, mode)
 
-    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    subject = f"Daily X post ({mode}) — {today}"
-    body = post
+    print("\n=== Generated Options ===\n")
+    for i, option in enumerate(options, 1):
+        print(f"{i}. {option}\n")
 
-    send_email(subject, body)
+    print(f"Remaining X API writes this month: {remaining_posts_this_month()}")
+    print("Actions:")
+    print("  1-3 = Post via X API (uses 1 write)")
+    print("  i   = Open selected in X composer (no API usage)")
+    print("  e   = Email all options")
+    choice = input("Pick an action: ").strip().lower()
+
+    if choice in {"1", "2", "3"}:
+        selected = options[int(choice) - 1]
+        result = post_to_x(selected)
+        if result["success"]:
+            print(f"✓ Posted to X. Tweet ID: {result['tweet_id']} | Remaining writes: {result['remaining']}")
+        else:
+            print(f"✗ API post failed: {result['error']}. Remaining writes: {result['remaining']}")
+            fallback = input("Open in X composer instead? (y/n): ").strip().lower()
+            if fallback == "y":
+                webbrowser.open(build_intent_url(selected))
+                print("Opened in browser. Review and post manually.")
+    elif choice == "i":
+        idx = input("Which option to open (1-3)?: ").strip()
+        selected = options[int(idx) - 1]
+        webbrowser.open(build_intent_url(selected))
+        print("Opened in browser. Review and post manually.")
+    elif choice == "e":
+        body = "\n\n---\n\n".join(options)
+        send_email(f"Post Options - {mode}", body)
+        print("✓ Sent to email")
+    else:
+        print("No action taken.")
+    
 
 if __name__ == "__main__":
     main()
