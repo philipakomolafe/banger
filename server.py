@@ -11,6 +11,7 @@ from pathlib import Path
 
 # Local imports
 from api import post_to_x, build_intent_url, remaining_posts_this_month
+import main as gen
 import importlib
 from email_utils import send_email
 
