@@ -56,6 +56,38 @@ def _record_post(tweet_id: str, text: str) -> None:
     }
     _save_ledger(led)
 
+def record_post_to_ledger(text: str, method: str = "manual", tweet_id: str = None) -> None:
+    """
+    Record any post (api/manual/community) to ledger.
+    Only records if not already posted in last 48h (duplicate check).
+    method: 'api' | 'manual' | 'community'
+    """
+    text = (text or "").strip()
+    if not text:
+        return
+    
+    # Duplicate check: don't record same text twice in 48h
+    if was_recently_posted(text, days=2):
+        return
+    
+    led = _load_ledger()
+    
+    # Generate unique ID based on method
+    if method == "api" and tweet_id:
+        record_id = tweet_id
+    else:
+        # For manual/community, use timestamp-based ID
+        record_id = f"{method}_{int(time.time() * 1000)}"
+    
+    led[record_id] = {
+        "ts": time.time(),
+        "month": _month_key(),
+        "norm_text": " ".join(text.split()),
+        "method": method,
+        "tweet_id": tweet_id if method == "api" else None
+    }
+    _save_ledger(led)
+
 def build_intent_url(tweet_text: str) -> str:
     # Newlines and special chars safe for web intent
     return f"https://twitter.com/intent/tweet?{urlencode({'text': tweet_text})}"
@@ -85,7 +117,7 @@ def post_to_x(tweet_text: str) -> dict:
         )
         response = client.create_tweet(text=tweet_text)
         tid = response.data["id"]
-        _record_post(tid, tweet_text)
+        record_post_to_ledger(tweet_text, method="api", tweet_id=tid)
         return {"success": True, "tweet_id": tid, "error": None, "remaining": remaining_posts_this_month()}
     except Exception as e:
         # Common: 403 duplicate, 429 rate limit

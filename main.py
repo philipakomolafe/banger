@@ -7,7 +7,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-ROTATION = ["music_testing", "product_building", "feature_cutting"]
+# ROTATION = ["music_testing", "product_building", "feature_cutting"]
+ROTATION = ["product_building", "feature_cutting"]
 
 PROMPT_RULES = """
 You are writing ONE post for X (Twitter).
@@ -63,10 +64,10 @@ BUILDER_CUES = [
     "timing", "intent", "outcome", "failure mode", "feedback loop",
 ]
 
-MUSIC_CONCRETE = [
-    "song", "track", "loop", "hook", "verse", "chorus", "tempo", "drums",
-    "bass", "silence", "melody", "rhythm", "playlist",
-]
+# MUSIC_CONCRETE = [
+#     "song", "track", "loop", "hook", "verse", "chorus", "tempo", "drums",
+#     "bass", "silence", "melody", "rhythm", "playlist",
+# ]
 
 GENERIC_ABSTRACT = [
     "the brain", "dopamine", "neuroscience", "psychology",
@@ -74,9 +75,9 @@ GENERIC_ABSTRACT = [
 ]
 
 TOPIC_SEEDS_PER_MODE = {
-    "music_testing": ["state transition test", "tempo gradient experiment"],
-    "product_building": ["feature removed", "user feedback"],
-    "feature_cutting": ["deleted feature", "constraint added"],
+    # "music_testing": ["state transition test", "tempo gradient experiment"],
+    "product_building": ["feature removed", "user feedback", "testing flow", "iteration"],
+    "feature_cutting": ["deleted feature", "constraint added", "simplified path"],
 }
 
 def pick_mode_for_today() -> str:
@@ -167,7 +168,7 @@ def build_prompt(mode: str, daily_context: dict = None) -> str:
         texts = ""
 
     mode_line = {
-        "music_testing": f"Mode: What you tested with music today. Seed: {seed}.",
+        # "music_testing": f"Mode: What you tested with music today. Seed: {seed}.",
         "product_building": f"Mode: What you shipped/broke/learned building today. Seed: {seed}.",
         "feature_cutting": f"Mode: What you deleted and what happened. Seed: {seed}.",
     }[mode]
@@ -220,11 +221,11 @@ def is_builder_feel(text: str, mode: str) -> bool:
     if any(x in t for x in ("neuroscience", "dopamine", "psychology says")):
         return False
 
-    # Music mode should actually mention music concretely
-    if mode == "music_testing":
-        has_music = any(w in t for w in MUSIC_CONCRETE)
-        if not has_music:
-            return False
+    # Remove music mode check entirely
+    # if mode == "music_testing":
+    #     has_music = any(w in t for w in MUSIC_CONCRETE)
+    #     if not has_music:
+    #         return False
 
     return True
 

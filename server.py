@@ -1,16 +1,18 @@
 import os
 import traceback
 import logging
+import json
 from typing import List, Optional
+from datetime import datetime, timezone
+from pathlib import Path
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from dotenv import load_dotenv
-from pathlib import Path
 
 # Local imports
-from api import post_to_x, build_intent_url, remaining_posts_this_month
+from api import post_to_x, build_intent_url, remaining_posts_this_month, record_post_to_ledger
 import main as gen
 import importlib
 from email_utils import send_email
@@ -55,6 +57,7 @@ class GenerateResponse(BaseModel):
 
 class PostRequest(BaseModel):
     text: str
+    method: str = "api"  # 'api' | 'manual' | 'community'
 
 class PostResponse(BaseModel):
     success: bool
@@ -99,7 +102,7 @@ def generate(req: GenerateRequest):
         # Generate up to 3 options, allow duplicates filtering
         options = []
         seen = set()
-        for attempt in range(6):  # try up to 6 to collect 3 decent ones
+        for attempt in range(3):  # try up to 3 to collect 3 decent ones
             try:
                 post = gen.generate_human_post(prompt, mode).strip()
                 logger.info(f"Attempt {attempt + 1}: Generated {len(post)} chars")
@@ -113,8 +116,8 @@ def generate(req: GenerateRequest):
                 continue
 
         if not options:
-            logger.error("No options generated after 6 attempts")
-            raise HTTPException(status_code=500, detail="Generation failed after 6 attempts")
+            logger.error("No options generated after 3 attempts")
+            raise HTTPException(status_code=500, detail="Generation failed after 3 attempts")
 
         logger.info(f"✓ Generated {len(options)} options")
         return GenerateResponse(
@@ -135,20 +138,37 @@ def post_to_x_api(req: PostRequest):
     if not text:
         raise HTTPException(status_code=400, detail="Empty text")
 
-    result = post_to_x(text)
-    if result["success"]:
+    method = req.method.lower()
+    if method not in ("api", "manual", "community"):
+        raise HTTPException(status_code=400, detail="method must be 'api', 'manual', or 'community'")
+
+    # If using API method, post via X API (already records to ledger inside post_to_x)
+    if method == "api":
+        result = post_to_x(text)
+        
+        if result["success"]:
+            return PostResponse(
+                success=True,
+                tweet_id=result["tweet_id"],
+                remaining=result["remaining"],
+                intent_url=build_intent_url(text),
+            )
         return PostResponse(
-            success=True,
-            tweet_id=result["tweet_id"],
+            success=False,
+            error=result["error"],
             remaining=result["remaining"],
             intent_url=build_intent_url(text),
         )
-    return PostResponse(
-        success=False,
-        error=result["error"],
-        remaining=result["remaining"],
-        intent_url=build_intent_url(text),
-    )
+    
+    # For manual/community: record to ledger using existing helper
+    else:
+        record_post_to_ledger(text, method=method)
+        return PostResponse(
+            success=True,
+            tweet_id=None,
+            remaining=remaining_posts_this_month(),  # unchanged
+            intent_url=build_intent_url(text),
+        )
 
 @app.post("/api/email")
 def email_options(req: EmailRequest):

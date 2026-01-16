@@ -50,7 +50,7 @@
       const btnPost = document.createElement('button');
       btnPost.textContent = 'Post via API';
       btnPost.onclick = async () => {
-        const res = await fetch('/api/post', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ text })});
+        const res = await fetch('/api/post', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ text, method: 'api' })});
         const data = await res.json();
         if (data.success) {
           alert(`Posted! Tweet ID: ${data.tweet_id}`);
@@ -68,8 +68,7 @@
       const btnIntent = document.createElement('button');
       btnIntent.textContent = 'Open in X';
       btnIntent.onclick = async () => {
-        // get composer link from server (returns same text-safe URL)
-        const res = await fetch('/api/post', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ text })});
+        const res = await fetch('/api/post', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ text, method: 'manual' })});
         const data = await res.json();
         if (data.intent_url) window.open(data.intent_url, '_blank');
       };
@@ -83,6 +82,9 @@
         }
         try {
           await navigator.clipboard.writeText(text);
+          // Record to ledger before opening
+          const res = await fetch('/api/post', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ text, method: 'community' })});
+          const data = await res.json();
           window.open(window.COMMUNITY_URL, '_blank');
           alert('Copied to clipboard. Paste in the Community composer.');
         } catch (e) {
