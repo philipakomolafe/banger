@@ -79,6 +79,14 @@ def get_config():
 
 @app.post("/api/generate", response_model=GenerateResponse)
 def generate(req: GenerateRequest):
+    # Enforce today's context are provided.
+    today_context = (req.today_context or "").strip()
+    current_mood = (req.current_mood or "").strip()
+    optional_angle = (req.optional_angle or "").strip()
+
+    if not all([today_context, current_mood, optional_angle]):
+        raise HTTPException(status_code=400, detail="today_context, current_mood, and optional_angle are required")
+
     # Ensure required functions exist
     for fn in ("pick_mode_for_today", "build_prompt", "generate_human_post"):
         if not hasattr(gen, fn):
@@ -90,9 +98,9 @@ def generate(req: GenerateRequest):
         
         # Build the prompt with explicit context
         daily_context = {
-            "today_context": (req.today_context or "").strip() or None,
-            "current_mood": (req.current_mood or "").strip() or None,
-            "optional_angle": (req.optional_angle or "").strip() or None,
+            "today_context": today_context or None,
+            "current_mood": current_mood or None,
+            "optional_angle": optional_angle or None,
         }
         logger.info(f"Daily context: {daily_context}")
         

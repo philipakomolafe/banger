@@ -15,7 +15,7 @@ load_dotenv()
 LEDGER_PATH = Path("data/post_ledger.json")
 LEDGER_PATH.parent.mkdir(parents=True, exist_ok=True)
 
-MAX_WRITES = int(os.environ.get("MAX_X_WRITES_PER_MONTH", "480"))  # leave buffer under 500
+MAX_WRITES = int(os.environ.get("MAX_X_WRITES_PER_MONTH", "280"))  # leave buffer under 500
 
 def _load_ledger() -> dict:
     if LEDGER_PATH.exists():

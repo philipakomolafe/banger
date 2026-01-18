@@ -190,15 +190,17 @@ Write in this style: casual, specific, grounded observations. Not promotional or
     if daily_context and daily_context.get("today_context"):
         context_injection = f"""
 
-            TODAY'S ACTUAL WORK (use this, don't invent):
-            {daily_context['today_context']}
+                            TODAY'S ACTUAL WORK (use this; do not invent):
+                            {daily_context['today_context']}
 
-            Current state: {daily_context.get('current_mood', 'building')}
-            Angle: {daily_context.get('optional_angle', 'persistence')}
+                            Current state: {daily_context.get('current_mood', 'building')}
+                            Angle: {daily_context.get('optional_angle', 'persistence')}
 
-            Write about THIS SPECIFIC WORK. If you mention deleting/shipping/testing something, it must be related to what's written above. Do not invent actions that didn't happen.
-            """
-    
+                            Hard constraint:
+                            - Your post MUST include at least all concrete detail copied from the text in TODAY'S ACTUAL WORK (a noun/number/tool/result).
+                            - If you can't do that, output: "NEED_MORE_CONTEXT"
+                            """
+
     tail = "\n\n".join(x for x in [few_shot, mode_line, context_injection, "Write the post now."] if x)
     return f"{PROMPT_RULES}{style_block}\n\n{tail}"
 
@@ -235,6 +237,7 @@ def generate_with_gemini(prompt: str, temperature: float = 0.4) -> str:
 
     genai.configure(api_key=api_key)
     llm = genai.GenerativeModel(model_name=model_name)
+    
 
     response = llm.generate_content(
         contents=prompt,

@@ -2,7 +2,22 @@
   "2012096660935975045": {
     "ts": 1768556200.5768049,
     "month": "2026-01",
-    "norm_text": "Tested tempo gradients in Banger's creative posting flow today. They didn't quite land the emotional shift I wanted. Sticking with this path, refining the transition curves tomorrow."
+    "norm_text": "Tested tempo gradients in Banger's creative posting flow today. They didn't quite land the emotional shift I wanted. Sticking with this path, refining the transition curves tomorrow.",
+    "method": "api",
+    "tweet_id": "2012096660935975045"
+  },
+  "2012613525819085091": {
+    "ts": 1768679432.675842,
+    "month": "2026-01",
+    "norm_text": "Mapped the product's full code flow end-to-end. It highlighted a few areas I hadn't seen in a while. Sticking with this deep dive to understand every path.",
+    "method": "api",
+    "tweet_id": "2012613525819085091"
+  },
+  "manual_1768746504279": {
+    "ts": 1768746504.2796774,
+    "month": "2026-01",
+    "norm_text": "Began refining the posting tool today. Uncovered a few tricky parts that need careful attention. This will be a longer effort than expected. Sticking with it.",
+    "method": "manual",
+    "tweet_id": null
   }
 }
-
