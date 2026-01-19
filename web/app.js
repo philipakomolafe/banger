@@ -6,6 +6,22 @@ function setStatus(msg, kind) {
   s.className = 'status' + (kind ? ` ${kind}` : '');
 }
 
+function normalize(s) {
+  return (s || '').trim();
+}
+
+function updateGenerateEnabled() {
+  const btn = el('generate');
+  const hasContext = normalize(el('today_context').value).length > 0;
+  btn.disabled = !hasContext;
+  if (!hasContext) {
+    // optional: hint only when empty and nothing else is happening
+    setStatus('Add today’s context to generate.', '');
+  } else if (el('status').textContent === 'Add today’s context to generate.') {
+    setStatus('', '');
+  }
+}
+
 async function fetchConfig() {
   try {
     const res = await fetch('/api/config');
@@ -151,21 +167,37 @@ function getAllOptionTexts() {
 }
 
 function wireUI() {
+  // Enable/disable Generate based on required input
+  el('today_context').addEventListener('input', updateGenerateEnabled);
+  updateGenerateEnabled();
+
   el('generate').onclick = async () => {
-    const today_context = el('today_context').value;
-    const current_mood = el('current_mood').value;
-    const optional_angle = el('optional_angle').value;
+    const today_context = normalize(el('today_context').value);
+    const current_mood = normalize(el('current_mood').value);
+    const optional_angle = normalize(el('optional_angle').value);
+
+    if (!today_context) {
+      setStatus("Today’s context is required.", 'err');
+      updateGenerateEnabled();
+      return;
+    }
 
     const max_options = parseInt(el('max_options').value || '3', 10);
     const max_chars = parseInt(el('max_chars').value || '280', 10);
 
     setStatus('Generating…');
 
-    const res = await fetch('/api/generate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ today_context, current_mood, optional_angle, max_options, max_chars })
-    });
+    let res;
+    try {
+      res = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ today_context, current_mood, optional_angle, max_options, max_chars })
+      });
+    } catch (e) {
+      setStatus('Network error. Is the server running? Open /web from the server URL.', 'err');
+      return;
+    }
 
     if (!res.ok) {
       let err = {};
@@ -251,6 +283,7 @@ function wireUI() {
     el('options').innerHTML = '';
     el('modePill').style.display = 'none';
     setStatus('', '');
+    updateGenerateEnabled();
   };
 }
 

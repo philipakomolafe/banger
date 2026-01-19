@@ -19,5 +19,33 @@
     "norm_text": "Began refining the posting tool today. Uncovered a few tricky parts that need careful attention. This will be a longer effort than expected. Sticking with it.",
     "method": "manual",
     "tweet_id": null
+  },
+  "community_1768822358129": {
+    "ts": 1768822358.1292048,
+    "month": "2026-01",
+    "norm_text": "Removed some inefficient processing that caused slow response times on requests. It was definitely too slow. Aiming to ship the fix by end of day.",
+    "method": "community",
+    "tweet_id": null
+  },
+  "community_1768824168757": {
+    "ts": 1768824168.7570498,
+    "month": "2026-01",
+    "norm_text": "Fixed the slow response time issue. I'm testing it now to see if it works at all. Will push it live once confirmed.",
+    "method": "community",
+    "tweet_id": null
+  },
+  "community_1768826736322": {
+    "ts": 1768826736.3228874,
+    "month": "2026-01",
+    "norm_text": "Reduced response time from 41110 milliseconds to 13665.7. That's a solid improvement for me. Now testing how stable it runs.",
+    "method": "community",
+    "tweet_id": null
+  },
+  "community_1768830719201": {
+    "ts": 1768830719.2019162,
+    "month": "2026-01",
+    "norm_text": "Fixed the response time issue. It dropped response time by 67.24%. This clears the path forward for more building.",
+    "method": "community",
+    "tweet_id": null
   }
 }
