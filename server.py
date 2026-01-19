@@ -228,31 +228,33 @@ def post_to_x_api(req: PostRequest):
     if method not in ("api", "manual", "community"):
         raise HTTPException(status_code=400, detail="method must be 'api', 'manual', or 'community'")
 
+    
+    result = post_to_x(text)
     if method == "api":
-        result = post_to_x(text)
-
-        if result["success"]:
+        if result["success"]:   
             return PostResponse(
                 success=True,
                 tweet_id=result["tweet_id"],
                 remaining=result["remaining"],
                 intent_url=build_intent_url(text),
             )
+
+    elif method in ["manual", "community"]:
+        record_post_to_ledger(text, method=method, tweet_id=result.get("tweet_id"))  
         return PostResponse(
-            success=False,
-            error=result["error"],
+            success=True,   
+            tweet_id=result.get("tweet_id"),
             remaining=result["remaining"],
             intent_url=build_intent_url(text),
-        )
+        )  
 
-    else:
-        record_post_to_ledger(text, method=method)
-        return PostResponse(
-            success=True,
-            tweet_id=None,
-            remaining=remaining_posts_this_month(),
-            intent_url=build_intent_url(text),
-        )
+    return PostResponse(
+        success=False,
+        error=result["error"],
+        remaining=result["remaining"],
+        intent_url=build_intent_url(text),
+    )
+
 
 @app.post("/api/email")
 def email_options(req: EmailRequest):

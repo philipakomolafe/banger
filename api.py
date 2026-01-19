@@ -84,7 +84,7 @@ def record_post_to_ledger(text: str, method: str = "manual", tweet_id: str = Non
         "month": _month_key(),
         "norm_text": " ".join(text.split()),
         "method": method,
-        "tweet_id": tweet_id if method == "api" else None
+        "tweet_id": tweet_id if tweet_id else None
     }
     _save_ledger(led)
 
