@@ -1,13 +1,24 @@
+"""
+Post generation module - handles AI-powered tweet/post generation.
+"""
+
 import os
 import json
 import random
 from datetime import datetime, timezone
+from pathlib import Path
+
 import google.generativeai as genai
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# ROTATION = ["music_testing", "product_building", "feature_cutting"]
+# Configuration paths
+CONFIG_DIR = Path(__file__).parent.parent.parent / "config"
+STYLE_PROFILE_PATH = CONFIG_DIR / "style_profile.json"
+TRAINING_TWEETS_PATH = CONFIG_DIR / "training_tweets.json"
+
+# Content rotation modes
 ROTATION = ["product_building", "feature_cutting"]
 
 PROMPT_RULES = """
@@ -64,25 +75,22 @@ BUILDER_CUES = [
     "timing", "intent", "outcome", "failure mode", "feedback loop",
 ]
 
-# MUSIC_CONCRETE = [
-#     "song", "track", "loop", "hook", "verse", "chorus", "tempo", "drums",
-#     "bass", "silence", "melody", "rhythm", "playlist",
-# ]
-
 GENERIC_ABSTRACT = [
     "the brain", "dopamine", "neuroscience", "psychology",
-    "patterns",  # too common; we only use it as a weak “generic” signal
+    "patterns",
 ]
 
 TOPIC_SEEDS_PER_MODE = {
-    # "music_testing": ["state transition test", "tempo gradient experiment"],
     "product_building": ["feature removed", "user feedback", "testing flow", "iteration"],
     "feature_cutting": ["deleted feature", "constraint added", "simplified path"],
 }
 
+
 def pick_mode_for_today() -> str:
+    """Pick content mode based on current date."""
     day_index = int(datetime.now(timezone.utc).strftime("%Y%m%d")) % len(ROTATION)
     return ROTATION[day_index]
+
 
 def load_style_guidance() -> str:
     """
@@ -90,7 +98,7 @@ def load_style_guidance() -> str:
     If missing, returns empty string.
     """
     try:
-        with open("style_profile.json", "r", encoding="utf-8") as f:
+        with open(STYLE_PROFILE_PATH, "r", encoding="utf-8") as f:
             profile = json.load(f)
 
         g = profile.get("guidance", {})
@@ -121,6 +129,7 @@ def load_style_guidance() -> str:
     except (json.JSONDecodeError, OSError):
         return ""
 
+
 def _coerce_tweet_text(item) -> str:
     """
     training_tweets.json can be a list of strings or objects like {"text": "..."}.
@@ -131,9 +140,10 @@ def _coerce_tweet_text(item) -> str:
         return str(item.get("text", "")).strip()
     return str(item).strip()
 
+
 def get_daily_context() -> dict:
     """
-    Get today's context from user input.
+    Get today's context from user input (CLI mode).
     Returns dict with: today_context, current_mood, optional_angle
     """
     print("\n=== Daily Context Input ===")
@@ -149,12 +159,14 @@ def get_daily_context() -> dict:
         "optional_angle": optional_angle or None
     }
 
+
 def build_prompt(mode: str, daily_context: dict = None) -> str:
+    """Build the full prompt for AI generation."""
     seed = random.choice(TOPIC_SEEDS_PER_MODE[mode])
 
     texts = ""
     try:
-        with open("training_tweets.json", "r", encoding="utf-8") as file:
+        with open(TRAINING_TWEETS_PATH, "r", encoding="utf-8") as file:
             tweet_examples = json.load(file) or []
             tweet_texts = [_coerce_tweet_text(t) for t in tweet_examples]
             tweet_texts = [t for t in tweet_texts if t]
@@ -168,7 +180,6 @@ def build_prompt(mode: str, daily_context: dict = None) -> str:
         texts = ""
 
     mode_line = {
-        # "music_testing": f"Mode: What you tested with music today. Seed: {seed}.",
         "product_building": f"Mode: What you shipped/broke/learned building today. Seed: {seed}.",
         "feature_cutting": f"Mode: What you deleted and what happened. Seed: {seed}.",
     }[mode]
@@ -185,7 +196,7 @@ Write in this style: casual, specific, grounded observations. Not promotional or
     style = load_style_guidance()
     style_block = f"\n\n{style}\n" if style else ""
 
-    # Add daily context if provided - make it VERY explicit
+    # Add daily context if provided
     context_injection = ""
     if daily_context and daily_context.get("today_context"):
         context_injection = f"""
@@ -204,7 +215,9 @@ Write in this style: casual, specific, grounded observations. Not promotional or
     tail = "\n\n".join(x for x in [few_shot, mode_line, context_injection, "Write the post now."] if x)
     return f"{PROMPT_RULES}{style_block}\n\n{tail}"
 
+
 def is_ad_like(text: str) -> bool:
+    """Check if text sounds promotional/ad-like."""
     t = text.strip().lower()
     if not t:
         return True
@@ -212,7 +225,9 @@ def is_ad_like(text: str) -> bool:
         return True
     return any(p in t for p in AD_LIKE_PHRASES)
 
+
 def is_builder_feel(text: str, mode: str) -> bool:
+    """Check if text has authentic builder voice."""
     t = " ".join((text or "").strip().lower().split())
     if not t:
         return False
@@ -223,21 +238,16 @@ def is_builder_feel(text: str, mode: str) -> bool:
     if any(x in t for x in ("neuroscience", "dopamine", "psychology says")):
         return False
 
-    # Remove music mode check entirely
-    # if mode == "music_testing":
-    #     has_music = any(w in t for w in MUSIC_CONCRETE)
-    #     if not has_music:
-    #         return False
-
     return True
 
+
 def generate_with_gemini(prompt: str, temperature: float = 0.4) -> str:
+    """Call Gemini API to generate content."""
     api_key = os.environ["GOOGLE_API_KEY"]
     model_name = os.environ["MODEL_NAME"]
 
     genai.configure(api_key=api_key)
     llm = genai.GenerativeModel(model_name=model_name)
-    
 
     response = llm.generate_content(
         contents=prompt,
@@ -250,8 +260,10 @@ def generate_with_gemini(prompt: str, temperature: float = 0.4) -> str:
         raise RuntimeError(f"Empty response from Gemini: {response!r}")
     return text
 
+
 def generate_human_post(prompt: str, mode: str) -> str:
-    # Try a few times; slightly lower temperature helps reduce “ad voice”.
+    """Generate a single human-sounding post with quality filters."""
+    # Try a few times; slightly lower temperature helps reduce "ad voice".
     for temp in (0.5, 0.4, 0.3, 0.2):
         post = generate_with_gemini(prompt, temperature=temp)
 
@@ -266,10 +278,9 @@ def generate_human_post(prompt: str, mode: str) -> str:
     )
     return generate_with_gemini(rewrite_prompt, temperature=0.2)
 
-def generate_multiple_options(prompt: str, mode: str, count=3) -> list:
-    """
-    Generate multiple post options for user to choose from.
-    """
+
+def generate_multiple_options(prompt: str, mode: str, count: int = 3) -> list:
+    """Generate multiple post options for user to choose from."""
     options = []
 
     for _ in range(count):
@@ -281,23 +292,3 @@ def generate_multiple_options(prompt: str, mode: str, count=3) -> list:
             continue
     
     return options
-
-
-
-def main():
-    mode = pick_mode_for_today()
-    
-    # Get daily context from user
-    daily_context = get_daily_context()
-    
-    prompt = build_prompt(mode, daily_context)
-    options = generate_multiple_options(prompt, mode)
-
-    print("\n=== Generated Options ===\n")
-    for i, option in enumerate(options, 1):
-        print(f"{i}. {option}\n")
-
-    
-
-if __name__ == "__main__":
-    main()

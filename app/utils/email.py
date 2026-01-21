@@ -1,8 +1,30 @@
+"""
+Email utilities module - handles sending email notifications.
+"""
+
 import os
 import smtplib
 from email.message import EmailMessage
 
+
 def send_email(subject: str, body: str) -> bool:
+    """
+    Send an email notification.
+    
+    Requires environment variables:
+        - SMTP_HOST: SMTP server hostname
+        - SMTP_PORT: SMTP server port (default: 587)
+        - SMTP_USER: SMTP username
+        - SMTP_PASS: SMTP password
+        - TO_EMAIL: Recipient email address
+    
+    Args:
+        subject: Email subject line
+        body: Email body content
+    
+    Returns:
+        True if email sent successfully, False otherwise
+    """
     host = os.environ.get("SMTP_HOST")
     port = int(os.environ.get("SMTP_PORT", "587"))
     user = os.environ.get("SMTP_USER")

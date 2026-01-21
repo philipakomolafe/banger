@@ -1,51 +1,74 @@
 {
-  "2012096660935975045": {
+  "api_1768556200576": {
     "ts": 1768556200.5768049,
     "month": "2026-01",
     "norm_text": "Tested tempo gradients in Banger's creative posting flow today. They didn't quite land the emotional shift I wanted. Sticking with this path, refining the transition curves tomorrow.",
     "method": "api",
-    "tweet_id": "2012096660935975045"
+    "tweet_id": "2012096660935975045",
+    "tweet_url": "https://x.com/i/web/status/2012096660935975045"
   },
-  "2012613525819085091": {
+  "api_1768679432675": {
     "ts": 1768679432.675842,
     "month": "2026-01",
     "norm_text": "Mapped the product's full code flow end-to-end. It highlighted a few areas I hadn't seen in a while. Sticking with this deep dive to understand every path.",
     "method": "api",
-    "tweet_id": "2012613525819085091"
+    "tweet_id": "2012613525819085091",
+    "tweet_url": "https://x.com/i/web/status/2012613525819085091"
   },
   "manual_1768746504279": {
     "ts": 1768746504.2796774,
     "month": "2026-01",
     "norm_text": "Began refining the posting tool today. Uncovered a few tricky parts that need careful attention. This will be a longer effort than expected. Sticking with it.",
     "method": "manual",
-    "tweet_id": null
+    "tweet_id": null,
+    "tweet_url": null
   },
   "community_1768822358129": {
     "ts": 1768822358.1292048,
     "month": "2026-01",
     "norm_text": "Removed some inefficient processing that caused slow response times on requests. It was definitely too slow. Aiming to ship the fix by end of day.",
     "method": "community",
-    "tweet_id": null
+    "tweet_id": null,
+    "tweet_url": null
   },
   "community_1768824168757": {
     "ts": 1768824168.7570498,
     "month": "2026-01",
     "norm_text": "Fixed the slow response time issue. I'm testing it now to see if it works at all. Will push it live once confirmed.",
     "method": "community",
-    "tweet_id": null
+    "tweet_id": null,
+    "tweet_url": null
   },
   "community_1768826736322": {
     "ts": 1768826736.3228874,
     "month": "2026-01",
     "norm_text": "Reduced response time from 41110 milliseconds to 13665.7. That's a solid improvement for me. Now testing how stable it runs.",
     "method": "community",
-    "tweet_id": null
+    "tweet_id": null,
+    "tweet_url": null
   },
   "community_1768830719201": {
     "ts": 1768830719.2019162,
     "month": "2026-01",
     "norm_text": "Fixed the response time issue. It dropped response time by 67.24%. This clears the path forward for more building.",
     "method": "community",
-    "tweet_id": null
+    "tweet_id": null,
+    "tweet_url": null
+  },
+  "api_1768900175230": {
+    "ts": 1768900175.2302427,
+    "month": "2026-01",
+    "norm_text": "Extracted tweet performance from each post. It felt different seeing the raw numbers on reach constraints. Now I'll dig into what patterns actually break through.",
+    "method": "api",
+    "tweet_id": "2013539389054259609",
+    "tweet_url": "https://x.com/i/web/status/2013539389054259609"
+  },
+  "api_1768900865255": {
+    "ts": 1768900865.2562428,
+    "month": "2026-01",
+    "norm_text": "Mapped out the foundational structure for Banger, the creative posting tool. This immediately showed where to simplify. I'll maintain these tight boundaries going forward.",
+    "method": "api",
+    "tweet_id": "2013542283702845576",
+    "tweet_url": "https://x.com/i/web/status/2013542283702845576"
   }
 }

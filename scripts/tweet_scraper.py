@@ -1,22 +1,46 @@
+"""
+Tweet Scraper - Fetches tweets via RSS and builds style profiles.
+
+This script analyzes public writing patterns to generate aggregate
+style guidance (without storing actual tweet content).
+
+Usage:
+    Set environment variables:
+        NITTER_BASE: Nitter instance URL (default: https://nitter.net)
+        TARGET_USERS: Comma-separated usernames (e.g., "patio11,levelsio,naval")
+        MAX_PER_USER: Max tweets per user (default: 100)
+    
+    Run:
+        python -m scripts.tweet_scraper
+"""
+
 import os
 import json
 import re
+from datetime import datetime
 from pathlib import Path
 from urllib.request import Request, urlopen
 from xml.etree import ElementTree as ET
 
+# Output path
+CONFIG_DIR = Path(__file__).parent.parent / "config"
+OUTPUT_PATH = CONFIG_DIR / "style_profile.json"
+
+# Regex patterns
 URL_RE = re.compile(r"https?://\S+")
 WS_RE = re.compile(r"\s+")
 SENT_SPLIT_RE = re.compile(r"[.!?]+")
 
 
 def clean_text(text: str) -> str:
+    """Remove URLs and normalize whitespace."""
     text = URL_RE.sub("", text)
     text = WS_RE.sub(" ", text).strip()
     return text
 
 
 def fetch_rss(rss_url: str, timeout: int = 30) -> str:
+    """Fetch RSS feed content."""
     req = Request(
         url=rss_url,
         headers={
@@ -52,28 +76,29 @@ def parse_rss_items(xml_text: str, max_items: int) -> list[str]:
 
 
 def percentile(sorted_vals: list[int], p: float) -> int:
+    """Calculate percentile value from sorted list."""
     if not sorted_vals:
         return 0
-    # p in [0, 1]
     idx = int(round((len(sorted_vals) - 1) * p))
     return sorted_vals[max(0, min(idx, len(sorted_vals) - 1))]
 
 
 def text_metrics(text: str) -> dict:
+    """Extract style metrics from text."""
     t = clean_text(text)
 
     char_len = len(t)
     words = [w for w in t.split(" ") if w]
     word_count = len(words)
 
-    # Very rough sentence count (good enough for style)
+    # Rough sentence count
     sentences = [s.strip() for s in SENT_SPLIT_RE.split(t) if s.strip()]
     sentence_count = max(1, len(sentences)) if t else 0
 
     has_question = "?" in t
     has_colon = ":" in t
     has_dash = "—" in t or "-" in t
-    has_quotes = '"' in t or "“" in t or "”" in t or "'" in t
+    has_quotes = '"' in t or """ in t or """ in t or "'" in t
     starts_with_but = t.lower().startswith("but ")
     contains_contrast = any(x in t.lower() for x in (" but ", " however ", " instead ", " rather "))
 
@@ -91,6 +116,7 @@ def text_metrics(text: str) -> dict:
 
 
 def aggregate(metrics: list[dict]) -> dict:
+    """Aggregate metrics into a style profile."""
     if not metrics:
         return {"count": 0}
 
@@ -128,7 +154,7 @@ def aggregate(metrics: list[dict]) -> dict:
         },
     }
 
-    # Turn stats into prompt-friendly guidance (still no copying)
+    # Turn stats into prompt-friendly guidance
     profile["guidance"] = {
         "recommended_char_range": [max(80, profile["char_len"]["p25"]), min(260, profile["char_len"]["p75"])],
         "recommended_sentence_range": [max(1, profile["sentence_count"]["p25"]), min(5, profile["sentence_count"]["p75"])],
@@ -143,9 +169,9 @@ def aggregate(metrics: list[dict]) -> dict:
 
 
 def main():
+    """Main entry point for tweet scraper."""
     # Inputs
     nitter_base = os.environ.get("NITTER_BASE", "https://nitter.net").rstrip("/")
-    # Comma-separated list: "patio11,levelsio,naval"
     users_raw = os.environ.get("TARGET_USERS", "jackfriks,patio11,levelsio,naval")
     per_user = int(os.environ.get("MAX_PER_USER", "100"))
 
@@ -157,34 +183,37 @@ def main():
     per_user_counts: dict[str, int] = {}
 
     for username in usernames:
+        print(f"Fetching tweets for @{username}...")
         rss_url = f"{nitter_base}/{username}/rss"
         xml_text = fetch_rss(rss_url)
         titles = parse_rss_items(xml_text, max_items=per_user)
 
-        # Convert to metrics and discard text (do not persist titles)
+        # Convert to metrics and discard text
         count_added = 0
         for title in titles:
             m = text_metrics(title)
-            # Skip tiny items / empty
             if m["char_len"] < 40:
                 continue
             all_metrics.append(m)
             count_added += 1
 
         per_user_counts[username] = count_added
+        print(f"  Added {count_added} tweets from @{username}")
 
     profile = aggregate(all_metrics)
     profile["source"] = {
         "nitter_base": nitter_base,
         "usernames": usernames,
         "per_user_counts": per_user_counts,
-        "generated_at_utc": __import__("datetime").datetime.utcnow().isoformat() + "Z",
+        "generated_at_utc": datetime.utcnow().isoformat() + "Z",
     }
 
-    out_path = Path("style_profile.json")
-    out_path.write_text(json.dumps(profile, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"Saved style profile -> {out_path.resolve()}")
-    print(f"Counted items: {profile.get('count', 0)}")
+    # Ensure config directory exists
+    CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+    
+    OUTPUT_PATH.write_text(json.dumps(profile, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"\nSaved style profile -> {OUTPUT_PATH.resolve()}")
+    print(f"Total counted items: {profile.get('count', 0)}")
 
 
 if __name__ == "__main__":
