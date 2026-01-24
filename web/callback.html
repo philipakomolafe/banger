@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Banger — Authenticating...</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="./styles.css" />
+  <style>
+    .callback-container { min-height: 100vh; display:flex; align-items:center; justify-content:center; text-align:center; }
+    .callback-box { color: var(--muted); }
+    .callback-box h2 { color: var(--text); margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+  <div class="callback-container">
+    <div class="callback-box">
+      <h2>Authenticating...</h2>
+      <p id="callbackStatus">Please wait</p>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const statusEl = document.getElementById('callbackStatus');
+    const setStatus = (t) => (statusEl.textContent = t);
+
+    async function getPublicConfig() {
+      const res = await fetch('/api/config');
+      if (!res.ok) throw new Error('Failed to load config');
+      return res.json();
+    }
+
+    function parseHashTokens() {
+      const hash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : '';
+      const params = new URLSearchParams(hash);
+      return {
+        access_token: params.get('access_token'),
+        refresh_token: params.get('refresh_token'),
+        error: params.get('error_description') || params.get('error'),
+      };
+    }
+
+    async function syncMe(accessToken) {
+      if (!accessToken) return;
+      await fetch('/api/auth/me', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+    }
+
+    async function main() {
+      const url = new URL(window.location.href);
+      const code = url.searchParams.get('code');
+
+      // 1) Implicit flow: tokens in hash
+      const hash = parseHashTokens();
+      if (hash.access_token) {
+        localStorage.setItem('access_token', hash.access_token);
+        localStorage.setItem('refresh_token', hash.refresh_token || '');
+
+        setStatus('Syncing profile...');
+        await syncMe(hash.access_token);
+
+        setStatus('Success! Redirecting...');
+        setTimeout(() => (window.location.href = './index.html'), 400);
+        return;
+      }
+
+      // 2) PKCE flow: code in query string -> exchange for session
+      if (code) {
+        setStatus('Exchanging code for session...');
+        const cfg = await getPublicConfig();
+
+        if (!cfg.supabase_url || !cfg.supabase_anon_key) {
+          throw new Error('Missing supabase_url or supabase_anon_key in /api/config');
+        }
+
+        const supabase = window.supabase.createClient(cfg.supabase_url, cfg.supabase_anon_key);
+
+        const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.href);
+        if (error) throw error;
+
+        const accessToken = data.session?.access_token || '';
+        const refreshToken = data.session?.refresh_token || '';
+
+        localStorage.setItem('access_token', accessToken);
+        localStorage.setItem('refresh_token', refreshToken);
+
+        setStatus('Syncing profile...');
+        await syncMe(accessToken);
+
+        setStatus('Success! Redirecting...');
+        setTimeout(() => (window.location.href = './index.html'), 400);
+        return;
+      }
+
+      // 3) Error fallback
+      setStatus(hash.error || 'Authentication failed (no code/token returned).');
+      setTimeout(() => (window.location.href = './auth.html'), 1500);
+    }
+
+    main().catch((e) => {
+      setStatus(e?.message || 'Authentication failed.');
+      setTimeout(() => (window.location.href = './auth.html'), 1500);
+    });
+  </script>
+</body>
+</html>

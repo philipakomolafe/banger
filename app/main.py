@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from app.api.routes import router as api_router
+from app.api.auth import router as auth_router
 
 
 def create_app() -> FastAPI:
@@ -35,9 +36,10 @@ def create_app() -> FastAPI:
 
     # Register API routes
     app.include_router(api_router)
+    app.include_router(auth_router)
     
     return app
 
 
-# Create the app instance for uvicorn
+# Useful for uvicorn entrypoint. ["app.main:app"]
 app = create_app()

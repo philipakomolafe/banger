@@ -70,5 +70,93 @@
     "method": "api",
     "tweet_id": "2013542283702845576",
     "tweet_url": "https://x.com/i/web/status/2013542283702845576"
+  },
+  "api_1769005275925": {
+    "ts": 1769005275.9252617,
+    "month": "2026-01",
+    "norm_text": "Refactored my entire codebase. Old logic made adding new features a nightmare. Now it's clean and the next steps are obvious. Sticking to this simpler structure for now.",
+    "method": "api",
+    "tweet_id": "2013980209465245947",
+    "tweet_url": "https://x.com/i/web/status/2013980209465245947"
+  },
+  "api_1769006286478": {
+    "ts": 1769006286.4786909,
+    "month": "2026-01",
+    "norm_text": "Refactored my entire codebase. Removed a lot of dead code that was making it hard to add new features. The system feels much more focused now. Sticking to this tighter design.",
+    "method": "api",
+    "tweet_id": "2013984449239621742",
+    "tweet_url": "https://x.com/i/web/status/2013984449239621742"
+  },
+  "api_1769006308881": {
+    "ts": 1769006308.8818946,
+    "month": "2026-01",
+    "norm_text": "Refactored my entire codebase. The new structure immediately clarified where the real performance constraints were. Focusing efforts on those specific points next.",
+    "method": "api",
+    "tweet_id": "2013984541300457557",
+    "tweet_url": "https://x.com/i/web/status/2013984541300457557"
+  },
+  "api_1769022716387": {
+    "ts": 1769022716.3877861,
+    "month": "2026-01",
+    "norm_text": "Refactored the entire codebase today. Hit a snag: messed up the server/endpoint format during the refactor. Sticking to debugging this constraint for now.",
+    "method": "api",
+    "tweet_id": "2014053361960562868",
+    "tweet_url": "https://x.com/i/web/status/2014053361960562868"
+  },
+  "api_1769023467837": {
+    "ts": 1769023467.837409,
+    "month": "2026-01",
+    "norm_text": "Refactored the entire codebase. Accidentally broke the server/endpoint format in the process. Fixing that specific format issue tomorrow.",
+    "method": "api",
+    "tweet_id": "2014056513577328741",
+    "tweet_url": "https://x.com/i/web/status/2014056513577328741"
+  },
+  "api_1769024366111": {
+    "ts": 1769024366.1114652,
+    "month": "2026-01",
+    "norm_text": "Refactored the entire codebase. It broke, seems I messed up the server/endpoint format during the process. Fixing those format issues next.",
+    "method": "api",
+    "tweet_id": "2014060281815593297",
+    "tweet_url": "https://x.com/i/web/status/2014060281815593297"
+  },
+  "api_1769027787635": {
+    "ts": 1769027787.6355565,
+    "month": "2026-01",
+    "norm_text": "Refactored my entire codebase today. Made a mistake with the server/endpoint format during the process. Now testing to pinpoint the issue.",
+    "method": "api",
+    "tweet_id": "2014074631771021322",
+    "tweet_url": "https://x.com/i/web/status/2014074631771021322"
+  },
+  "community_1769031705728": {
+    "ts": 1769031705.7288923,
+    "month": "2026-01",
+    "norm_text": "Refactored my codebase. Found bugs after 2+ hours of hunting. The hunt was worth it. Sticking with the cleaner code for now.",
+    "method": "community",
+    "tweet_id": null,
+    "tweet_url": null
+  },
+  "2014105928509857984": {
+    "ts": 1769035249.1912012,
+    "month": "2026-01",
+    "norm_text": "Refactored my codebase. Found bugs hunting for 2+ hours. It was worth it. Sticking with the cleaner code for now.",
+    "method": "api",
+    "tweet_id": "2014105928509857984",
+    "tweet_url": "https://x.com/i/web/status/2014105928509857984"
+  },
+  "manual_1769035453787": {
+    "ts": 1769035453.787238,
+    "month": "2026-01",
+    "norm_text": "Refactored my codebase. Found bugs hunting for 2+ hours. The constraints are tighter now. Sticking with this simplified path.",
+    "method": "manual",
+    "tweet_id": null,
+    "tweet_url": null
+  },
+  "community_1769187507117": {
+    "ts": 1769187507.117174,
+    "month": "2026-01",
+    "norm_text": "Sorted yesterday's DB issue. Added a waitlist and modified the UI to help users grasp Banger's concept. Still building, but also testing Banger right now.",
+    "method": "community",
+    "tweet_id": null,
+    "tweet_url": null
   }
 }

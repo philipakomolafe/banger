@@ -5,6 +5,7 @@ X (Twitter) API module - handles posting and ledger management.
 import os
 import json
 import time
+import re
 import platform
 import subprocess
 import webbrowser
@@ -23,10 +24,18 @@ LEDGER_PATH = DATA_DIR / "post_ledger.json"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 # Rate limiting
-MAX_WRITES = int(os.environ.get("MAX_X_WRITES_PER_MONTH", "280"))
+MAX_WRITES = int(os.environ.get("MAX_X_WRITES_PER_MONTH", "480"))
 
 # Community URL for manual posting
 COMMUNITY_URL = os.environ.get("X_COMMUNITY_URL")
+
+_TWEET_ID_RE = re.compile(r"/status/(\d+)", re.IGNORECASE)
+
+def extract_tweet_id_from_url(tweet_url: str) -> str | None:
+    if not tweet_url:
+        return None
+    m = _TWEET_ID_RE.search(tweet_url)
+    return m.group(1) if m else None
 
 
 def _load_ledger() -> dict:
@@ -54,7 +63,7 @@ def remaining_posts_this_month() -> int:
     """Calculate remaining posts allowed this month."""
     led = _load_ledger()
     mk = _month_key()
-    used = len([x for x in led.values() if x.get("month") == mk])
+    used = len([x for x in led.values() if x.get("month") == mk and x.get("method") == "api"])
     return max(0, MAX_WRITES - used)
 
 
@@ -74,34 +83,45 @@ def _tweet_url(tweet_id: str) -> str:
     return f"https://x.com/i/web/status/{tweet_id}"
 
 
-def record_post_to_ledger(text: str, method: str = "manual", tweet_id: str = None) -> None:
+def record_post_to_ledger(
+    text: str,
+    method: str = "manual",
+    tweet_id: str = None,
+    tweet_url: str = None,
+) -> None:
     """
     Record any post (api/manual/community) to ledger.
-    Only records if not already posted in last 48h (duplicate check).
-    
-    Args:
-        text: The post text
-        method: 'api' | 'manual' | 'community'
-        tweet_id: Optional tweet ID if available
+    If the same text was recorded recently and tweet_id is provided,
+    UPDATE the existing record instead of skipping.
+    method: 'api' | 'manual' | 'community'
     """
     text = (text or "").strip()
     if not text:
         return
-    
-    # Duplicate check: don't record same text twice in 48h
-    if was_recently_posted(text, days=2):
-        return
-    
+
+    norm = " ".join(text.split())
+    cutoff = time.time() - 2 * 86400
     led = _load_ledger()
-    record_id = f"{method}_{int(time.time() * 1000)}"
-    
+
+    # If recently recorded, update (attach tweet_id/url) instead of returning
+    for rid, rec in led.items():
+        if rec.get("norm_text") == norm and rec.get("ts", 0) >= cutoff:
+            if tweet_id and not rec.get("tweet_id"):
+                rec["tweet_id"] = tweet_id
+                rec["tweet_url"] = tweet_url or _tweet_url(tweet_id)
+                led[rid] = rec
+                _save_ledger(led)
+            return
+
+    # Otherwise insert new record
+    record_id = f"{method}_{int(time.time() * 1000)}" if method != "api" else f"api_{int(time.time() * 1000)}"
     led[record_id] = {
         "ts": time.time(),
         "month": _month_key(),
-        "norm_text": " ".join(text.split()),
+        "norm_text": norm,
         "method": method,
-        "tweet_id": tweet_id,
-        "tweet_url": _tweet_url(tweet_id) if tweet_id else None
+        "tweet_id": tweet_id if method == "api" else (tweet_id or None),
+        "tweet_url": (tweet_url or (_tweet_url(tweet_id) if tweet_id else None)),
     }
     _save_ledger(led)
 

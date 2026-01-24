@@ -11,12 +11,19 @@ from typing import List, Optional
 from datetime import datetime, timezone
 
 import anyio
-from fastapi import APIRouter, HTTPException, Response
+from fastapi import APIRouter, HTTPException, Response, Request
 from pydantic import BaseModel
 
-from app.core.x_client import post_to_x, build_intent_url, remaining_posts_this_month, record_post_to_ledger
+from app.core.x_client import (
+    post_to_x,
+    build_intent_url,
+    remaining_posts_this_month,
+    record_post_to_ledger,
+    extract_tweet_id_from_url,
+)
 from app.core import generator as gen
 from app.utils.email import send_email
+from app.utils.supabase import get_supabase
 from app.utils.cache import get_cached_options, set_cached_options, append_perf, read_perf_entries
 
 logger = logging.getLogger(__name__)
@@ -43,7 +50,7 @@ class GenerateResponse(BaseModel):
 
 class PostRequest(BaseModel):
     text: str
-    method: str = "api"  # 'api' | 'manual' | 'community'
+    method: str = "manual"  # 'api' | 'manual' | 'community'
 
 
 class PostResponse(BaseModel):
@@ -58,8 +65,15 @@ class EmailRequest(BaseModel):
     subject: str
     options: List[str]
 
+class WaitlistRequest(BaseModel):
+    email: str
 
-# === Routes ===
+
+class RecordRequest(BaseModel):
+    text: str
+    method: str = "manual"  # 'manual' | 'community'
+    tweet_url: Optional[str] = None
+
 
 @router.get("/config")
 def get_config():
@@ -67,6 +81,8 @@ def get_config():
     return {
         "remaining_writes": remaining_posts_this_month(),
         "community_url": os.environ.get("X_COMMUNITY_URL"),
+        "supabase_url": os.environ.get("SUPABASE_URL"),
+        "supabase_anon_key": os.environ.get("SUPABASE_ANON_KEY"),
     }
 
 
@@ -157,6 +173,8 @@ async def generate(req: GenerateRequest, response: Response):
         total_ms = (time.perf_counter() - t0) * 1000.0
         response.headers["X-Gen-Time-Ms"] = f"{total_ms:.1f}"
         response.headers["X-Cache-Hit"] = "0"
+        response.headers["X-Options-Count"] = str(len(options))
+        
         append_perf({
             "ts": datetime.now(timezone.utc).isoformat(),
             "mode": mode,
@@ -180,43 +198,45 @@ async def generate(req: GenerateRequest, response: Response):
 
 
 @router.post("/post", response_model=PostResponse)
-def post_to_x_api(req: PostRequest):
+def post_to_x_api(req: PostRequest, request: Request):
     """Post content to X (Twitter)."""
     text = (req.text or "").strip()
     if not text:
         raise HTTPException(status_code=400, detail="Empty text")
 
-    method = req.method.lower()
+    method = (req.method or "manual").lower()
     if method not in ("api", "manual", "community"):
         raise HTTPException(status_code=400, detail="method must be 'api', 'manual', or 'community'")
 
-    result = post_to_x(text)
-    
+    # API posting: consumes X write quota (and whatever your post_to_x tracks)
+    if method == "api" and request.headers.get("x-use-x-api") != "1":
+        raise HTTPException(status_code=400, detail="To post via API, set method='api' and include 'X-Use-X-API: 1' header")
+
     if method == "api":
-        if result["success"]:   
+        result = post_to_x(text)
+        if result.get("success"):
             return PostResponse(
                 success=True,
-                tweet_id=result["tweet_id"],
-                remaining=result["remaining"],
+                tweet_id=result.get("tweet_id"),
+                remaining=result.get("remaining", remaining_posts_this_month()),
                 intent_url=build_intent_url(text),
             )
 
-    elif method in ["manual", "community"]:
-        record_post_to_ledger(text, method=method, tweet_id=result.get("tweet_id"))  
         return PostResponse(
-            success=True,   
-            tweet_id=result.get("tweet_id"),
-            remaining=result["remaining"],
+            success=False,
+            error=result.get("error", "Unknown error"),
+            remaining=result.get("remaining", remaining_posts_this_month()),
             intent_url=build_intent_url(text),
-        )  
+        )
 
+    # Manual/community: do NOT call the API at all (no write quota usage)
+    record_post_to_ledger(text, method=method)
     return PostResponse(
-        success=False,
-        error=result["error"],
-        remaining=result["remaining"],
+        success=True,
+        tweet_id=None,
+        remaining=remaining_posts_this_month(),
         intent_url=build_intent_url(text),
     )
-
 
 @router.post("/email")
 def email_options(req: EmailRequest):
@@ -229,6 +249,44 @@ def email_options(req: EmailRequest):
             detail="Email not configured (set SMTP_* and EMAIL_* env vars)"
         )
     return {"ok": True}
+
+@router.post("/waitlist")
+async def join_waitlist(req: WaitlistRequest):
+    """Join the waitlist by providing an email."""
+    email = (req.email or "").strip().lower()
+
+    if not email or "@" not in email:
+        raise HTTPException(status_code=400, detail="Invalid email address.")
+    try:
+        supabase = get_supabase(admin=True)
+        data = {
+            "email": email,
+        }
+        supabase.table("waitlist").upsert(data).execute()
+        return {"ok": True}
+    
+    except Exception as e:
+        logger.error(f"Error joining waitlist: {e}\n{traceback.format_exc()}")
+        raise HTTPException(status_code=500, detail="Failed to join waitlist")
+
+
+
+@router.post("/record")
+def record_tweet_url(req: RecordRequest):
+    text = (req.text or "").strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="Empty text")
+
+    method = (req.method or "manual").lower()
+    if method not in ("manual", "community"):
+        raise HTTPException(status_code=400, detail="method must be 'manual' or 'community'")
+
+    tid = extract_tweet_id_from_url((req.tweet_url or "").strip())
+    # This must UPDATE the existing recent record (not create a new duplicate)
+    record_post_to_ledger(text, method=method, tweet_id=tid, tweet_url=req.tweet_url)
+
+    return {"ok": True, "tweet_id": tid}
+
 
 
 @router.get("/perf")

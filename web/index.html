@@ -104,8 +104,30 @@
     </div>
 
     <div class="options" id="options"></div>
+
+    <!-- Screenshot Card for sharing -->
+    <div class="screenshot-card" id="screenshotCard">
+      <div class="screenshot-card-inner" id="screenshotInner">
+        <div class="screenshot-side before">
+          <div class="screenshot-label">Raw input</div>
+          <div id="screenshotBefore"></div>
+        </div>
+        <div class="screenshot-side after">
+          <div class="screenshot-label">Banger output</div>
+          <div id="screenshotAfter"></div>
+        </div>
+      </div>
+      <div class="screenshot-branding">
+        Made with <b>Banger</b> ✨ → <a href="https://getbanger.app" target="_blank">getbanger.app</a>
+      </div>
+      <div class="screenshot-actions">
+        <button class="btn" id="downloadScreenshot">📸 Download as Image</button>
+      </div>
+    </div>
+
   </div>
 
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
   <script src="./app.js" defer></script>
 </body>
 </html>

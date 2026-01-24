@@ -34,6 +34,33 @@ async function fetchConfig() {
   }
 }
 
+async function ensureAuthed() {
+  const token = localStorage.getItem('access_token');
+  if (!token) {
+    window.location.href = './auth.html';
+    return false;
+  }
+
+  try {
+    const res = await fetch('/api/auth/me', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (!res.ok) {
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('user_email');
+      window.location.href = './auth.html';
+      return false;
+    }
+
+    return true;
+  } catch (_) {
+    window.location.href = './auth.html';
+    return false;
+  }
+}
+
 function optionCard(initialText, idx) {
   const card = document.createElement('div');
   card.className = 'card';
@@ -90,7 +117,10 @@ function optionCard(initialText, idx) {
     setStatus('Posting via API…');
     const res = await fetch('/api/post', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Use-X-Api': '1' // must be string; backend checks x-use-x-api == "1"
+      },
       body: JSON.stringify({ text, method: 'api' })
     });
     const data = await res.json();
@@ -133,12 +163,11 @@ function optionCard(initialText, idx) {
     if (!text) return setStatus('Empty draft.', 'err');
 
     if (!window.COMMUNITY_URL) {
-      setStatus('Set X_COMMUNITY_URL in your environment to use Community.', 'err');
+      setStatus('Community URL not configured in backend env (X_COMMUNITY_URL).', 'err');
       return;
     }
 
-    try { await navigator.clipboard.writeText(text); } catch {}
-
+    // record "community intent" (no API write)
     await fetch('/api/post', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -146,7 +175,19 @@ function optionCard(initialText, idx) {
     });
 
     window.open(window.COMMUNITY_URL, '_blank');
-    setStatus('Copied (if permitted). Paste into the Community composer.', 'ok');
+    setStatus('Paste into Community composer. After posting, paste the tweet link to save tweet_id.', 'ok');
+
+    // EASY MODE: user pastes tweet URL after posting
+    const tweetUrl = window.prompt('After you post, paste the tweet URL here to save tweet_id:', '');
+    if (tweetUrl && tweetUrl.trim()) {
+      await fetch('/api/record', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, method: 'community', tweet_url: tweetUrl.trim() })
+      });
+      setStatus('Saved tweet link/tweet_id to ledger.', 'ok');
+    }
+
     setTimeout(() => setStatus('', ''), 1800);
   };
 
@@ -166,10 +207,42 @@ function getAllOptionTexts() {
   return cards.map(t => (t.value || '').trim()).filter(Boolean);
 }
 
+function showScreenshotCard(rawInput, polishedOutput) {
+  const card = el('screenshotCard');
+  el('screenshotBefore').textContent = rawInput.slice(0, 300);
+  el('screenshotAfter').textContent = polishedOutput.slice(0, 300);
+  card.classList.add('visible');
+}
+
+function hideScreenshotCard() {
+  el('screenshotCard').classList.remove('visible');
+}
+
+async function downloadScreenshot() {
+  const inner = el('screenshotInner');
+  if (!inner) return;
+
+  try {
+    const canvas = await html2canvas(inner.parentElement, {
+      backgroundColor: '#13151c',
+      scale: 2,
+    });
+    const link = document.createElement('a');
+    link.download = `banger-${Date.now()}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    setStatus('Screenshot downloaded!', 'ok');
+  } catch (e) {
+    setStatus('Screenshot failed. Try a manual screenshot.', 'err');
+  }
+}
+
 function wireUI() {
   // Enable/disable Generate based on required input
   el('today_context').addEventListener('input', updateGenerateEnabled);
   updateGenerateEnabled();
+
+  el('downloadScreenshot').onclick = downloadScreenshot;
 
   el('generate').onclick = async () => {
     const today_context = normalize(el('today_context').value);
@@ -224,6 +297,11 @@ function wireUI() {
       const { card } = optionCard(o, idx);
       container.appendChild(card);
     });
+
+    // Show screenshot card with first option
+    if (data.options && data.options.length > 0) {
+      showScreenshotCard(today_context, data.options[0]);
+    }
 
     fetchConfig();
 
@@ -284,10 +362,14 @@ function wireUI() {
     el('modePill').style.display = 'none';
     setStatus('', '');
     updateGenerateEnabled();
+    hideScreenshotCard();
   };
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  const ok = await ensureAuthed();
+  if (!ok) return;
+
   wireUI();
   fetchConfig();
 });
