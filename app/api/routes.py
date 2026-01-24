@@ -32,6 +32,100 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api", tags=["api"])
 
 
+def _get_user_id_from_request(request: Request) -> Optional[str]:
+    """
+    Extract user_id from Bearer token via Supabase Auth.
+    Returns None if not authenticated (allows anonymous usage if desired).
+    """
+    auth_header = request.headers.get("Authorization", "")
+    if not auth_header.startswith("Bearer "):
+        return None
+
+    token = auth_header.replace("Bearer ", "").strip()
+    if not token:
+        return None
+
+    try:
+        supabase = get_supabase(admin=False)
+        result = supabase.auth.get_user(token)
+        return result.user.id if result.user else None
+    except Exception as e:
+        logger.warning(f"Failed to get user from token: {e}")
+        return None
+
+
+def _save_post_to_supabase(
+    user_id: str,
+    text: str,
+    method: str,
+    tweet_id: Optional[str] = None,
+    tweet_url: Optional[str] = None,
+) -> None:
+    """Save a post entry to Supabase post_ledger table."""
+    if not user_id:
+        return
+
+    try:
+        from datetime import datetime, timezone
+        import hashlib
+
+        now = datetime.now(timezone.utc)
+        month = now.strftime("%Y-%m")
+        norm_text = text.strip().lower()[:500]
+
+        # Create a stable ledger_key from method + timestamp
+        ts_ms = int(now.timestamp() * 1000)
+        ledger_key = f"{method}_{ts_ms}"
+
+        admin = get_supabase(admin=True)
+        admin.table("post_ledger").upsert(
+            {
+                "user_id": user_id,
+                "ledger_key": ledger_key,
+                "ts": now.isoformat(),
+                "month": month,
+                "norm_text": norm_text,
+                "method": method,
+                "tweet_id": tweet_id,
+                "tweet_url": tweet_url,
+            },
+            on_conflict="user_id,ledger_key",
+        ).execute()
+    except Exception as e:
+        logger.error(f"Failed to save post to Supabase: {e}\n{traceback.format_exc()}")
+
+
+def _save_perf_to_supabase(
+    user_id: str,
+    mode: str,
+    cache_hit: bool,
+    gen_time_ms: float,
+    options_count: int,
+) -> None:
+    """Save a perf entry to Supabase perf_entries table."""
+    if not user_id:
+        return
+
+    try:
+        from datetime import datetime, timezone
+
+        now = datetime.now(timezone.utc)
+
+        admin = get_supabase(admin=True)
+        admin.table("perf_entries").insert(
+            {
+                "user_id": user_id,
+                "ts": now.isoformat(),
+                "mode": mode,
+                "cache_hit": cache_hit,
+                "gen_time_ms": gen_time_ms,
+                "options_count": options_count,
+            }
+        ).execute()
+    except Exception as e:
+        logger.error(f"Failed to save perf to Supabase: {e}\n{traceback.format_exc()}")
+
+
 # === Pydantic Models ===
 
 class GenerateRequest(BaseModel):
@@ -87,9 +181,11 @@ def get_config():
 
 
 @router.post("/generate", response_model=GenerateResponse)
-async def generate(req: GenerateRequest, response: Response):
+async def generate(req: GenerateRequest, request: Request, response: Response):
     """Generate post options using AI."""
     t0 = time.perf_counter()
+
+    user_id = _get_user_id_from_request(request)
 
     today_context = (req.today_context or "").strip()
     current_mood = (req.current_mood or "").strip()
@@ -124,12 +220,18 @@ async def generate(req: GenerateRequest, response: Response):
 
             response.headers["X-Gen-Time-Ms"] = f"{total_ms:.1f}"
             response.headers["X-Cache-Hit"] = "1"
+
+            # Local perf log
             append_perf({
                 "ts": datetime.now(timezone.utc).isoformat(),
                 "mode": mode,
                 "cache_hit": True,
                 "gen_time_ms": round(total_ms, 1),
+                "options_count": len(cached),
             })
+
+            # Supabase perf log
+            _save_perf_to_supabase(user_id, mode, True, round(total_ms, 1), len(cached))
 
             return GenerateResponse(
                 mode=mode,
@@ -174,13 +276,18 @@ async def generate(req: GenerateRequest, response: Response):
         response.headers["X-Gen-Time-Ms"] = f"{total_ms:.1f}"
         response.headers["X-Cache-Hit"] = "0"
         response.headers["X-Options-Count"] = str(len(options))
-        
+
+        # Local perf log
         append_perf({
             "ts": datetime.now(timezone.utc).isoformat(),
             "mode": mode,
             "cache_hit": False,
             "gen_time_ms": round(total_ms, 1),
+            "options_count": len(options),
         })
+
+        # Supabase perf log
+        _save_perf_to_supabase(user_id, mode, False, round(total_ms, 1), len(options))
 
         return GenerateResponse(
             mode=mode,
@@ -208,16 +315,23 @@ def post_to_x_api(req: PostRequest, request: Request):
     if method not in ("api", "manual", "community"):
         raise HTTPException(status_code=400, detail="method must be 'api', 'manual', or 'community'")
 
+    user_id = _get_user_id_from_request(request)
+
     # API posting: consumes X write quota (and whatever your post_to_x tracks)
     if method == "api" and request.headers.get("x-use-x-api") != "1":
         raise HTTPException(status_code=400, detail="To post via API, set method='api' and include 'X-Use-X-API: 1' header")
 
     if method == "api":
         result = post_to_x(text)
+        tweet_id = result.get("tweet_id")
+
+        # Save to Supabase
+        _save_post_to_supabase(user_id, text, method, tweet_id=tweet_id)
+
         if result.get("success"):
             return PostResponse(
                 success=True,
-                tweet_id=result.get("tweet_id"),
+                tweet_id=tweet_id,
                 remaining=result.get("remaining", remaining_posts_this_month()),
                 intent_url=build_intent_url(text),
             )
@@ -231,6 +345,10 @@ def post_to_x_api(req: PostRequest, request: Request):
 
     # Manual/community: do NOT call the API at all (no write quota usage)
     record_post_to_ledger(text, method=method)
+
+    # Save to Supabase
+    _save_post_to_supabase(user_id, text, method)
+
     return PostResponse(
         success=True,
         tweet_id=None,
@@ -272,7 +390,7 @@ async def join_waitlist(req: WaitlistRequest):
 
 
 @router.post("/record")
-def record_tweet_url(req: RecordRequest):
+def record_tweet_url(req: RecordRequest, request: Request):
     text = (req.text or "").strip()
     if not text:
         raise HTTPException(status_code=400, detail="Empty text")
@@ -281,9 +399,14 @@ def record_tweet_url(req: RecordRequest):
     if method not in ("manual", "community"):
         raise HTTPException(status_code=400, detail="method must be 'manual' or 'community'")
 
+    user_id = _get_user_id_from_request(request)
     tid = extract_tweet_id_from_url((req.tweet_url or "").strip())
-    # This must UPDATE the existing recent record (not create a new duplicate)
+
+    # Local ledger (existing behavior)
     record_post_to_ledger(text, method=method, tweet_id=tid, tweet_url=req.tweet_url)
+
+    # Supabase ledger
+    _save_post_to_supabase(user_id, text, method, tweet_id=tid, tweet_url=req.tweet_url)
 
     return {"ok": True, "tweet_id": tid}
 

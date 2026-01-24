@@ -1,5 +1,9 @@
 import os
 from supabase import create_client, Client
+from dotenv import load_dotenv
+
+# Load the env vars.
+load_dotenv() 
 
 _supabase_anon: Client | None = None
 _supabase_admin: Client | None = None

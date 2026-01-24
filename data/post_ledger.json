@@ -158,5 +158,13 @@
     "method": "community",
     "tweet_id": null,
     "tweet_url": null
+  },
+  "community_1769277535903": {
+    "ts": 1769277535.9037867,
+    "month": "2026-01",
+    "norm_text": "Built the auth/login page and moved log profiling from local storage to Supabase. It works, but syncing data took longer than expected. Sticking with Supabase for now.",
+    "method": "community",
+    "tweet_id": null,
+    "tweet_url": null
   }
 }

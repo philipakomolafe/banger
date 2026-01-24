@@ -117,10 +117,7 @@ function optionCard(initialText, idx) {
     setStatus('Posting via API…');
     const res = await fetch('/api/post', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Use-X-Api': '1' // must be string; backend checks x-use-x-api == "1"
-      },
+      headers: { ...getAuthHeaders(), 'X-Use-X-Api': '1' },
       body: JSON.stringify({ text, method: 'api' })
     });
     const data = await res.json();
@@ -146,7 +143,7 @@ function optionCard(initialText, idx) {
     setStatus('Opening X composer…');
     const res = await fetch('/api/post', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ text, method: 'manual' })
     });
     const data = await res.json();
@@ -170,19 +167,18 @@ function optionCard(initialText, idx) {
     // record "community intent" (no API write)
     await fetch('/api/post', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ text, method: 'community' })
     });
 
     window.open(window.COMMUNITY_URL, '_blank');
     setStatus('Paste into Community composer. After posting, paste the tweet link to save tweet_id.', 'ok');
 
-    // EASY MODE: user pastes tweet URL after posting
     const tweetUrl = window.prompt('After you post, paste the tweet URL here to save tweet_id:', '');
     if (tweetUrl && tweetUrl.trim()) {
       await fetch('/api/record', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ text, method: 'community', tweet_url: tweetUrl.trim() })
       });
       setStatus('Saved tweet link/tweet_id to ledger.', 'ok');
@@ -264,7 +260,7 @@ function wireUI() {
     try {
       res = await fetch('/api/generate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ today_context, current_mood, optional_angle, max_options, max_chars })
       });
     } catch (e) {
@@ -340,7 +336,7 @@ function wireUI() {
     setStatus('Sending email…');
     const res = await fetch('/api/email', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ subject, options })
     });
 
@@ -364,6 +360,15 @@ function wireUI() {
     updateGenerateEnabled();
     hideScreenshotCard();
   };
+}
+
+function getAuthHeaders() {
+  const token = localStorage.getItem('access_token');
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  return headers;
 }
 
 document.addEventListener('DOMContentLoaded', async () => {

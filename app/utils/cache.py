@@ -22,7 +22,7 @@ _GEN_CACHE_TTL_SECONDS = 120  # 2 minutes
 
 def get_cached_options(key: Tuple[str, str, str, str]) -> Optional[List[str]]:
     """Get cached generation results if still valid."""
-    item = _GEN_CACHE.get(key)
+    item = _GEN_CACHE.get(key)  # a tuple of (timestamp, options)
     if not item:
         return None
     ts, options = item
