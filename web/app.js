@@ -23,8 +23,8 @@ function updateGenerateEnabled() {
   const hasContext = normalize(ctx.value).length > 0;
   btn.disabled = !hasContext;
   if (!hasContext) {
-    setStatus('Add today's context to generate.', '');
-  } else if (el('status')?.textContent === 'Add today's context to generate.') {
+    setStatus("Add today's context to generate.", '');
+  } else if (el('status')?.textContent === "Add today's context to generate.") {
     setStatus('', '');
   }
 }
