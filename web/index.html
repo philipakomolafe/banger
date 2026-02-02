@@ -13,7 +13,7 @@
       <div class="meta">
         <span class="pill usage-pill" id="usagePill" title="Click for account">
           <span id="usageIcon">⚡</span>
-          <span id="usageDisplay">Loading usage...</span>
+          <span id="usageDisplay">Loading...</span>
         </span>
         <span class="pill" id="quota">Loading quota…</span>
         <span class="pill" id="modePill" style="display:none;"></span>
@@ -30,85 +30,60 @@
       <div class="content">
         <div class="grid">
           <div>
-            <label>Today's context <span class="req">(required)</span></label>
-            <textarea id="today_context" placeholder="What did you actually do today? (specific)"></textarea>
-
-            <div class="space"></div>
-
-            <details>
-              <summary>Optional inputs</summary>
-              <div class="space"></div>
-
-              <div class="row">
-                <div>
-                  <label>Current mood</label>
-                  <input id="current_mood" placeholder="building / grateful / curious…" />
-                </div>
-                <div>
-                  <label>Angle</label>
-                  <input id="optional_angle" placeholder="constraints / story / lesson / call-to-action…" />
-                </div>
-              </div>
-
-              <div class="space"></div>
-
-              <div class="row">
-                <div>
-                  <label>Options</label>
-                  <select id="max_options">
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3" selected>3</option>
-                  </select>
-                </div>
-                <div>
-                  <label>Max characters</label>
-                  <input id="max_chars" type="number" min="1" max="1000" value="280" />
-                </div>
-              </div>
-            </details>
-
-            <div class="actions">
-              <button class="btn primary" id="generate" disabled>Generate</button>
-              <div class="hint">Edit any draft before posting.</div>
-            </div>
-
-            <div class="status" id="status"></div>
+            <label for="today_context">What did you do today? <span class="required">*</span></label>
+            <textarea id="today_context" rows="4" placeholder="fixed auth bug, added stripe webhook, talked to 2 users about dark mode..."></textarea>
           </div>
 
           <div>
-            <label>Email subject (optional)</label>
-            <input id="email_subject" placeholder="Drafts for today" />
-            <div class="hint mt8">
-              If SMTP is configured, you can email the generated options to yourself.
+            <label for="current_mood">Mood / vibe (optional)</label>
+            <input type="text" id="current_mood" placeholder="hyped, tired but happy, grinding..." />
+          </div>
+
+          <div>
+            <label for="optional_angle">What's next? (optional)</label>
+            <input type="text" id="optional_angle" placeholder="shipping tomorrow, more user interviews..." />
+          </div>
+
+          <div class="row gap8">
+            <div>
+              <label for="max_options">Options</label>
+              <select id="max_options">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3" selected>3</option>
+              </select>
             </div>
-
-            <div class="sep"></div>
-
-            <div class="hint">
-              Posting methods:
-              <ul class="list">
-                <li><b>API</b>: posts directly</li>
-                <li><b>Open in X</b>: opens composer + records to ledger</li>
-                <li><b>Community</b>: opens community URL + records to ledger</li>
-              </ul>
+            <div>
+              <label for="max_chars">Max chars</label>
+              <input type="number" id="max_chars" value="280" min="100" max="500" />
             </div>
           </div>
+
+          <div>
+            <label for="email_subject">Email subject (if sending)</label>
+            <input type="text" id="email_subject" value="Banger drafts" />
+          </div>
         </div>
+
+        <div class="actions">
+          <button class="btn primary" id="generate" disabled>Generate</button>
+        </div>
+
+        <div class="status" id="status"></div>
       </div>
     </div>
 
     <div class="optionsHeader">
       <h2>Options</h2>
       <div class="row end gap8">
-        <button class="btn" id="emailAll" title="Send all options to email (server must be configured)">Email all</button>
+        <button class="btn" id="emailAll" title="Send all options to email">Email all</button>
         <button class="btn" id="copyAll" title="Copy all options to clipboard">Copy all</button>
       </div>
     </div>
 
     <div class="options" id="options"></div>
 
-    <!-- Screenshot Card for sharing -->
+    <!-- Screenshot Card -->
     <div class="screenshot-card" id="screenshotCard">
       <div class="screenshot-card-inner" id="screenshotInner">
         <div class="screenshot-side before">
@@ -145,9 +120,9 @@
           </div>
           <ul class="pricing-features">
             <li>✓ Unlimited generations</li>
-            <li>✓ All posting methods</li>
             <li>✓ Priority support</li>
-            <li>✓ Cancel anytime</li>
+            <li>✓ Early access to new features</li>
+            <li>✓ Voice learning (coming soon)</li>
           </ul>
           <button class="btn primary btn-upgrade" id="upgradeBtn">Upgrade to Pro</button>
         </div>
@@ -159,7 +134,7 @@
       </div>
     </div>
 
-    <!-- Account/Settings Modal -->
+    <!-- Account Modal -->
     <div class="modal-overlay" id="accountModal">
       <div class="modal-box modal-account">
         <button class="modal-close" id="closeAccount">&times;</button>
@@ -173,22 +148,22 @@
         <div class="account-section">
           <div class="account-label">Plan</div>
           <div class="account-value">
-            <span class="plan-badge" id="accountPlan">Free</span>
+            <span class="plan-badge free" id="accountPlan">Free</span>
           </div>
         </div>
         
         <div class="account-section" id="usageSection">
           <div class="account-label">Today's Usage</div>
           <div class="usage-bar-container">
-            <div class="usage-bar" id="usageBar"></div>
+            <div class="usage-bar" id="usageBar" style="width: 0%;"></div>
           </div>
           <div class="usage-text" id="usageText">0 / 3 generations</div>
         </div>
         
         <div class="account-actions">
-          <button class="btn primary" id="accountUpgradeBtn" style="display: none;">Upgrade to Pro</button>
+          <button class="btn primary" id="accountUpgradeBtn">Upgrade to Pro</button>
           <button class="btn" id="manageSubscription" style="display: none;">Manage Subscription</button>
-          <button class="btn danger" id="logoutBtn">Log Out</button>
+          <button class="btn danger" id="logoutBtn">Log out</button>
         </div>
       </div>
     </div>
@@ -196,6 +171,6 @@
   </div>
 
   <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-  <script src="./app.js" defer></script>
+  <script src="./app.js"></script>
 </body>
 </html>

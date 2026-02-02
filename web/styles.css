@@ -243,12 +243,11 @@ a:hover { text-decoration: underline; }
 /* Screenshot Card */
 .screenshot-card {
   display: none;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: linear-gradient(135deg, #13151c 0%, #1a1d28 100%);
+  margin-top: 24px;
   padding: 20px;
-  margin-top: 12px;
-  position: relative;
+  background: var(--card, #1a1d27);
+  border: 1px solid var(--border, #2a2d3a);
+  border-radius: 12px;
 }
 
 .screenshot-card.visible {
@@ -268,23 +267,21 @@ a:hover { text-decoration: underline; }
 }
 
 .screenshot-side {
-  padding: 14px;
+  padding: 16px;
   border-radius: 10px;
   font-size: 13px;
-  line-height: 1.5;
-  white-space: pre-wrap;
-  word-break: break-word;
+  line-height: 1.6;
 }
 
 .screenshot-side.before {
   background: rgba(255, 92, 122, 0.08);
-  border: 1px solid rgba(255, 92, 122, 0.25);
+  border: 1px solid rgba(255, 92, 122, 0.2);
   color: #ffc9d3;
 }
 
 .screenshot-side.after {
   background: rgba(53, 208, 127, 0.08);
-  border: 1px solid rgba(53, 208, 127, 0.25);
+  border: 1px solid rgba(53, 208, 127, 0.2);
   color: #c4f5d9;
 }
 
@@ -292,26 +289,27 @@ a:hover { text-decoration: underline; }
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 1px;
-  margin-bottom: 8px;
-  opacity: 0.7;
+  opacity: 0.6;
+  margin-bottom: 10px;
+  font-weight: 600;
 }
 
 .screenshot-branding {
   text-align: center;
   margin-top: 16px;
   font-size: 12px;
-  color: var(--muted);
+  color: var(--muted, #888);
 }
 
 .screenshot-branding a {
-  color: var(--accent);
+  color: var(--accent, #6366f1);
+  text-decoration: none;
 }
 
 .screenshot-actions {
   display: flex;
-  gap: 8px;
-  margin-top: 14px;
   justify-content: center;
+  margin-top: 16px;
 }
 
 /* Account Button */
@@ -326,72 +324,85 @@ a:hover { text-decoration: underline; }
   justify-content: center;
 }
 
-/* Usage Pill */
+/* Usage Pill Styles */
 .usage-pill {
   cursor: pointer;
+  transition: all 0.2s;
   display: flex;
   align-items: center;
   gap: 6px;
-  transition: all 0.2s;
 }
 
 .usage-pill:hover {
-  border-color: var(--accent);
-  background: rgba(124, 92, 255, 0.1);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .usage-pill.pro {
-  border-color: rgba(53, 208, 127, 0.4);
-  background: rgba(53, 208, 127, 0.1);
-  color: var(--ok);
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2));
+  border-color: rgba(99, 102, 241, 0.4);
 }
 
-.usage-pill.low {
-  border-color: rgba(255, 92, 122, 0.4);
-  background: rgba(255, 92, 122, 0.1);
-  color: var(--danger);
+.usage-pill.exhausted {
+  background: rgba(255, 92, 122, 0.15);
+  border-color: rgba(255, 92, 122, 0.3);
 }
 
-/* Modal Styles */
+.account-btn {
+  padding: 8px 12px;
+  font-size: 16px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--fg);
+  transition: all 0.2s;
+}
+
+.account-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* ==================== */
+/* Modal Overlay        */
+/* ==================== */
 .modal-overlay {
-  display: none;
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   background: rgba(0, 0, 0, 0.75);
   backdrop-filter: blur(4px);
-  z-index: 1000;
+  display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  z-index: 9999;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s, visibility 0.2s;
 }
 
 .modal-overlay.visible {
-  display: flex;
+  opacity: 1;
+  visibility: visible;
 }
 
+/* ==================== */
+/* Modal Box            */
+/* ==================== */
 .modal-box {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  background: var(--card, #1a1d27);
+  border: 1px solid var(--border, #2a2d3a);
+  border-radius: 16px;
+  padding: 32px;
   max-width: 420px;
-  width: 100%;
-  padding: 32px 28px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
   position: relative;
-  animation: modalSlideIn 0.25s ease-out;
+  transform: scale(0.95);
+  transition: transform 0.2s;
 }
 
-@keyframes modalSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-20px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+.modal-overlay.visible .modal-box {
+  transform: scale(1);
 }
 
 .modal-close {
@@ -400,16 +411,18 @@ a:hover { text-decoration: underline; }
   right: 16px;
   background: none;
   border: none;
-  color: var(--muted);
-  font-size: 24px;
+  color: var(--muted, #888);
+  font-size: 28px;
   cursor: pointer;
-  padding: 4px;
+  padding: 4px 10px;
   line-height: 1;
-  transition: color 0.2s;
+  border-radius: 6px;
+  transition: all 0.2s;
 }
 
 .modal-close:hover {
-  color: var(--text);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .modal-icon {
@@ -419,27 +432,131 @@ a:hover { text-decoration: underline; }
 }
 
 .modal-box h2 {
+  text-align: center;
   margin: 0 0 8px;
   font-size: 22px;
-  text-align: center;
+  color: var(--fg, #fff);
 }
 
 .modal-subtitle {
-  color: var(--muted);
-  font-size: 14px;
   text-align: center;
+  color: var(--muted, #888);
   margin: 0 0 24px;
+  font-size: 14px;
   line-height: 1.5;
 }
 
-/* Pricing Card */
+/* ==================== */
+/* Account Modal        */
+/* ==================== */
+.modal-account {
+  text-align: left;
+}
+
+.modal-account h2 {
+  text-align: left;
+  margin-bottom: 24px;
+}
+
+.account-section {
+  margin-bottom: 20px;
+}
+
+.account-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted, #888);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.account-value {
+  font-size: 16px;
+  color: var(--fg, #fff);
+}
+
+.plan-badge {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.plan-badge.free {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--muted, #888);
+}
+
+.plan-badge.pro {
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  color: #fff;
+}
+
+/* ==================== */
+/* Usage Bar            */
+/* ==================== */
+.usage-bar-container {
+  height: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.usage-bar {
+  height: 100%;
+  background: var(--accent, #6366f1);
+  border-radius: 5px;
+  transition: width 0.3s ease, background 0.3s ease;
+  min-width: 0;
+}
+
+.usage-text {
+  font-size: 13px;
+  color: var(--muted, #888);
+}
+
+/* ==================== */
+/* Account Actions      */
+/* ==================== */
+.account-actions {
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.account-actions .btn {
+  width: 100%;
+  justify-content: center;
+}
+
+.btn.danger {
+  background: transparent;
+  border: 1px solid rgba(255, 92, 122, 0.4);
+  color: #ff5c7a;
+}
+
+.btn.danger:hover {
+  background: rgba(255, 92, 122, 0.1);
+  border-color: rgba(255, 92, 122, 0.6);
+}
+
+/* ==================== */
+/* Pricing Card         */
+/* ==================== */
 .pricing-card {
-  background: linear-gradient(135deg, rgba(124, 92, 255, 0.1) 0%, rgba(124, 92, 255, 0.05) 100%);
-  border: 1px solid rgba(124, 92, 255, 0.3);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border, #2a2d3a);
   border-radius: 12px;
   padding: 24px;
   text-align: center;
   position: relative;
+  margin-bottom: 20px;
 }
 
 .pricing-badge {
@@ -447,49 +564,50 @@ a:hover { text-decoration: underline; }
   top: -10px;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--accent);
-  color: white;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  color: #fff;
   font-size: 10px;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   padding: 4px 12px;
-  border-radius: 999px;
+  border-radius: 10px;
 }
 
 .pricing-plan {
   font-size: 18px;
   font-weight: 600;
-  margin: 8px 0 4px;
+  margin-top: 8px;
+  color: var(--fg, #fff);
 }
 
 .pricing-price {
-  margin: 12px 0 16px;
+  margin: 16px 0;
 }
 
 .price-amount {
   font-size: 42px;
   font-weight: 700;
-  color: var(--text);
+  color: var(--fg, #fff);
 }
 
 .price-period {
-  font-size: 16px;
-  color: var(--muted);
+  font-size: 14px;
+  color: var(--muted, #888);
 }
 
 .pricing-features {
   list-style: none;
   padding: 0;
-  margin: 0 0 20px;
+  margin: 20px 0;
   text-align: left;
 }
 
 .pricing-features li {
-  padding: 8px 0;
+  padding: 10px 0;
   font-size: 14px;
-  color: var(--muted);
-  border-bottom: 1px solid var(--border);
+  color: var(--muted, #888);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .pricing-features li:last-child {
@@ -499,107 +617,97 @@ a:hover { text-decoration: underline; }
 .btn-upgrade {
   width: 100%;
   padding: 14px;
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 15px;
+  margin-top: 8px;
 }
 
 .modal-footer-text {
   text-align: center;
   font-size: 12px;
-  color: var(--muted);
-  margin: 20px 0 0;
+  color: var(--muted, #888);
+  margin: 0;
   line-height: 1.6;
 }
 
 .modal-footer-text a {
-  color: var(--accent);
+  color: var(--accent, #6366f1);
+  text-decoration: none;
 }
 
-/* Account Modal */
-.modal-account {
-  max-width: 380px;
+.modal-footer-text a:hover {
+  text-decoration: underline;
 }
 
-.account-section {
-  padding: 16px 0;
-  border-bottom: 1px solid var(--border);
+/* ==================== */
+/* Screenshot Card      */
+/* ==================== */
+.screenshot-card {
+  display: none;
+  margin-top: 24px;
+  padding: 20px;
+  background: var(--card, #1a1d27);
+  border: 1px solid var(--border, #2a2d3a);
+  border-radius: 12px;
 }
 
-.account-section:last-of-type {
-  border-bottom: none;
+.screenshot-card.visible {
+  display: block;
 }
 
-.account-label {
-  font-size: 12px;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 6px;
+.screenshot-card-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
 }
 
-.account-value {
-  font-size: 15px;
-  color: var(--text);
+@media (max-width: 600px) {
+  .screenshot-card-inner {
+    grid-template-columns: 1fr;
+  }
 }
 
-.plan-badge {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-}
-
-.plan-badge.free {
-  background: rgba(163, 166, 178, 0.15);
-  color: var(--muted);
-  border: 1px solid var(--border);
-}
-
-.plan-badge.pro {
-  background: rgba(124, 92, 255, 0.15);
-  color: var(--accent);
-  border: 1px solid rgba(124, 92, 255, 0.3);
-}
-
-/* Usage Bar */
-.usage-bar-container {
-  height: 8px;
-  background: var(--border);
-  border-radius: 4px;
-  overflow: hidden;
-  margin: 8px 0;
-}
-
-.usage-bar {
-  height: 100%;
-  background: linear-gradient(90deg, var(--accent), #9f7cff);
-  border-radius: 4px;
-  transition: width 0.3s ease;
-}
-
-.usage-bar.warning {
-  background: linear-gradient(90deg, #ff9f5c, var(--danger));
-}
-
-.usage-bar.full {
-  background: var(--danger);
-}
-
-.usage-text {
+.screenshot-side {
+  padding: 16px;
+  border-radius: 10px;
   font-size: 13px;
-  color: var(--muted);
+  line-height: 1.6;
 }
 
-.account-actions {
+.screenshot-side.before {
+  background: rgba(255, 92, 122, 0.08);
+  border: 1px solid rgba(255, 92, 122, 0.2);
+  color: #ffc9d3;
+}
+
+.screenshot-side.after {
+  background: rgba(53, 208, 127, 0.08);
+  border: 1px solid rgba(53, 208, 127, 0.2);
+  color: #c4f5d9;
+}
+
+.screenshot-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.6;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.screenshot-branding {
+  text-align: center;
+  margin-top: 16px;
+  font-size: 12px;
+  color: var(--muted, #888);
+}
+
+.screenshot-branding a {
+  color: var(--accent, #6366f1);
+  text-decoration: none;
+}
+
+.screenshot-actions {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 20px;
-}
-
-.account-actions .btn {
-  width: 100%;
   justify-content: center;
+  margin-top: 16px;
 }

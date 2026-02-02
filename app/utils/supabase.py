@@ -1,26 +1,57 @@
+"""
+Supabase client utilities with connection handling.
+"""
+
 import os
+import logging
+from functools import lru_cache
 from supabase import create_client, Client
-from dotenv import load_dotenv
 
-# Load the env vars.
-load_dotenv() 
+logger = logging.getLogger(__name__)
 
-_supabase_anon: Client | None = None
-_supabase_admin: Client | None = None
+# Don't cache clients to avoid SSL connection issues
+_admin_client: Client = None
+_anon_client: Client = None
 
 
-def get_supabase(admin: bool) -> Client:
-    global _supabase_anon, _supabase_admin
-
-    url = os.environ["SUPABASE_URL"]
-
+def get_supabase(admin: bool = False) -> Client:
+    """
+    Get a Supabase client.
+    admin=True uses service role key (bypasses RLS).
+    admin=False uses anon key (respects RLS).
+    """
+    global _admin_client, _anon_client
+    
+    url = os.environ.get("SUPABASE_URL", "").strip()
+    
+    if not url:
+        raise ValueError("SUPABASE_URL not configured")
+    
     if admin:
-        if _supabase_admin is None:
-            key = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
-            _supabase_admin = create_client(url, key)
-        return _supabase_admin
+        key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "").strip()
+        if not key:
+            raise ValueError("SUPABASE_SERVICE_ROLE_KEY not configured")
+        # Create fresh client each time to avoid SSL issues
+        return create_client(url, key)
+    else:
+        key = os.environ.get("SUPABASE_ANON_KEY", "").strip()
+        if not key:
+            raise ValueError("SUPABASE_ANON_KEY not configured")
+        return create_client(url, key)
 
-    if _supabase_anon is None:
-        key = os.environ["SUPABASE_ANON_KEY"]
-        _supabase_anon = create_client(url, key)
-    return _supabase_anon
+
+def get_supabase_with_retry(admin: bool = False, retries: int = 3) -> Client:
+    """Get Supabase client with retry logic for transient SSL errors."""
+    import time
+    
+    last_error = None
+    for attempt in range(retries):
+        try:
+            return get_supabase(admin=admin)
+        except Exception as e:
+            last_error = e
+            if attempt < retries - 1:
+                time.sleep(0.5 * (attempt + 1))
+                logger.warning(f"Supabase connection retry {attempt + 1}/{retries}: {e}")
+    
+    raise last_error

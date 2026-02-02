@@ -5,8 +5,8 @@ Paid: unlimited
 """
 from datetime import datetime, timezone
 from typing import Optional, Tuple
-from app.utils.supabase import get_supabase
 import logging
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -18,32 +18,62 @@ def _today_key() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
 
+def _get_admin_client():
+    """Get admin client with import to avoid circular imports."""
+    from app.utils.supabase import get_supabase
+    return get_supabase(admin=True)
+
+
+def _safe_query(query_fn, default=None, retries=2):
+    """Execute a query with retry logic for transient SSL errors."""
+    last_error = None
+    for attempt in range(retries):
+        try:
+            return query_fn()
+        except Exception as e:
+            last_error = e
+            error_str = str(e).lower()
+            # Retry on SSL/connection errors
+            if 'ssl' in error_str or 'connection' in error_str or 'timeout' in error_str:
+                if attempt < retries - 1:
+                    time.sleep(0.3 * (attempt + 1))
+                    logger.warning(f"Retrying query (attempt {attempt + 2}/{retries}): {e}")
+                    continue
+            # Non-retryable error
+            break
+    
+    logger.warning(f"Query failed after {retries} attempts: {last_error}")
+    return default
+
+
 def get_user_usage(user_id: str) -> dict:
     """Get user's usage data from Supabase."""
-    try:
-        admin = get_supabase(admin=True)
-        result = admin.table("user_usage").select("*").eq("user_id", user_id).single().execute()
-        return result.data if result.data else {}
-    except Exception as e:
-        logger.warning(f"No usage record found for {user_id}: {e}")
+    def query():
+        admin = _get_admin_client()
+        result = admin.table("user_usage").select("*").eq("user_id", user_id).execute()
+        if result.data and len(result.data) > 0:
+            return result.data[0]
         return {}
+    
+    return _safe_query(query, default={})
 
 
 def get_user_subscription(user_id: str) -> dict:
     """Get user's subscription status from Supabase."""
-    try:
-        admin = get_supabase(admin=True)
-        result = admin.table("subscriptions").select("*").eq("user_id", user_id).single().execute()
-        return result.data if result.data else {}
-    except Exception as e:
-        logger.warning(f"No subscription found for {user_id}: {e}")
+    def query():
+        admin = _get_admin_client()
+        result = admin.table("subscriptions").select("*").eq("user_id", user_id).execute()
+        if result.data and len(result.data) > 0:
+            return result.data[0]
         return {}
+    
+    return _safe_query(query, default={})
 
 
 def is_user_paid(user_id: str) -> bool:
     """Check if user has an active paid subscription."""
     sub = get_user_subscription(user_id)
-    return sub.get("status") == "active" # returns True if status is active False otherwise.
+    return sub.get("status") == "active"
 
 
 def get_daily_generations(user_id: str) -> int:
@@ -55,7 +85,6 @@ def get_daily_generations(user_id: str) -> int:
         return 0
     
     return usage.get("daily_generations", 0)
-
 
 
 def can_generate(user_id: str) -> Tuple[bool, int, str]:
@@ -89,8 +118,8 @@ def increment_usage(user_id: str) -> int:
     else:
         new_count = usage.get("daily_generations", 0) + 1
     
-    try:
-        admin = get_supabase(admin=True)
+    def update():
+        admin = _get_admin_client()
         admin.table("user_usage").upsert(
             {
                 "user_id": user_id,
@@ -100,11 +129,10 @@ def increment_usage(user_id: str) -> int:
             },
             on_conflict="user_id",
         ).execute()
-    except Exception as e:
-        logger.error(f"Failed to update usage for {user_id}: {e}")
+        return new_count
     
-    return new_count
-
+    result = _safe_query(update, default=new_count)
+    return result if result is not None else new_count
 
 
 def get_usage_status(user_id: Optional[str]) -> dict:

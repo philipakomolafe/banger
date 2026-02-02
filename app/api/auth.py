@@ -12,6 +12,7 @@ from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 
 from app.utils.supabase import get_supabase
+from app.utils.usage import get_usage_status, FREE_DAILY_LIMIT
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +40,16 @@ class AuthResponse(BaseModel):
 
 class GoogleAuthResponse(BaseModel):
     url: str
+
+
+class UserInfoResponse(BaseModel):
+    user_id: str
+    email: Optional[str] = None
+    plan: str = "free"
+    is_pro: bool = False
+    daily_usage: int = 0
+    daily_limit: int = FREE_DAILY_LIMIT
+    created_at: Optional[str] = None
 
 
 def _upsert_profile(user_id: str, email: Optional[str]) -> None:
@@ -139,8 +150,9 @@ async def google_auth(_: Request):
         raise HTTPException(status_code=500, detail="Failed to get google auth url")
 
 
-@router.get("/me")
+@router.get("/me", response_model=UserInfoResponse)
 async def me(request: Request):
+    """Get current user info including usage stats."""
     auth_header = request.headers.get("Authorization", "")
     if not auth_header.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Missing or invalid token")
@@ -154,10 +166,28 @@ async def me(request: Request):
         if not result.user:
             raise HTTPException(status_code=401, detail="Invalid token")
 
-        # This is the key for Google sign-in: callback.html calls /me after OAuth.
-        _upsert_profile(result.user.id, result.user.email)
+        user_id = result.user.id
+        user_email = result.user.email
 
-        return {"user_id": result.user.id, "email": result.user.email}
+        # Ensure profile exists (important for Google sign-in)
+        _upsert_profile(user_id, user_email)
+
+        # Get usage status from usage.py
+        usage = get_usage_status(user_id)
+
+        # Determine plan
+        is_pro = usage.get("is_paid", False)
+        plan = "pro" if is_pro else "free"
+
+        return UserInfoResponse(
+            user_id=user_id,
+            email=user_email,
+            plan=plan,
+            is_pro=is_pro,
+            daily_usage=usage.get("used_today", 0),
+            daily_limit=usage.get("daily_limit", FREE_DAILY_LIMIT),
+            created_at=str(result.user.created_at) if hasattr(result.user, "created_at") else None,
+        )
     except HTTPException:
         raise
     except Exception as e:
