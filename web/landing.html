@@ -7,32 +7,65 @@
   <meta name="description" content="Stop staring at a blank tweet. Paste your rough daily notes, get polished posts for X in seconds." />
   <link rel="stylesheet" href="./styles.css" />
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     .landing {
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       text-align: center;
-      padding: 40px 20px;
+      padding: 80px 20px 60px;
+      max-width: 720px;
+      margin: 0 auto;
     }
 
-    .landing h1 {
-      font-size: clamp(32px, 6vw, 56px);
-      margin: 0 0 16px;
-      letter-spacing: -1px;
+    /* Hero Section */
+    .hero {
+      margin-bottom: 48px;
     }
 
-    .landing .tagline {
-      font-size: clamp(16px, 3vw, 22px);
+    .micro-pain {
+      font-size: 14px;
       color: var(--muted);
-      max-width: 500px;
-      margin: 0 auto 32px;
-      line-height: 1.5;
+      margin-bottom: 20px;
+      opacity: 0.7;
+      letter-spacing: 0.3px;
     }
 
-    .landing .highlight {
+    .logo {
+      font-size: clamp(40px, 8vw, 64px);
+      font-weight: 800;
+      margin: 0 0 8px;
+      letter-spacing: -2px;
+      background: linear-gradient(135deg, #fff 0%, #a0a0a0 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .tagline {
+      font-size: clamp(15px, 2.5vw, 18px);
+      color: var(--muted);
+      max-width: 460px;
+      margin: 0 auto;
+      line-height: 1.7;
+      font-weight: 400;
+    }
+
+    .tagline .highlight {
       color: var(--accent);
+      font-weight: 500;
+    }
+
+    /* CTA Section */
+    .cta-section {
+      margin-bottom: 16px;
+      width: 100%;
+      max-width: 400px;
     }
 
     .waitlist-form {
@@ -40,73 +73,125 @@
       gap: 10px;
       flex-wrap: wrap;
       justify-content: center;
-      max-width: 420px;
       width: 100%;
     }
 
     .waitlist-form input {
       flex: 1;
-      min-width: 200px;
+      min-width: 180px;
+      padding: 14px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.05);
+      color: #fff;
+      font-size: 14px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .waitlist-form input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    }
+
+    .waitlist-form input::placeholder {
+      color: var(--muted);
+      opacity: 0.6;
     }
 
     .waitlist-form .btn {
+      padding: 14px 24px;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 10px;
       white-space: nowrap;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .waitlist-form .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
     }
 
     .waitlist-status {
-      margin-top: 14px;
-      font-size: 14px;
+      margin-top: 12px;
+      font-size: 13px;
       min-height: 20px;
     }
 
     .waitlist-status.ok { color: var(--ok); }
     .waitlist-status.err { color: var(--danger); }
 
+    .social-proof {
+      margin-top: 20px;
+      font-size: 13px;
+      color: var(--muted);
+      opacity: 0.7;
+    }
+
+    /* Proof Section */
+    .proof-section {
+      width: 100%;
+      margin-top: 56px;
+    }
+
     .proof {
-      margin-top: 48px;
-      padding: 24px;
+      padding: 28px;
       border: 1px solid var(--border);
-      border-radius: var(--radius);
-      background: rgba(255,255,255,.02);
-      max-width: 600px;
+      border-radius: 16px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
       width: 100%;
     }
 
     .proof-label {
       font-size: 11px;
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 1.5px;
       color: var(--muted);
-      margin-bottom: 16px;
+      margin-bottom: 20px;
+      font-weight: 600;
     }
 
     .proof-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 16px;
+      align-items: center;
       text-align: left;
     }
 
-    @media (max-width: 500px) {
-      .proof-grid { grid-template-columns: 1fr; }
+    @media (max-width: 560px) {
+      .proof-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      .proof-arrow {
+        transform: rotate(90deg);
+      }
+    }
+
+    .proof-arrow {
+      font-size: 20px;
+      color: var(--muted);
+      opacity: 0.4;
     }
 
     .proof-side {
-      padding: 12px;
-      border-radius: 8px;
+      padding: 16px;
+      border-radius: 12px;
       font-size: 13px;
-      line-height: 1.5;
+      line-height: 1.6;
     }
 
     .proof-side.before {
-      background: rgba(255, 92, 122, 0.08);
-      border: 1px solid rgba(255, 92, 122, 0.2);
+      background: rgba(255, 92, 122, 0.06);
+      border: 1px solid rgba(255, 92, 122, 0.15);
       color: #ffc9d3;
     }
 
     .proof-side.after {
-      background: rgba(53, 208, 127, 0.08);
-      border: 1px solid rgba(53, 208, 127, 0.2);
+      background: rgba(53, 208, 127, 0.06);
+      border: 1px solid rgba(53, 208, 127, 0.15);
       color: #c4f5d9;
     }
 
@@ -114,65 +199,138 @@
       font-size: 10px;
       text-transform: uppercase;
       letter-spacing: 1px;
-      opacity: 0.6;
-      margin-bottom: 6px;
+      opacity: 0.5;
+      margin-bottom: 10px;
+      font-weight: 600;
     }
 
-    .footer {
+    /* Who's this for */
+    .audience-section {
+      width: 100%;
       margin-top: 48px;
+      text-align: center;
+    }
+
+    .audience-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--muted);
+      margin-bottom: 16px;
+      font-weight: 600;
+    }
+
+    .audience-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .audience-tag {
+      padding: 8px 16px;
       font-size: 12px;
       color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: rgba(255,255,255,0.02);
     }
 
-    .footer a { color: var(--accent); }
-
-    .micro-pain {
-      font-size: 14px;
+    /* Footer */
+    .footer {
+      margin-top: 64px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      width: 100%;
+      font-size: 13px;
       color: var(--muted);
-      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .footer a {
+      color: var(--accent);
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+
+    .footer a:hover {
       opacity: 0.8;
+    }
+
+    @media (max-width: 400px) {
+      .footer {
+        flex-direction: column;
+        text-align: center;
+      }
     }
   </style>
 </head>
 <body>
   <div class="landing">
-    <p class="micro-pain">🫠 Staring at the tweet box for 20 minutes... again?</p>
-    <h1>Banger</h1>  
-    <p class="tagline">
-      You ship code daily. But tweeting about it? <span class="highlight">Feels cringe.</span><br>
-      Dump your build notes. Get posts that sound like you—not some growth-hacking bro.
-    </p>
+    
+    <!-- Hero -->
+    <section class="hero">
+      <p class="micro-pain">Staring at the tweet box for 20 minutes... again?</p>
+      <h1 class="logo">Banger</h1>
+      <p class="tagline">
+        You ship code daily. But tweeting about it? <span class="highlight">Feels cringe.</span><br>
+        Dump your build notes. Get posts that sound like you — not some growth-hacking bro.
+      </p>
+    </section>
 
-    <form class="waitlist-form" id="waitlistForm">
-      <input type="email" id="waitlistEmail" placeholder="you@email.com" required />
-      <button type="submit" class="btn primary">Join waitlist</button>
-    </form>
-    <div class="waitlist-status" id="waitlistStatus"></div>
+    <!-- CTA -->
+    <section class="cta-section">
+      <form class="waitlist-form" id="waitlistForm">
+        <input type="email" id="waitlistEmail" placeholder="you@email.com" required />
+        <button type="submit" class="btn primary">Get early access</button>
+      </form>
+      <div class="waitlist-status" id="waitlistStatus"></div>
+      <p class="social-proof">🔥 127 builders on the waitlist</p>
+    </section>
 
-    <p class="social-proof">🔥 127 builders on the waitlist</p>
-
-    <div class="proof">
-      <div class="proof-label">See the transformation</div>
-      <div class="proof-grid">
-        <div class="proof-side before">
-          <div class="proof-side-label">Your messy notes</div>
-          fixed bug in auth flow. added stripe webhook. tired. might ship tomorrow. also talked to 2 users they want dark mode
-        </div>
-        <div class="proof-side after">
-          <div class="proof-side-label">Banger output</div>
-          Today's wins:<br><br>
-          → Fixed a nasty auth bug<br>
-          → Stripe webhooks now live<br>
-          → Talked to 2 users (they want dark mode 👀)<br><br>
-          Shipping tomorrow. LFG 🚀
+    <!-- Proof -->
+    <section class="proof-section">
+      <div class="proof">
+        <div class="proof-label">From brain dump to banger</div>
+        <div class="proof-grid">
+          <div class="proof-side before">
+            <div class="proof-side-label">Your messy notes</div>
+            fixed bug in auth flow. added stripe webhook. tired. might ship tomorrow. also talked to 2 users they want dark mode
+          </div>
+          <span class="proof-arrow">→</span>
+          <div class="proof-side after">
+            <div class="proof-side-label">Banger output</div>
+            Today's wins:<br><br>
+            → Fixed a nasty auth bug<br>
+            → Stripe webhooks now live<br>
+            → Talked to 2 users (they want dark mode 👀)<br><br>
+            Shipping tomorrow. LFG 🚀
+          </div>
         </div>
       </div>
-    </div>
+    </section>
 
-    <div class="footer">
-      Already have access? <a href="./auth.html">Sign in</a><br><br>
-      Built by <a href="https://x.com/PhilipAkomolaf_" target="_blank">@PhilipAkomolaf_</a>
-    </div>
+    <!-- Audience -->
+    <section class="audience-section">
+      <div class="audience-label">Built for</div>
+      <div class="audience-tags">
+        <span class="audience-tag">Indie Hackers</span>
+        <span class="audience-tag">Solo Founders</span>
+        <span class="audience-tag">Devs Building in Public</span>
+        <span class="audience-tag">Creators Who Ship</span>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <span>Already have access? <a href="./auth.html">Sign in</a></span>
+      <span>Built by <a href="https://x.com/PhilipAkomolaf_" target="_blank">@PhilipAkomolaf_</a></span>
+    </footer>
+
   </div>
 
   <script>

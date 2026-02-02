@@ -1,33 +1,53 @@
 {
   "count": 360,
-  "char_len": { "p25": 120, "p50": 175, "p75": 235 },
-  "word_count": { "p25": 18, "p50": 28, "p75": 40 },
-  "sentence_count": { "p25": 2, "p50": 3, "p75": 4 },
+  "char_len": { "p25": 120, "p50": 200, "p75": 280 },
+  "word_count": { "p25": 20, "p50": 35, "p75": 50 },
+  "sentence_count": { "p25": 3, "p50": 5, "p75": 7 },
   "rates": {
     "question": 0.12,
     "colon": 0.08,
     "dash": 0.18,
     "quotes": 0.06,
     "starts_with_but": 0.04,
-    "contrast_language": 0.22
+    "contrast_language": 0.22,
+    "emoji": 0.30,
+    "arrow_bullets": 0.60
   },
   "guidance": {
-    "recommended_char_range": [120, 235],
-    "recommended_sentence_range": [2, 4],
+    "recommended_char_range": [120, 280],
+    "recommended_sentence_range": [3, 7],
     "notes": [
-      "Write like a bold builder: eager, action-oriented, committed to the craft.",
-      "Speak broadly about building while staying grounded in real tradeoffs and constraints.",
-      "Show enthusiasm for creation balanced with awareness of what it takes (persistence, focus, commitment).",
-      "Emphasize long-term thinking, sticking to a path, watching for results over time.",
-      "Use concrete language (build, ship, create, commit) with a forward-looking energy.",
-      "Avoid generic motivation; stay specific to the building journey and its lessons.",
-      "One clear insight per post. End with conviction, not a call-to-action."
+      "Use structured format: opener → bullet points → closing energy",
+      "Be specific about what you actually did (actions, numbers, outcomes)",
+      "Personality is encouraged: humor, excitement, honesty all welcome",
+      "Emojis are fine (1-2 per post, usually at the end)",
+      "Casual language is good: 'LFG', 'shipped', 'let's go', etc.",
+      "End with forward momentum: what's next, or how you feel",
+      "Sound like you're updating a friend, not writing a blog post"
+    ]
+  },
+  "format": {
+    "structure": "opener + arrow_bullets + closing",
+    "arrow_symbol": "→",
+    "bullet_count": [2, 4],
+    "opener_examples": [
+      "Today's wins:",
+      "Shipped some stuff:",
+      "Quick update:",
+      "Building in public:",
+      "Quiet day but:"
+    ],
+    "closing_vibes": [
+      "forward_looking",
+      "energy",
+      "honest_tired",
+      "excited"
     ]
   },
   "source": {
     "nitter_base": "manual",
     "usernames": ["manual_style_profile"],
     "per_user_counts": { "manual_style_profile": 360 },
-    "generated_at_utc": "2026-01-13T20:05:00Z"
+    "generated_at_utc": "2026-02-02T12:00:00Z"
   }
 }
