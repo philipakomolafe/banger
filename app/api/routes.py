@@ -16,6 +16,7 @@ from pydantic import BaseModel
 
 from app.core.x_client import (
     post_to_x,
+    _tweet_url,
     build_intent_url,
     remaining_posts_this_month,
     record_post_to_ledger,
@@ -25,6 +26,7 @@ from app.core import generator as gen
 from app.utils.email import send_email
 from app.utils.supabase import get_supabase
 from app.utils.cache import get_cached_options, set_cached_options, append_perf, read_perf_entries
+from app.utils.usage import can_generate, increment_usage, get_usage_status
 
 logger = logging.getLogger(__name__)
 
@@ -67,10 +69,10 @@ def _save_post_to_supabase(
 
     try:
         from datetime import datetime, timezone
-        import hashlib
+        from app.core.x_client import _month_key
 
         now = datetime.now(timezone.utc)
-        month = now.strftime("%Y-%m")
+        mk = _month_key()
         norm_text = text.strip().lower()[:500]
 
         # Create a stable ledger_key from method + timestamp
@@ -83,11 +85,11 @@ def _save_post_to_supabase(
                 "user_id": user_id,
                 "ledger_key": ledger_key,
                 "ts": now.isoformat(),
-                "month": month,
+                "month": mk,
                 "norm_text": norm_text,
                 "method": method,
                 "tweet_id": tweet_id,
-                "tweet_url": tweet_url,
+                "tweet_url":  _tweet_url(tweet_id) if tweet_id and not tweet_url else None,
             },
             on_conflict="user_id,ledger_key",
         ).execute()
@@ -126,8 +128,6 @@ def _save_perf_to_supabase(
         logger.error(f"Failed to save perf to Supabase: {e}\n{traceback.format_exc()}")
 
 
-# === Pydantic Models ===
-
 class GenerateRequest(BaseModel):
     today_context: Optional[str] = None
     current_mood: Optional[str] = None
@@ -140,6 +140,8 @@ class GenerateResponse(BaseModel):
     options: List[str]
     gen_time_ms: float
     cache_hit: bool
+    # Add usage info
+    usage: Optional[dict] = None
 
 
 class PostRequest(BaseModel):
@@ -186,16 +188,27 @@ async def generate(req: GenerateRequest, request: Request, response: Response):
     t0 = time.perf_counter()
 
     user_id = _get_user_id_from_request(request)
+    
+    # === PAYWALL CHECK ===
+    if user_id:
+        allowed, remaining, reason = can_generate(user_id)
+        if not allowed:
+            raise HTTPException(
+                status_code=402,
+                detail={
+                    "error": "limit_reached",
+                    "message": "You've used all 3 free generations today. Upgrade to continue.",
+                    "checkout_url": os.environ.get("LEMONSQUEEZY_CHECKOUT_URL", ""),
+                }
+            )
+    # === END PAYWALL CHECK ===
 
     today_context = (req.today_context or "").strip()
     current_mood = (req.current_mood or "").strip()
     optional_angle = (req.optional_angle or "").strip()
 
     if not all([today_context, current_mood, optional_angle]):
-        raise HTTPException(
-            status_code=400, 
-            detail="today_context, current_mood, and optional_angle are required"
-        )
+        raise HTTPException(status_code=400, detail="All fields required")
 
     cache_hit = False
     try:
@@ -239,12 +252,13 @@ async def generate(req: GenerateRequest, request: Request, response: Response):
                 options=cached,
                 gen_time_ms=round(total_ms, 1),
                 cache_hit=True,
+                usage=get_usage_status(user_id),
             )
 
         async def _one_call() -> str:
             return (await anyio.to_thread.run_sync(gen.generate_human_post, prompt, mode)).strip()
 
-        results = await asyncio.gather(*[_one_call() for _ in range(3)], return_exceptions=True)
+        results = await asyncio.gather(*[_one_call() for _ in range(2)], return_exceptions=True)
 
         options: List[str] = []
         seen = set()
@@ -256,8 +270,8 @@ async def generate(req: GenerateRequest, request: Request, response: Response):
                 seen.add(r)
                 options.append(r)
 
-        extra_tries = 2
-        while len(options) < 3 and extra_tries > 0:
+        extra_tries = 1  # 2
+        while len(options) < 2 and extra_tries > 0:  # options initial length < 3
             extra_tries -= 1
             try:
                 post = (await anyio.to_thread.run_sync(gen.generate_human_post, prompt, mode)).strip()
@@ -289,14 +303,21 @@ async def generate(req: GenerateRequest, request: Request, response: Response):
         # Supabase perf log
         _save_perf_to_supabase(user_id, mode, False, round(total_ms, 1), len(options))
 
+        # === INCREMENT USAGE AFTER SUCCESS ===
+        if user_id:
+            increment_usage(user_id)
+        
+        usage = get_usage_status(user_id)
+        
         return GenerateResponse(
             mode=mode,
             remaining_writes=remaining_posts_this_month(),
             options=options,
             gen_time_ms=round(total_ms, 1),
             cache_hit=False,
+            usage=usage,
         )
-
+        
     except HTTPException:
         raise
     except Exception as e:

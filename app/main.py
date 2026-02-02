@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.api.routes import router as api_router
 from app.api.auth import router as auth_router
+from app.api.payments import router as payments_router
 
 
 def create_app() -> FastAPI:
@@ -37,6 +38,7 @@ def create_app() -> FastAPI:
     # Register API routes
     app.include_router(api_router)
     app.include_router(auth_router)
+    app.include_router(payments_router)
     
     return app
 

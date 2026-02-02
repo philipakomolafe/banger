@@ -4,8 +4,11 @@ Email utilities module - handles sending email notifications.
 
 import os
 import smtplib
+from dotenv import load_dotenv
 from email.message import EmailMessage
 
+# Load ENV vars.
+load_dotenv()
 
 def send_email(subject: str, body: str) -> bool:
     """

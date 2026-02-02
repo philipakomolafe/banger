@@ -11,8 +11,13 @@
     <header>
       <h1>Banger</h1>
       <div class="meta">
+        <span class="pill usage-pill" id="usagePill" title="Click for account">
+          <span id="usageIcon">⚡</span>
+          <span id="usageDisplay">Loading usage...</span>
+        </span>
         <span class="pill" id="quota">Loading quota…</span>
         <span class="pill" id="modePill" style="display:none;"></span>
+        <button class="btn account-btn" id="accountBtn" title="Account">👤</button>
       </div>
     </header>
 
@@ -25,7 +30,7 @@
       <div class="content">
         <div class="grid">
           <div>
-            <label>Today’s context <span class="req">(required)</span></label>
+            <label>Today's context <span class="req">(required)</span></label>
             <textarea id="today_context" placeholder="What did you actually do today? (specific)"></textarea>
 
             <div class="space"></div>
@@ -54,8 +59,6 @@
                     <option value="1">1</option>
                     <option value="2">2</option>
                     <option value="3" selected>3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
                   </select>
                 </div>
                 <div>
@@ -122,6 +125,71 @@
       </div>
       <div class="screenshot-actions">
         <button class="btn" id="downloadScreenshot">📸 Download as Image</button>
+      </div>
+    </div>
+
+    <!-- Paywall Modal -->
+    <div class="modal-overlay" id="paywallModal">
+      <div class="modal-box">
+        <button class="modal-close" id="closePaywall">&times;</button>
+        <div class="modal-icon">🚀</div>
+        <h2>You've hit your daily limit!</h2>
+        <p class="modal-subtitle">Free users get <b>3 generations per day</b>. Upgrade to Pro for unlimited bangers.</p>
+        
+        <div class="pricing-card">
+          <div class="pricing-badge">Most Popular</div>
+          <div class="pricing-plan">Pro Plan</div>
+          <div class="pricing-price">
+            <span class="price-amount">$9</span>
+            <span class="price-period">/month</span>
+          </div>
+          <ul class="pricing-features">
+            <li>✓ Unlimited generations</li>
+            <li>✓ All posting methods</li>
+            <li>✓ Priority support</li>
+            <li>✓ Cancel anytime</li>
+          </ul>
+          <button class="btn primary btn-upgrade" id="upgradeBtn">Upgrade to Pro</button>
+        </div>
+        
+        <p class="modal-footer-text">
+          Your limit resets tomorrow at midnight UTC.<br>
+          <a href="#" id="continueFreeTomorrow">Continue with free plan</a>
+        </p>
+      </div>
+    </div>
+
+    <!-- Account/Settings Modal -->
+    <div class="modal-overlay" id="accountModal">
+      <div class="modal-box modal-account">
+        <button class="modal-close" id="closeAccount">&times;</button>
+        <h2>Account</h2>
+        
+        <div class="account-section">
+          <div class="account-label">Email</div>
+          <div class="account-value" id="accountEmail">Loading...</div>
+        </div>
+        
+        <div class="account-section">
+          <div class="account-label">Plan</div>
+          <div class="account-value">
+            <span class="plan-badge" id="accountPlan">Free</span>
+          </div>
+        </div>
+        
+        <div class="account-section" id="usageSection">
+          <div class="account-label">Today's Usage</div>
+          <div class="usage-bar-container">
+            <div class="usage-bar" id="usageBar"></div>
+          </div>
+          <div class="usage-text" id="usageText">0 / 3 generations</div>
+        </div>
+        
+        <div class="account-actions">
+          <button class="btn primary" id="accountUpgradeBtn" style="display: none;">Upgrade to Pro</button>
+          <button class="btn" id="manageSubscription" style="display: none;">Manage Subscription</button>
+          <button class="btn danger" id="logoutBtn">Log Out</button>
+        </div>
       </div>
     </div>
 

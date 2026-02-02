@@ -279,7 +279,7 @@ def generate_human_post(prompt: str, mode: str) -> str:
     return generate_with_gemini(rewrite_prompt, temperature=0.2)
 
 
-def generate_multiple_options(prompt: str, mode: str, count: int = 3) -> list:
+def generate_multiple_options(prompt: str, mode: str, count: int = 2) -> list:
     """Generate multiple post options for user to choose from."""
     options = []
 

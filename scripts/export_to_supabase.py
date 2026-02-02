@@ -76,7 +76,8 @@ def main():
     p.add_argument("--batch", type=int, default=300)
     args = p.parse_args()
 
-    if not args.user_id and not args.access_token:
+    # this fails to catch a case where the user-id is provided.
+    if not args.user_id and not args.access_token:                      
         raise SystemExit("Provide either --user-id or --access-token")
 
     user_id = args.user_id
@@ -95,9 +96,13 @@ def main():
 
     total = 0
     for i in range(0, len(payload), args.batch):
-        chunk = payload[i : i + args.batch]
-        supabase.table(args.table).upsert(chunk).execute()
-        total += len(chunk)
+        # rolling through the dict indices. 
+        # so, we move from the current idx-position through to [current-idx-posit + batch length].
+        sample = payload[i : i + args.batch]
+        # so here we refer to the supabase table: `perf_entries` to export data to.
+        # since the .table() method in supabase calls the .from_() method which also calls postgrest so i think i'll just swap to using it directly.
+        supabase.from_(args.table).upsert(sample).execute()
+        total += len(sample)
         print(f"Upserted {total}/{len(payload)}")
     print("Done.")
 
