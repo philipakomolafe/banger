@@ -735,20 +735,14 @@ function wireUI() {
   const clearBtn = el('clear');
   if (clearBtn) {
     clearBtn.onclick = () => {
-      const ctx = el('today_context');
-      const mood = el('current_mood');
-      const angle = el('optional_angle');
-      const options = el('options');
-      const modePill = el('modePill');
+      document.getElementById('today_context').value = '';
+      document.getElementById('current_mood').value = '';
+      document.getElementById('optional_angle').value = '';
+      document.getElementById('options').innerHTML = '';
+      document.getElementById('status').textContent = '';
       
-      if (ctx) ctx.value = '';
-      if (mood) mood.value = '';
-      if (angle) angle.value = '';
-      if (options) options.innerHTML = '';
-      if (modePill) modePill.style.display = 'none';
-      setStatus('', '');
-      updateGenerateEnabled();
-      hideScreenshotCard();
+      // Hide screenshot card on clear
+      document.getElementById('screenshotCard').style.display = 'none';
     };
   }
   

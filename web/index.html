@@ -55,12 +55,12 @@
             </div>
             <div>
               <label for="max_chars">Max chars</label>
-              <input type="number" id="max_chars" value="280" min="100" max="500" />
+              <input type="number" id="max_chars" value="280" min="100" max="300" />
             </div>
           </div>
 
           <div>
-            <label for="email_subject">Email subject (if sending)</label>
+            <label for="email_subject">Email subject</label>
             <input type="text" id="email_subject" value="Banger drafts" />
           </div>
         </div>
@@ -83,8 +83,8 @@
 
     <div class="options" id="options"></div>
 
-    <!-- Screenshot Card -->
-    <div class="screenshot-card" id="screenshotCard">
+    <!-- Screenshot Card (hidden by default) -->
+    <div class="screenshot-card" id="screenshotCard" style="display: none;">
       <div class="screenshot-card-inner" id="screenshotInner">
         <div class="screenshot-side before">
           <div class="screenshot-label">Raw input</div>
@@ -96,7 +96,7 @@
         </div>
       </div>
       <div class="screenshot-branding">
-        Made with <b>Banger</b> ✨ → <a href="https://getbanger.app" target="_blank">getbanger.app</a>
+        Made with <b>Banger</b> ✨ → <a href="https://getbanger.tech" target="_blank">getbanger.tech</a>
       </div>
       <div class="screenshot-actions">
         <button class="btn" id="downloadScreenshot">📸 Download as Image</button>
