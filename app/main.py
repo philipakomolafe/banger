@@ -22,13 +22,27 @@ def create_app() -> FastAPI:
     )
     
     # CORS middleware
+    allowed_origins = [
+        "https://getbanger.tech",
+        "https://www.getbanger.tech",
+        "https://banger.onrender.com",
+        "https://www.banger.onrender.com",
+        "http://localhost",
+        "http://localhost:8000",
+    ]
+
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],  # Tighten in production
+        allow_origins=allowed_origins,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    # Health check endpoint
+    @app.get("/health")
+    async def health_check():
+        return {"status": "healthy", "service": "Banger"}
 
     # Mount static files for web frontend
     web_path = Path(__file__).parent.parent / "web"

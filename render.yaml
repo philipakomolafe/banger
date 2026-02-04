@@ -1,0 +1,67 @@
+services:
+  - type: web
+    name: banger
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      # Google AI
+      - key: GOOGLE_API_KEY
+        sync: false
+      - key: MODEL_NAME
+        value: gemini-2.5-flash
+
+      # SMTP Email
+      - key: SMTP_DEBUG
+        value: "0"
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: TO_EMAIL
+        sync: false
+
+      # X/Twitter API
+      - key: X_API_KEY
+        sync: false
+      - key: X_API_SECRET
+        sync: false
+      - key: X_ACCESS_TOKEN
+        sync: false
+      - key: X_ACCESS_SECRET
+        sync: false
+      - key: X_BEARER_TOKEN
+        sync: false
+      - key: X_USERNAME
+        sync: false
+
+      # OAuth 2.0
+      - key: CLIENT_ID
+        sync: false
+      - key: CLIENT_SECRET
+        sync: false
+
+      # X Limits
+      - key: MAX_X_WRITES_PER_MONTH
+        value: "480"
+      - key: X_COMMUNITY_URL
+        value: https://x.com/i/communities/1493446837214187523
+
+      # Supabase
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+
+      # Auth Redirect (update for production)
+      - key: AUTH_REDIRECT_URL
+        value: https://getbanger.tech/web/callback.html
+
+    healthCheckPath: /health
+    autoDeploy: true
