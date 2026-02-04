@@ -2,6 +2,7 @@ const el = (id) => document.getElementById(id);
 
 // User state
 let currentUser = null;
+let pendingTweetData = null; // Store data for tweet URL modal
 
 function setStatus(msg, kind) {
   const s = el('status');
@@ -34,6 +35,9 @@ function updateUsageDisplay(used, limit, isPro) {
   const usageIcon = el('usageIcon');
   const usagePill = el('usagePill');
   
+  console.log('updateUsageDisplay:', { used, limit, isPro });
+  console.log('Elements:', { usageDisplay: !!usageDisplay, usageIcon: !!usageIcon, usagePill: !!usagePill });
+  
   if (!usageDisplay || !usageIcon || !usagePill) {
     console.warn('Usage display elements not found');
     return;
@@ -43,6 +47,7 @@ function updateUsageDisplay(used, limit, isPro) {
     usageDisplay.textContent = 'Pro (Unlimited)';
     usageIcon.textContent = '⚡';
     usagePill.classList.add('pro');
+    usagePill.classList.remove('exhausted');
   } else {
     const remaining = Math.max(0, limit - used);
     usageDisplay.textContent = `${remaining}/${limit} left`;
@@ -58,11 +63,13 @@ function updateUsageDisplay(used, limit, isPro) {
 }
 
 function updateAccountModal(user) {
-  console.log('Updating account modal with user:', user);
+  console.log('updateAccountModal:', user);
   
   // Email
   const emailEl = el('accountEmail');
-  if (emailEl) emailEl.textContent = user.email || 'Unknown';
+  if (emailEl) {
+    emailEl.textContent = user.email || 'Unknown';
+  }
   
   // Plan
   const planBadge = el('accountPlan');
@@ -84,7 +91,7 @@ function updateAccountModal(user) {
       const percentage = Math.min(100, (used / limit) * 100);
       
       const usageBar = el('usageBar');
-      const usageText = el('usageText');
+      const accountUsage = el('accountUsage');
       
       if (usageBar) {
         usageBar.style.width = `${percentage}%`;
@@ -92,14 +99,14 @@ function updateAccountModal(user) {
         if (percentage >= 100) {
           usageBar.style.background = 'var(--danger, #ff5c7a)';
         } else if (percentage >= 66) {
-          usageBar.style.background = 'var(--warning, #f59e0b)';
+          usageBar.style.background = '#f59e0b';
         } else {
           usageBar.style.background = 'var(--accent, #6366f1)';
         }
       }
       
-      if (usageText) {
-        usageText.textContent = `${used} / ${limit} generations`;
+      if (accountUsage) {
+        accountUsage.textContent = `${used} / ${limit} generations`;
       }
     }
   }
@@ -126,6 +133,8 @@ async function fetchUserInfo() {
     
     if (!res.ok) {
       console.error('Failed to fetch user info:', res.status);
+      const text = await res.text();
+      console.error('Response:', text);
       return null;
     }
     
@@ -133,13 +142,21 @@ async function fetchUserInfo() {
     console.log('User info received:', user);
     currentUser = user;
     
-    // Update UI with user info
-    const isPro = user.plan === 'pro' || user.is_pro;
-    const used = user.daily_usage || 0;
-    const limit = user.daily_limit || 3;
+    // Parse values - handle both flat and nested structures
+    const isPro = user.plan === 'pro' || user.is_pro === true;
+    const used = user.daily_usage ?? 0;
+    const limit = user.daily_limit ?? 3;
     
+    console.log('Parsed values:', { isPro, used, limit });
+    
+    // Update both displays
     updateUsageDisplay(used, limit, isPro);
-    updateAccountModal(user);
+    updateAccountModal({
+      ...user,
+      daily_usage: used,
+      daily_limit: limit,
+      is_pro: isPro
+    });
     
     return user;
   } catch (e) {
@@ -157,6 +174,7 @@ async function fetchConfig() {
     if (quotaEl) quotaEl.textContent = `API writes: ${cfg.remaining_writes ?? 0}`;
     window.COMMUNITY_URL = cfg.community_url || null;
   } catch (e) {
+    console.error('fetchConfig error:', e);
     const quotaEl = el('quota');
     if (quotaEl) quotaEl.textContent = 'Quota unavailable';
   }
@@ -189,35 +207,88 @@ async function ensureAuthed() {
   }
 }
 
+// Modal functions
 function showPaywallModal() {
   const modal = el('paywallModal');
   if (modal) {
     modal.classList.add('visible');
-    console.log('Paywall modal shown');
+    document.body.style.overflow = 'hidden';
   }
 }
 
 function hidePaywallModal() {
   const modal = el('paywallModal');
-  if (modal) modal.classList.remove('visible');
+  if (modal) {
+    modal.classList.remove('visible');
+    document.body.style.overflow = '';
+  }
 }
 
 function showAccountModal() {
   console.log('Opening account modal...');
-  // Refresh user info when opening
-  fetchUserInfo();
+  fetchUserInfo(); // Refresh user info
   const modal = el('accountModal');
   if (modal) {
     modal.classList.add('visible');
-    console.log('Account modal shown');
-  } else {
-    console.error('Account modal element not found!');
+    document.body.style.overflow = 'hidden';
   }
 }
 
 function hideAccountModal() {
   const modal = el('accountModal');
-  if (modal) modal.classList.remove('visible');
+  if (modal) {
+    modal.classList.remove('visible');
+    document.body.style.overflow = '';
+  }
+}
+
+function showTweetUrlModal(text, method) {
+  pendingTweetData = { text, method };
+  const modal = el('tweetUrlModal');
+  const input = el('tweetUrlInput');
+  if (input) input.value = '';
+  if (modal) {
+    modal.classList.add('visible');
+    document.body.style.overflow = 'hidden';
+    if (input) input.focus();
+  }
+}
+
+function hideTweetUrlModal() {
+  const modal = el('tweetUrlModal');
+  if (modal) {
+    modal.classList.remove('visible');
+    document.body.style.overflow = '';
+  }
+  pendingTweetData = null;
+}
+
+async function saveTweetUrl() {
+  if (!pendingTweetData) return;
+  
+  const input = el('tweetUrlInput');
+  const tweetUrl = (input?.value || '').trim();
+  
+  if (tweetUrl) {
+    try {
+      await fetch('/api/record', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          text: pendingTweetData.text,
+          method: pendingTweetData.method,
+          tweet_url: tweetUrl
+        })
+      });
+      setStatus('Tweet tracked successfully!', 'ok');
+      setTimeout(() => setStatus('', ''), 2000);
+    } catch (e) {
+      console.error('Failed to save tweet URL:', e);
+      setStatus('Failed to save tweet URL', 'err');
+    }
+  }
+  
+  hideTweetUrlModal();
 }
 
 function logout() {
@@ -261,6 +332,7 @@ function optionCard(initialText, idx) {
   const actions = document.createElement('div');
   actions.className = 'cardActions';
 
+  // Copy button
   const btnCopy = document.createElement('button');
   btnCopy.className = 'btn';
   btnCopy.textContent = 'Copy';
@@ -274,6 +346,7 @@ function optionCard(initialText, idx) {
     }
   };
 
+  // Post via API button
   const btnPost = document.createElement('button');
   btnPost.className = 'btn primary';
   btnPost.textContent = 'Post via API';
@@ -282,24 +355,29 @@ function optionCard(initialText, idx) {
     if (!text) return setStatus('Empty draft.', 'err');
 
     setStatus('Posting via API…');
-    const res = await fetch('/api/post', {
-      method: 'POST',
-      headers: { ...getAuthHeaders(), 'X-Use-X-Api': '1' },
-      body: JSON.stringify({ text, method: 'api' })
-    });
-    const data = await res.json();
-    if (data.success) {
-      setStatus(`Posted. Tweet ID: ${data.tweet_id}`, 'ok');
-      fetchConfig();
-    } else {
-      if (data.intent_url) {
-        const go = confirm(`API failed: ${data.error}\nOpen in X composer instead?`);
-        if (go) window.open(data.intent_url, '_blank');
+    try {
+      const res = await fetch('/api/post', {
+        method: 'POST',
+        headers: { ...getAuthHeaders(), 'X-Use-X-Api': '1' },
+        body: JSON.stringify({ text, method: 'api' })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setStatus(`Posted! Tweet ID: ${data.tweet_id}`, 'ok');
+        fetchConfig();
+      } else {
+        if (data.intent_url) {
+          const go = confirm(`API failed: ${data.error}\nOpen in X composer instead?`);
+          if (go) window.open(data.intent_url, '_blank');
+        }
+        setStatus(`API failed: ${data.error || 'Unknown error'}`, 'err');
       }
-      setStatus(`API failed: ${data.error || 'Unknown error'}`, 'err');
+    } catch (e) {
+      setStatus('Network error posting', 'err');
     }
   };
 
+  // Open in X button
   const btnIntent = document.createElement('button');
   btnIntent.className = 'btn';
   btnIntent.textContent = 'Open in X';
@@ -308,17 +386,29 @@ function optionCard(initialText, idx) {
     if (!text) return setStatus('Empty draft.', 'err');
 
     setStatus('Opening X composer…');
-    const res = await fetch('/api/post', {
-      method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify({ text, method: 'manual' })
-    });
-    const data = await res.json();
-    if (data.intent_url) window.open(data.intent_url, '_blank');
-    setStatus('Opened X composer (recorded to ledger).', 'ok');
-    setTimeout(() => setStatus('', ''), 1500);
+    try {
+      const res = await fetch('/api/post', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ text, method: 'manual' })
+      });
+
+      const data = await res.json();
+      if (data.intent_url) {
+        window.open(data.intent_url, '_blank');
+      }
+      setStatus('Opened X composer.', 'ok');
+      
+      // Show modal to capture tweet URL
+      setTimeout(() => {
+        showTweetUrlModal(text, 'manual');
+      }, 1000);
+    } catch (e) {
+      setStatus('Failed to open X', 'err');
+    }
   };
 
+  // Community button
   const btnCommunity = document.createElement('button');
   btnCommunity.className = 'btn';
   btnCommunity.textContent = 'Community';
@@ -327,30 +417,27 @@ function optionCard(initialText, idx) {
     if (!text) return setStatus('Empty draft.', 'err');
 
     if (!window.COMMUNITY_URL) {
-      setStatus('Community URL not configured in backend env (X_COMMUNITY_URL).', 'err');
+      setStatus('Community URL not configured.', 'err');
       return;
     }
 
-    await fetch('/api/post', {
-      method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify({ text, method: 'community' })
-    });
-
-    window.open(window.COMMUNITY_URL, '_blank');
-    setStatus('Paste into Community composer. After posting, paste the tweet link to save tweet_id.', 'ok');
-
-    const tweetUrl = window.prompt('After you post, paste the tweet URL here to save tweet_id:', '');
-    if (tweetUrl && tweetUrl.trim()) {
-      await fetch('/api/record', {
+    try {
+      await fetch('/api/post', {
         method: 'POST',
         headers: getAuthHeaders(),
-        body: JSON.stringify({ text, method: 'community', tweet_url: tweetUrl.trim() })
+        body: JSON.stringify({ text, method: 'community' })
       });
-      setStatus('Saved tweet link/tweet_id to ledger.', 'ok');
-    }
 
-    setTimeout(() => setStatus('', ''), 1800);
+      window.open(window.COMMUNITY_URL, '_blank');
+      setStatus('Opening Community. Paste your draft there!', 'ok');
+      
+      // Show modal to capture tweet URL
+      setTimeout(() => {
+        showTweetUrlModal(text, 'community');
+      }, 1000);
+    } catch (e) {
+      setStatus('Failed to record post', 'err');
+    }
   };
 
   actions.appendChild(btnCopy);
@@ -398,52 +485,46 @@ async function downloadScreenshot() {
     link.click();
     setStatus('Screenshot downloaded!', 'ok');
   } catch (e) {
-    setStatus('Screenshot failed. Try a manual screenshot.', 'err');
+    setStatus('Screenshot failed.', 'err');
   }
 }
 
 function wireUI() {
   console.log('Wiring UI...');
   
-  // Enable/disable Generate based on required input
+  // Generate button enable/disable
   const todayContext = el('today_context');
   if (todayContext) {
     todayContext.addEventListener('input', updateGenerateEnabled);
     updateGenerateEnabled();
   }
 
+  // Screenshot download
   const downloadBtn = el('downloadScreenshot');
   if (downloadBtn) downloadBtn.onclick = downloadScreenshot;
 
-  // Account button click
+  // Account button & usage pill -> open account modal
   const accountBtn = el('accountBtn');
   const usagePill = el('usagePill');
   
   if (accountBtn) {
-    accountBtn.onclick = () => {
-      console.log('Account button clicked');
-      showAccountModal();
-    };
-  } else {
-    console.error('accountBtn not found');
+    accountBtn.onclick = showAccountModal;
   }
   
   if (usagePill) {
-    usagePill.onclick = () => {
-      console.log('Usage pill clicked');
-      showAccountModal();
-    };
-  } else {
-    console.error('usagePill not found');
+    usagePill.onclick = showAccountModal;
+    usagePill.style.cursor = 'pointer';
   }
   
-  // Close modals
+  // Close modal buttons
   const closeAccount = el('closeAccount');
   const closePaywall = el('closePaywall');
+  const closeTweetUrl = el('closeTweetUrl');
   const continueFreeTomorrow = el('continueFreeTomorrow');
   
   if (closeAccount) closeAccount.onclick = hideAccountModal;
   if (closePaywall) closePaywall.onclick = hidePaywallModal;
+  if (closeTweetUrl) closeTweetUrl.onclick = hideTweetUrlModal;
   if (continueFreeTomorrow) {
     continueFreeTomorrow.onclick = (e) => {
       e.preventDefault();
@@ -451,9 +532,17 @@ function wireUI() {
     };
   }
   
+  // Tweet URL modal buttons
+  const skipTweetUrl = el('skipTweetUrl');
+  const saveTweetUrlBtn = el('saveTweetUrl');
+  
+  if (skipTweetUrl) skipTweetUrl.onclick = hideTweetUrlModal;
+  if (saveTweetUrlBtn) saveTweetUrlBtn.onclick = saveTweetUrl;
+  
   // Click outside modal to close
   const accountModal = el('accountModal');
   const paywallModal = el('paywallModal');
+  const tweetUrlModal = el('tweetUrlModal');
   
   if (accountModal) {
     accountModal.onclick = (e) => {
@@ -463,6 +552,11 @@ function wireUI() {
   if (paywallModal) {
     paywallModal.onclick = (e) => {
       if (e.target === paywallModal) hidePaywallModal();
+    };
+  }
+  if (tweetUrlModal) {
+    tweetUrlModal.onclick = (e) => {
+      if (e.target === tweetUrlModal) hideTweetUrlModal();
     };
   }
   
@@ -492,6 +586,7 @@ function wireUI() {
     };
   }
 
+  // Generate button
   const generateBtn = el('generate');
   if (generateBtn) {
     generateBtn.onclick = async () => {
@@ -509,6 +604,7 @@ function wireUI() {
       const max_chars = parseInt(el('max_chars')?.value || '280', 10);
 
       setStatus('Generating…');
+      generateBtn.disabled = true;
 
       let res;
       try {
@@ -518,9 +614,12 @@ function wireUI() {
           body: JSON.stringify({ today_context, current_mood, optional_angle, max_options, max_chars })
         });
       } catch (e) {
+        generateBtn.disabled = false;
         setStatus('Network error. Is the server running?', 'err');
         return;
       }
+
+      generateBtn.disabled = false;
 
       // Check for rate limit / paywall
       if (res.status === 429) {
@@ -539,8 +638,9 @@ function wireUI() {
       const data = await res.json();
 
       // Update usage after generation
-      fetchUserInfo();
+      await fetchUserInfo();
 
+      // Mode pill
       const mode = data.mode || '';
       const pill = el('modePill');
       if (pill) {
@@ -552,6 +652,7 @@ function wireUI() {
         }
       }
 
+      // Render option cards
       const container = el('options');
       if (container) {
         container.innerHTML = '';
@@ -561,13 +662,14 @@ function wireUI() {
         });
       }
 
+      // Screenshot card
       if (data.options && data.options.length > 0) {
         showScreenshotCard(today_context, data.options[0]);
       }
 
       fetchConfig();
 
-      const remaining = (data.remaining_writes ?? null);
+      const remaining = data.remaining_writes ?? null;
       if (remaining !== null && remaining !== undefined) {
         setStatus(`Generated ${data.options?.length || 0} option(s). API writes: ${remaining}`, 'ok');
       } else {
@@ -580,6 +682,7 @@ function wireUI() {
     };
   }
 
+  // Copy all button
   const copyAllBtn = el('copyAll');
   if (copyAllBtn) {
     copyAllBtn.onclick = async () => {
@@ -592,11 +695,12 @@ function wireUI() {
         setStatus('Copied all options.', 'ok');
         setTimeout(() => setStatus('', ''), 1200);
       } catch {
-        setStatus('Clipboard failed. Copy manually.', 'err');
+        setStatus('Clipboard failed.', 'err');
       }
     };
   }
 
+  // Email all button
   const emailAllBtn = el('emailAll');
   if (emailAllBtn) {
     emailAllBtn.onclick = async () => {
@@ -606,23 +710,28 @@ function wireUI() {
       const subject = (el('email_subject')?.value || 'Banger drafts').trim();
 
       setStatus('Sending email…');
-      const res = await fetch('/api/email', {
-        method: 'POST',
-        headers: getAuthHeaders(),
-        body: JSON.stringify({ subject, options })
-      });
+      try {
+        const res = await fetch('/api/email', {
+          method: 'POST',
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ subject, options })
+        });
 
-      if (!res.ok) {
-        let err = {};
-        try { err = await res.json(); } catch {}
-        setStatus(`Email failed: ${err.detail || res.statusText}`, 'err');
-        return;
+        if (!res.ok) {
+          let err = {};
+          try { err = await res.json(); } catch {}
+          setStatus(`Email failed: ${err.detail || res.statusText}`, 'err');
+          return;
+        }
+        setStatus('Email sent.', 'ok');
+        setTimeout(() => setStatus('', ''), 1400);
+      } catch (e) {
+        setStatus('Email failed.', 'err');
       }
-      setStatus('Email sent.', 'ok');
-      setTimeout(() => setStatus('', ''), 1400);
     };
   }
 
+  // Clear button
   const clearBtn = el('clear');
   if (clearBtn) {
     clearBtn.onclick = () => {
@@ -655,13 +764,15 @@ function getAuthHeaders() {
   return headers;
 }
 
+// Initialize on DOM load
 document.addEventListener('DOMContentLoaded', async () => {
   console.log('DOM loaded, checking auth...');
   const ok = await ensureAuthed();
   if (!ok) return;
 
-  console.log('Auth OK, wiring UI...');
+  console.log('Auth OK, initializing...');
   wireUI();
-  fetchConfig();
-  fetchUserInfo();
+  await fetchConfig();
+  await fetchUserInfo();
+  console.log('Initialization complete');
 });

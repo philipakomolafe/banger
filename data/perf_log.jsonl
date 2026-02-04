@@ -24,3 +24,6 @@
 {"ts": "2026-01-24T18:07:32.283290+00:00", "mode": "product_building", "cache_hit": false, "gen_time_ms": 2463.5, "options_count": 3}
 {"ts": "2026-01-24T21:26:14.785604+00:00", "mode": "product_building", "cache_hit": false, "gen_time_ms": 63065.8, "options_count": 1}
 {"ts": "2026-01-25T16:13:50.307165+00:00", "mode": "feature_cutting", "cache_hit": false, "gen_time_ms": 13444.0, "options_count": 2}
+{"ts": "2026-02-02T17:07:56.808518+00:00", "mode": "shipping_update", "cache_hit": false, "gen_time_ms": 27692.9, "options_count": 2}
+{"ts": "2026-02-02T22:59:38.109938+00:00", "mode": "shipping_update", "cache_hit": false, "gen_time_ms": 28686.5, "options_count": 2}
+{"ts": "2026-02-03T13:56:10.205779+00:00", "mode": "daily_wins", "cache_hit": false, "gen_time_ms": 21084.2, "options_count": 2}

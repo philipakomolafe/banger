@@ -10,7 +10,8 @@ import time
 
 logger = logging.getLogger(__name__)
 
-FREE_DAILY_LIMIT = 3
+# adjust to 3 later.
+FREE_DAILY_LIMIT = 1
 
 
 def _today_key() -> str:

@@ -174,5 +174,21 @@
     "method": "api",
     "tweet_id": "2015174425218256922",
     "tweet_url": "https://x.com/i/web/status/2015174425218256922"
+  },
+  "community_1770052286739": {
+    "ts": 1770052286.7397332,
+    "month": "2026-02",
+    "norm_text": "Shipped some stuff: → Lemon Squeezy payments connected → Tweaked daily usage limit UI → Worked on user account setup flow (still buggy though 😅) Next up: tackling those constraints.",
+    "method": "community",
+    "tweet_id": null,
+    "tweet_url": null
+  },
+  "community_1770127168348": {
+    "ts": 1770127168.3483286,
+    "month": "2026-02",
+    "norm_text": "Today's wins: → Fixed a nasty backend/frontend error code bug. → Prepping for deployment: moving off local to Render/Vercel (which one's best btw?) Grinding hard. Next up: deployment. LG! 🚀",
+    "method": "community",
+    "tweet_id": "2018686913637437527",
+    "tweet_url": "https://x.com/PhilipAkomolaf_/status/2018686913637437527"
   }
 }

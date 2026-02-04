@@ -80,7 +80,27 @@ def _save_post_to_supabase(
         ledger_key = f"{method}_{ts_ms}"
 
         admin = get_supabase(admin=True)
-        admin.table("post_ledger").upsert(
+
+        existing = admin.table("post_ledger").select("id, method, tweet_id, tweet_url").eq("ledger_key", ledger_key).execute()
+        if existing.data and len(existing.data) > 0:
+            logger.info(f"Post already exists in Supabase for ledger_key={ledger_key}, skipping insert.")
+            
+            record = existing.data[0]
+            updates = {}
+
+            if tweet_id and not record.get("tweet_id"):
+                updates["tweet_id"] = tweet_id
+            if tweet_url and not record.get("tweet_url"):
+                updates["tweet_url"] = tweet_url
+
+            # checks if the missing tweet info are present, then update.
+            if updates:
+                admin.table("post_ledger").update(updates).eq("ledger_key", ledger_key).execute()
+                logger.info(f"Updated post in Supabase for ledger_key={ledger_key} with tweet info.")
+            return
+        
+        # Insert record.
+        admin.table("post_ledger").insert(
             {
                 "user_id": user_id,
                 "ledger_key": ledger_key,
@@ -89,10 +109,14 @@ def _save_post_to_supabase(
                 "norm_text": norm_text,
                 "method": method,
                 "tweet_id": tweet_id,
-                "tweet_url":  _tweet_url(tweet_id) if tweet_id and not tweet_url else None,
+                "tweet_url": _tweet_url(tweet_id) if tweet_id and not tweet_url else None,
             },
             on_conflict="user_id,ledger_key",
         ).execute()
+
+        logger.info(f"Saved post to Supabase for user_id={user_id}, ledger_key={ledger_key}")
+
+
     except Exception as e:
         logger.error(f"Failed to save post to Supabase: {e}\n{traceback.format_exc()}")
 
@@ -147,6 +171,7 @@ class GenerateResponse(BaseModel):
 class PostRequest(BaseModel):
     text: str
     method: str = "manual"  # 'api' | 'manual' | 'community'
+    tweet_url: Optional[str] = None
 
 
 class PostResponse(BaseModel):
@@ -164,12 +189,9 @@ class EmailRequest(BaseModel):
 class WaitlistRequest(BaseModel):
     email: str
 
-
-class RecordRequest(BaseModel):
-    text: str
-    method: str = "manual"  # 'manual' | 'community'
-    tweet_url: Optional[str] = None
-
+# If the user wants to just record a post without posting.
+class RecordRequest(PostRequest):
+    pass
 
 @router.get("/config")
 def get_config():
@@ -189,19 +211,24 @@ async def generate(req: GenerateRequest, request: Request, response: Response):
 
     user_id = _get_user_id_from_request(request)
     
-    # === PAYWALL CHECK ===
+    # PAYWALL CHECK
     if user_id:
         allowed, remaining, reason = can_generate(user_id)
         if not allowed:
             raise HTTPException(
-                status_code=402,
+                status_code=429,
                 detail={
                     "error": "limit_reached",
                     "message": "You've used all 3 free generations today. Upgrade to continue.",
                     "checkout_url": os.environ.get("LEMONSQUEEZY_CHECKOUT_URL", ""),
                 }
             )
-    # === END PAYWALL CHECK ===
+        
+    else:
+        raise HTTPException(
+            status_code=401,
+            detail= "Authentication required"
+        )
 
     today_context = (req.today_context or "").strip()
     current_mood = (req.current_mood or "").strip()
@@ -258,6 +285,7 @@ async def generate(req: GenerateRequest, request: Request, response: Response):
         async def _one_call() -> str:
             return (await anyio.to_thread.run_sync(gen.generate_human_post, prompt, mode)).strip()
 
+        # also adjust the range lenght from 2 -> 3.
         results = await asyncio.gather(*[_one_call() for _ in range(2)], return_exceptions=True)
 
         options: List[str] = []
@@ -303,7 +331,7 @@ async def generate(req: GenerateRequest, request: Request, response: Response):
         # Supabase perf log
         _save_perf_to_supabase(user_id, mode, False, round(total_ms, 1), len(options))
 
-        # === INCREMENT USAGE AFTER SUCCESS ===
+        # INCREMENT USAGE AFTER SUCCESS 
         if user_id:
             increment_usage(user_id)
         
@@ -347,7 +375,7 @@ def post_to_x_api(req: PostRequest, request: Request):
         tweet_id = result.get("tweet_id")
 
         # Save to Supabase
-        _save_post_to_supabase(user_id, text, method, tweet_id=tweet_id)
+        _save_post_to_supabase(user_id, text, method, tweet_id=tweet_id, tweet_url=_tweet_url(tweet_id) if tweet_id is not None else None)
 
         if result.get("success"):
             return PostResponse(
@@ -365,10 +393,13 @@ def post_to_x_api(req: PostRequest, request: Request):
         )
 
     # Manual/community: do NOT call the API at all (no write quota usage)
-    record_post_to_ledger(text, method=method)
+    tweet_url = req.tweet_url or ""
+    tweet_id = extract_tweet_id_from_url(tweet_url)
+    
+    record_post_to_ledger(text, method=method, tweet_id=tweet_id, tweet_url=tweet_url)
 
-    # Save to Supabase
-    _save_post_to_supabase(user_id, text, method)
+    # Save to Supabase with tweet_id if tweet_url is provided
+    _save_post_to_supabase(user_id, text, method, tweet_id=tweet_id, tweet_url=tweet_url)
 
     return PostResponse(
         success=True,

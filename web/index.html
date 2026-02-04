@@ -105,31 +105,29 @@
 
     <!-- Paywall Modal -->
     <div class="modal-overlay" id="paywallModal">
-      <div class="modal-box">
+      <div class="modal-box modal-paywall">
         <button class="modal-close" id="closePaywall">&times;</button>
         <div class="modal-icon">🚀</div>
-        <h2>You've hit your daily limit!</h2>
-        <p class="modal-subtitle">Free users get <b>3 generations per day</b>. Upgrade to Pro for unlimited bangers.</p>
+        <h2>Daily limit reached!</h2>
+        <p class="modal-subtitle">Free users get <b>3 generations/day</b>. Upgrade for unlimited.</p>
         
         <div class="pricing-card">
-          <div class="pricing-badge">Most Popular</div>
-          <div class="pricing-plan">Pro Plan</div>
+          <div class="pricing-badge">Pro</div>
           <div class="pricing-price">
             <span class="price-amount">$9</span>
-            <span class="price-period">/month</span>
+            <span class="price-period">/mo</span>
           </div>
           <ul class="pricing-features">
             <li>✓ Unlimited generations</li>
             <li>✓ Priority support</li>
-            <li>✓ Early access to new features</li>
-            <li>✓ Voice learning (coming soon)</li>
+            <li>✓ Early access features</li>
           </ul>
           <button class="btn primary btn-upgrade" id="upgradeBtn">Upgrade to Pro</button>
         </div>
         
         <p class="modal-footer-text">
-          Your limit resets tomorrow at midnight UTC.<br>
-          <a href="#" id="continueFreeTomorrow">Continue with free plan</a>
+          Resets tomorrow at midnight UTC<br>
+          <a href="#" id="continueFreeTomorrow">Continue free</a>
         </p>
       </div>
     </div>
@@ -157,13 +155,33 @@
           <div class="usage-bar-container">
             <div class="usage-bar" id="usageBar" style="width: 0%;"></div>
           </div>
-          <div class="usage-text" id="usageText">0 / 3 generations</div>
+          <div class="usage-text" id="accountUsage">0 / 3 generations</div>
         </div>
         
         <div class="account-actions">
           <button class="btn primary" id="accountUpgradeBtn">Upgrade to Pro</button>
           <button class="btn" id="manageSubscription" style="display: none;">Manage Subscription</button>
           <button class="btn danger" id="logoutBtn">Log out</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tweet URL Modal (for capturing tweet_id after posting) -->
+    <div class="modal-overlay" id="tweetUrlModal">
+      <div class="modal-box modal-tweet-url">
+        <button class="modal-close" id="closeTweetUrl">&times;</button>
+        <div class="modal-icon">🐦</div>
+        <h2>Track your post!</h2>
+        <p class="modal-subtitle">Paste your tweet URL to track engagement and save the tweet ID.</p>
+        
+        <div class="tweet-url-input-group">
+          <label for="tweetUrlInput">Tweet URL</label>
+          <input type="text" id="tweetUrlInput" placeholder="https://x.com/username/status/123456789..." />
+        </div>
+        
+        <div class="tweet-url-actions">
+          <button class="btn" id="skipTweetUrl">Skip</button>
+          <button class="btn primary" id="saveTweetUrl">Save & Track</button>
         </div>
       </div>
     </div>
