@@ -83,23 +83,32 @@
 
     <div class="options" id="options"></div>
 
-    <!-- Screenshot Card (hidden by default) -->
-    <div class="screenshot-card" id="screenshotCard" style="display: none;">
-      <div class="screenshot-card-inner" id="screenshotInner">
-        <div class="screenshot-side before">
-          <div class="screenshot-label">Raw input</div>
-          <div id="screenshotBefore"></div>
+    <!-- Screenshot Modal (hidden by default) -->
+    <div class="modal-overlay" id="screenshotModal" style="display: none;">
+      <div class="modal-box modal-screenshot">
+        <button class="modal-close" id="closeScreenshot">&times;</button>
+        <h2>Share your Banger! 🔥</h2>
+        
+        <div class="screenshot-card" id="screenshotCard">
+          <div class="screenshot-card-inner" id="screenshotInner">
+            <div class="screenshot-side before">
+              <div class="screenshot-label">Raw input</div>
+              <div id="screenshotBefore"></div>
+            </div>
+            <div class="screenshot-side after">
+              <div class="screenshot-label">Banger output</div>
+              <div id="screenshotAfter"></div>
+            </div>
+          </div>
+          <div class="screenshot-branding">
+            Made with <b>Banger</b> ✨ → <a href="https://getbanger.tech" target="_blank">getbanger.tech</a>
+          </div>
         </div>
-        <div class="screenshot-side after">
-          <div class="screenshot-label">Banger output</div>
-          <div id="screenshotAfter"></div>
+        
+        <div class="screenshot-actions">
+          <button class="btn" id="downloadScreenshot">📸 Download as Image</button>
+          <button class="btn primary" id="closeScreenshotBtn">Done</button>
         </div>
-      </div>
-      <div class="screenshot-branding">
-        Made with <b>Banger</b> ✨ → <a href="https://getbanger.tech" target="_blank">getbanger.tech</a>
-      </div>
-      <div class="screenshot-actions">
-        <button class="btn" id="downloadScreenshot">📸 Download as Image</button>
       </div>
     </div>
 

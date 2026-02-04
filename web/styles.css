@@ -609,3 +609,23 @@ input:focus, textarea:focus, select:focus {
 /* Links */
 a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
+
+.modal-screenshot {
+  max-width: 500px;
+  text-align: center;
+}
+
+.modal-screenshot h2 {
+  margin-bottom: 16px;
+}
+
+.modal-screenshot .screenshot-card {
+  margin: 0 auto 20px;
+  display: block;
+}
+
+.modal-screenshot .screenshot-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}

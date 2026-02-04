@@ -457,18 +457,35 @@ function getAllOptionTexts() {
 }
 
 function showScreenshotCard(rawInput, polishedOutput) {
-  const card = el('screenshotCard');
+  const modal = el('screenshotModal');
   const before = el('screenshotBefore');
   const after = el('screenshotAfter');
   if (before) before.textContent = rawInput.slice(0, 300);
   if (after) after.textContent = polishedOutput.slice(0, 300);
-  if (card) card.style.display = 'block';  // Changed from classList.add('visible')
+  if (modal) modal.style.display = 'flex';
 }
 
 function hideScreenshotCard() {
-  const card = el('screenshotCard');
-  if (card) card.style.display = 'none';  // Changed from classList.remove('visible')
+  const modal = el('screenshotModal');
+  if (modal) modal.style.display = 'none';
 }
+
+// Add event listeners for closing the modal
+document.addEventListener('DOMContentLoaded', () => {
+  const closeBtn = el('closeScreenshot');
+  const doneBtn = el('closeScreenshotBtn');
+  const modal = el('screenshotModal');
+  
+  if (closeBtn) closeBtn.addEventListener('click', hideScreenshotCard);
+  if (doneBtn) doneBtn.addEventListener('click', hideScreenshotCard);
+  
+  // Close on overlay click
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) hideScreenshotCard();
+    });
+  }
+});
 
 async function downloadScreenshot() {
   const inner = el('screenshotInner');
