@@ -462,12 +462,12 @@ function showScreenshotCard(rawInput, polishedOutput) {
   const after = el('screenshotAfter');
   if (before) before.textContent = rawInput.slice(0, 300);
   if (after) after.textContent = polishedOutput.slice(0, 300);
-  if (card) card.classList.add('visible');
+  if (card) card.style.display = 'block';  // Changed from classList.add('visible')
 }
 
 function hideScreenshotCard() {
   const card = el('screenshotCard');
-  if (card) card.classList.remove('visible');
+  if (card) card.style.display = 'none';  // Changed from classList.remove('visible')
 }
 
 async function downloadScreenshot() {
