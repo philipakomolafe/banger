@@ -7,6 +7,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import RedirectResponse
 
 from app.api.routes import router as api_router
 from app.api.auth import router as auth_router
@@ -37,6 +38,11 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
+    # Root redirect to web frontend.
+    @app.get("/")
+    async def root_redirect():
+        return RedirectResponse(url="/web/")
+    
     # Health check endpoint
     @app.get("/health")
     async def health_check():
