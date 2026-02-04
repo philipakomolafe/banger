@@ -758,8 +758,8 @@ function wireUI() {
       document.getElementById('options').innerHTML = '';
       document.getElementById('status').textContent = '';
       
-      // Hide screenshot card on clear
-      document.getElementById('screenshotCard').style.display = 'none';
+      // Hide screenshot modal on clear
+      hideScreenshotCard();
     };
   }
   

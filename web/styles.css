@@ -624,7 +624,80 @@ a:hover { text-decoration: underline; }
   display: block;
 }
 
-.modal-screenshot .screenshot-actions {
+@media (max-width: 500px) {
+  .screenshot-card-inner {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+/* ==================== */
+/* Screenshot Card      */
+/* ==================== */
+.screenshot-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.screenshot-card-inner {
+  display: flex;
+  gap: 16px;
+}
+
+.screenshot-side {
+  flex: 1;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.screenshot-side.before {
+  border-left: 3px solid var(--muted);
+}
+
+.screenshot-side.after {
+  border-left: 3px solid var(--accent);
+}
+
+.screenshot-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+#screenshotBefore,
+#screenshotAfter {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text);
+  word-wrap: break-word;
+}
+
+.screenshot-branding {
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.screenshot-branding b {
+  color: var(--accent);
+}
+
+.screenshot-branding a {
+  color: var(--accent);
+}
+
+.screenshot-actions {
   display: flex;
   gap: 12px;
   justify-content: center;

@@ -99,8 +99,8 @@ def _save_post_to_supabase(
                 logger.info(f"Updated post in Supabase for ledger_key={ledger_key} with tweet info.")
             return
         
-        # Insert record.
-        admin.table("post_ledger").insert(
+        # Upsert record.
+        admin.table("post_ledger").upsert(
             {
                 "user_id": user_id,
                 "ledger_key": ledger_key,
