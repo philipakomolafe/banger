@@ -25,9 +25,7 @@ def create_app() -> FastAPI:
     allowed_origins = [
         "https://getbanger.tech",
         "https://www.getbanger.tech",
-        "https://banger.onrender.com",
-        "https://www.banger.onrender.com",
-        "http://localhost",
+        "https://banger-npf3.onrender.com",  # Updated Render URL
         "http://localhost:8000",
     ]
 
