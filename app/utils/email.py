@@ -21,7 +21,8 @@ def send_email(subject: str, body: str) -> bool:
     """
 
     to_addr = os.environ.get("TO_EMAIL")
-    from_addr = os.environ.get("FROM_USER", to_addr)
+    # from_addr = os.environ.get("FROM_USER", to_addr)
+    from_addr = "Banger <onboarding@resend.dev>"
 
     if not all([to_addr, from_addr]):
         logger.error("Email addresses not configured properly.")
