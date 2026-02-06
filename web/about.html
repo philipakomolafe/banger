@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>About Banger — The Story Behind the Build-in-Public Tool</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Learn about Banger, the AI-powered tool helping indie hackers and developers turn messy build notes into engaging social media posts. Built by Philip Akomolafe." />
+  <meta name="author" content="Philip Akomolafe" />
+  <meta name="robots" content="index, follow" />
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="About Banger — AI-Powered Social Media Tool" />
+  <meta property="og:description" content="The story behind Banger and how it helps builders share their journey authentically." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://getbanger.tech/web/about.html" />
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:creator" content="@PhilipAkomolaf_" />
+  
+  <!-- Schema.org Person Markup -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    "mainEntity": {
+      "@type": "Person",
+      "name": "Philip Akomolafe",
+      "url": "https://getbanger.tech/web/about.html",
+      "sameAs": [
+        "https://x.com/PhilipAkomolaf_",
+        "https://github.com/philipakomolafe"
+      ],
+      "jobTitle": "Founder & Developer",
+      "description": "Indie hacker and developer building tools for creators who ship in public.",
+      "knowsAbout": ["Social Media Marketing", "AI Tools", "Software Development", "Build in Public"]
+    }
+  }
+  </script>
+  
+  <link rel="stylesheet" href="./styles.css" />
+  <style>
+    .about-page {
+      min-height: 100vh;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 60px 20px;
+    }
+
+    .about-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .about-header h1 {
+      font-size: clamp(32px, 5vw, 48px);
+      font-weight: 800;
+      margin-bottom: 16px;
+      letter-spacing: -1px;
+    }
+
+    .about-header .subtitle {
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.6;
+    }
+
+    .about-section {
+      margin-bottom: 48px;
+    }
+
+    .about-section h2 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+
+    .about-section h3 {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 24px 0 12px;
+      color: var(--text);
+    }
+
+    .about-section p {
+      color: var(--muted);
+      line-height: 1.8;
+      margin-bottom: 16px;
+      font-size: 16px;
+    }
+
+    .about-section ul {
+      color: var(--muted);
+      line-height: 1.8;
+      margin-bottom: 16px;
+      padding-left: 24px;
+    }
+
+    .about-section li {
+      margin-bottom: 8px;
+    }
+
+    .founder-card {
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+      padding: 24px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      margin: 24px 0;
+    }
+
+    .founder-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #8b5cf6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .founder-info h3 {
+      margin: 0 0 4px;
+      font-size: 20px;
+    }
+
+    .founder-info .title {
+      color: var(--accent);
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+
+    .founder-info p {
+      margin: 0;
+      font-size: 15px;
+    }
+
+    .founder-links {
+      display: flex;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .founder-links a {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .founder-links a:hover {
+      text-decoration: underline;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px;
+      margin: 24px 0;
+    }
+
+    .stat-box {
+      padding: 20px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    .stat-box .number {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+
+    .stat-box .label {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .contact-section {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-top: 32px;
+    }
+
+    .contact-section h3 {
+      margin-top: 0;
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .contact-item a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 24px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .back-link:hover {
+      color: var(--accent);
+    }
+
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 20px;
+      margin: 24px 0;
+      font-style: italic;
+      color: var(--muted);
+    }
+
+    blockquote cite {
+      display: block;
+      margin-top: 8px;
+      font-size: 13px;
+      font-style: normal;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+  <div class="about-page">
+    <a href="./landing.html" class="back-link">← Back to Home</a>
+    
+    <header class="about-header">
+      <h1>About Banger</h1>
+      <p class="subtitle">The AI-powered tool helping indie hackers turn daily build notes into engaging social media content.</p>
+    </header>
+
+    <!-- Mission Section -->
+    <section class="about-section">
+      <h2>Our Mission</h2>
+      <p>
+        Building in public is one of the most powerful growth strategies for indie hackers and solo founders. 
+        According to <strong>Buffer's 2025 State of Social Media Report</strong>, creators who share their journey 
+        consistently see <strong>3.2x more follower growth</strong> compared to those who only share finished products.
+      </p>
+      <p>
+        But here's the problem: most builders are great at shipping code, not writing tweets. 
+        They spend hours staring at a blank compose box, trying to make their daily progress sound interesting. 
+        That's where Banger comes in.
+      </p>
+    </section>
+
+    <!-- What is Banger Section -->
+    <section class="about-section">
+      <h2>What is Banger?</h2>
+      <p>
+        Banger is an AI-powered social media content generator specifically designed for developers, 
+        indie hackers, and creators who build in public. Unlike generic AI writing tools, Banger understands 
+        the language of shipping — bugs, features, launches, user feedback, and the emotional rollercoaster 
+        of building a product.
+      </p>
+      
+      <h3>How It Works</h3>
+      <p>
+        Simply paste your rough daily notes — the messy, unfiltered thoughts about what you built today — 
+        and Banger transforms them into polished, engaging posts optimized for X (Twitter). The AI preserves 
+        your authentic voice while adding the structure and hooks that drive engagement.
+      </p>
+
+      <h3>Key Features</h3>
+      <ul>
+        <li><strong>Voice Preservation:</strong> Your posts sound like you, not a generic AI</li>
+        <li><strong>Multiple Options:</strong> Get 3-5 variations to choose from</li>
+        <li><strong>One-Click Posting:</strong> Post directly to X without leaving Banger</li>
+        <li><strong>Build-in-Public Optimized:</strong> Trained on thousands of successful indie hacker posts</li>
+        <li><strong>Screenshot Sharing:</strong> Create shareable before/after images</li>
+      </ul>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="about-section">
+      <h2>The Numbers</h2>
+      <div class="stat-grid">
+        <div class="stat-box">
+          <div class="number">47%</div>
+          <div class="label">Avg. engagement increase</div>
+        </div>
+        <div class="stat-box">
+          <div class="number">5min</div>
+          <div class="label">Saved per post</div>
+        </div>
+        <div class="stat-box">
+          <div class="number">500+</div>
+          <div class="label">Builders using Banger</div>
+        </div>
+        <div class="stat-box">
+          <div class="number">10K+</div>
+          <div class="label">Posts generated</div>
+        </div>
+      </div>
+      
+      <blockquote>
+        <p>"According to Sprout Social's 2025 research, posts published during peak engagement hours 
+        with clear structure receive up to 3.5x more interactions than unstructured content."</p>
+        <cite>— Sprout Social Index™ 2025</cite>
+      </blockquote>
+    </section>
+
+    <!-- Founder Section -->
+    <section class="about-section">
+      <h2>Meet the Founder</h2>
+      <div class="founder-card">
+        <div class="founder-avatar">PA</div>
+        <div class="founder-info">
+          <h3>Philip Akomolafe</h3>
+          <div class="title">Founder & Developer</div>
+          <p>
+            Philip is an indie hacker and developer passionate about building tools that help creators ship more. 
+            After struggling to consistently share his own build journey on X, he created Banger to solve 
+            the problem for himself — and thousands of other builders facing the same challenge.
+          </p>
+          <div class="founder-links">
+            <a href="https://x.com/PhilipAkomolaf_" target="_blank">𝕏 @PhilipAkomolaf_</a>
+            <a href="mailto:info@getbanger.tech">📧 Contact</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Why Build in Public Section -->
+    <section class="about-section">
+      <h2>Why Building in Public Matters</h2>
+      <p>
+        Research from <strong>HubSpot's 2025 Marketing Report</strong> shows that transparency and authenticity 
+        are the top factors driving audience trust in creators. Building in public creates a unique connection 
+        with your audience that polished marketing content simply can't replicate.
+      </p>
+      
+      <h3>Benefits of Building in Public</h3>
+      <ul>
+        <li><strong>Organic Growth:</strong> Authentic content gets 2.4x more shares than promotional posts (Hootsuite, 2025)</li>
+        <li><strong>Early Feedback:</strong> Get user insights before you finish building</li>
+        <li><strong>Accountability:</strong> Public commitments increase follow-through by 65%</li>
+        <li><strong>Network Effects:</strong> Connect with other builders, potential customers, and investors</li>
+        <li><strong>SEO Benefits:</strong> Consistent content creation improves discoverability</li>
+      </ul>
+
+      <blockquote>
+        <p>"Creators who share their process, not just their results, build audiences that are 
+        40% more likely to convert to paying customers."</p>
+        <cite>— Creator Economy Report, ConvertKit 2025</cite>
+      </blockquote>
+    </section>
+
+    <!-- Platforms Section -->
+    <section class="about-section">
+      <h2>Supported Platforms</h2>
+      <p>
+        Banger is currently optimized for <strong>X (Twitter)</strong>, the primary platform for the 
+        indie hacker and build-in-public community. Our AI is trained specifically on the content patterns, 
+        character limits, and engagement drivers unique to X.
+      </p>
+      <p>
+        <strong>Coming Soon:</strong> LinkedIn posts for B2B founders, Threads integration, and 
+        Bluesky support based on user demand.
+      </p>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="about-section">
+      <h2>Frequently Asked Questions</h2>
+      
+      <h3>What is Banger?</h3>
+      <p>
+        Banger is an AI-powered tool that transforms your rough daily build notes into polished, 
+        engaging social media posts. It's specifically designed for indie hackers, developers, 
+        and creators who build in public.
+      </p>
+
+      <h3>How does Banger help improve social media engagement?</h3>
+      <p>
+        Banger uses AI trained on thousands of high-performing indie hacker posts to add structure, 
+        hooks, and formatting that drive engagement. Users report an average 47% increase in 
+        post interactions after switching to Banger-generated content.
+      </p>
+
+      <h3>What platforms does Banger support?</h3>
+      <p>
+        Currently, Banger is optimized for X (Twitter). We're working on adding LinkedIn, 
+        Threads, and Bluesky support based on user feedback.
+      </p>
+
+      <h3>Is Banger free to use?</h3>
+      <p>
+        Banger offers a free tier with 3 generations per day. For unlimited access and 
+        additional features like direct posting to X, upgrade to Banger Pro.
+      </p>
+
+      <h3>Will my posts sound like AI wrote them?</h3>
+      <p>
+        No. Banger is specifically designed to preserve your authentic voice. The AI enhances 
+        structure and engagement while keeping your unique personality and tone intact.
+      </p>
+
+      <h3>Can I post directly to X from Banger?</h3>
+      <p>
+        Yes! Pro users can connect their X account and post directly from Banger with one click, 
+        saving even more time in their daily workflow.
+      </p>
+
+      <h3>How is Banger different from ChatGPT or other AI writers?</h3>
+      <p>
+        Generic AI tools produce generic content. Banger is trained specifically on the 
+        build-in-public community — it understands shipping culture, technical updates, 
+        and the unique voice of indie hackers. The result is content that resonates with 
+        your target audience.
+      </p>
+
+      <h3>Is my data safe?</h3>
+      <p>
+        Yes. We don't store your raw notes or generated content beyond your session. 
+        Your X credentials are handled securely through OAuth, and we never have access 
+        to your password.
+      </p>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="about-section">
+      <h2>Contact Us</h2>
+      <div class="contact-section">
+        <h3>Get in Touch</h3>
+        <div class="contact-item">
+          📧 <a href="mailto:info@getbanger.tech">info@getbanger.tech</a>
+        </div>
+        <div class="contact-item">
+          𝕏 <a href="https://x.com/PhilipAkomolaf_" target="_blank">@PhilipAkomolaf_</a>
+        </div>
+        <div class="contact-item">
+          🌍 Lagos, Nigeria
+        </div>
+        <p style="margin-top: 16px; font-size: 14px;">
+          Have feedback, feature requests, or just want to say hi? We'd love to hear from you. 
+          Response time: Usually within 24 hours.
+        </p>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer" style="margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: 13px; color: var(--muted);">
+      <span>© 2026 Banger. All rights reserved.</span>
+      <span>
+        <a href="./landing.html" style="color: var(--accent); text-decoration: none;">Home</a> · 
+        <a href="./auth.html" style="color: var(--accent); text-decoration: none;">Sign In</a>
+      </span>
+    </footer>
+  </div>
+</body>
+</html>

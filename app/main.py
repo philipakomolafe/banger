@@ -7,7 +7,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, FileResponse
 
 from app.api.routes import router as api_router
 from app.api.auth import router as auth_router
@@ -38,18 +38,38 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    # Root redirect to web frontend.
+    
+    # Mount static files for web frontend
+    web_path = Path(__file__).parent.parent / "web"
+
+    # Serve robots.txt for SEO and crawler intructions.
+    @app.get("/robots.txt", response_class=FileResponse)
+    async def serve_robots():
+        robot_file = web_path / "robots.txt"
+        if robot_file.exists():
+            return FileResponse(robot_file, media_type="text/plain")
+        return FileResponse(status_code=404)
+
+
+    # Server sitemap.xml at root for SEO and crawler instructions.
+    @app.get("/sitemap.xml", response_class=FileResponse)
+    async def serve_sitemap():
+        sitemap_file = web_path / "sitemap.xml"
+        if sitemap_file.exists():
+            return FileResponse(sitemap_file, media_type="application/xml")
+        return FileResponse(status_code=404)
+
+
+    # Root redirect to web frontend
     @app.get("/")
     async def root_redirect():
-        return RedirectResponse(url="/web/")
+        return RedirectResponse(url="/web/landing.html")
     
     # Health check endpoint
     @app.get("/health")
     async def health_check():
         return {"status": "healthy", "service": "Banger"}
 
-    # Mount static files for web frontend
-    web_path = Path(__file__).parent.parent / "web"
     if web_path.exists():
         app.mount("/web", StaticFiles(directory=web_path, html=True), name="web")
 

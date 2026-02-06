@@ -80,27 +80,9 @@ def _save_post_to_supabase(
         ledger_key = f"{method}_{ts_ms}"
 
         admin = get_supabase(admin=True)
-
-        existing = admin.table("post_ledger").select("id, method, tweet_id, tweet_url").eq("ledger_key", ledger_key).execute()
-        if existing.data and len(existing.data) > 0:
-            logger.info(f"Post already exists in Supabase for ledger_key={ledger_key}, skipping insert.")
-            
-            record = existing.data[0]
-            updates = {}
-
-            if tweet_id and not record.get("tweet_id"):
-                updates["tweet_id"] = tweet_id
-            if tweet_url and not record.get("tweet_url"):
-                updates["tweet_url"] = tweet_url
-
-            # checks if the missing tweet info are present, then update.
-            if updates:
-                admin.table("post_ledger").update(updates).eq("ledger_key", ledger_key).execute()
-                logger.info(f"Updated post in Supabase for ledger_key={ledger_key} with tweet info.")
-            return
         
         # Upsert record.
-        admin.table("post_ledger").upsert(
+        admin.table("post_ledger").insert(
             {
                 "user_id": user_id,
                 "ledger_key": ledger_key,
@@ -109,9 +91,8 @@ def _save_post_to_supabase(
                 "norm_text": norm_text,
                 "method": method,
                 "tweet_id": tweet_id,
-                "tweet_url": _tweet_url(tweet_id) if tweet_id and not tweet_url else None,
-            },
-            on_conflict="user_id,ledger_key",
+                "tweet_url": _tweet_url(tweet_id) if tweet_id else None,
+            }
         ).execute()
 
         logger.info(f"Saved post to Supabase for user_id={user_id}, ledger_key={ledger_key}")
