@@ -4,6 +4,16 @@ const el = (id) => document.getElementById(id);
 let currentUser = null;
 let pendingTweetData = null; // Store data for tweet URL modal
 
+// ============================================
+// NOTIFICATION HELPER (was missing!)
+// ============================================
+function showNotification(message, type = 'ok') {
+    setStatus(message, type === 'error' ? 'err' : type);
+    if (type !== 'error') {
+        setTimeout(() => setStatus('', ''), 3000);
+    }
+}
+
 function setStatus(msg, kind) {
   const s = el('status');
   if (s) {
@@ -470,23 +480,6 @@ function hideScreenshotCard() {
   if (modal) modal.style.display = 'none';
 }
 
-// Add event listeners for closing the modal
-document.addEventListener('DOMContentLoaded', () => {
-  const closeBtn = el('closeScreenshot');
-  const doneBtn = el('closeScreenshotBtn');
-  const modal = el('screenshotModal');
-  
-  if (closeBtn) closeBtn.addEventListener('click', hideScreenshotCard);
-  if (doneBtn) doneBtn.addEventListener('click', hideScreenshotCard);
-  
-  // Close on overlay click
-  if (modal) {
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) hideScreenshotCard();
-    });
-  }
-});
-
 async function downloadScreenshot() {
   const inner = el('screenshotInner');
   if (!inner) return;
@@ -506,6 +499,314 @@ async function downloadScreenshot() {
   }
 }
 
+function getAuthHeaders() {
+  const token = localStorage.getItem('access_token');
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  return headers;
+}
+
+// ============================================
+// X ACCOUNT CONNECTION
+// ============================================
+
+async function checkXConnectionStatus() {
+    const token = localStorage.getItem('access_token');
+    if (!token) return { connected: false };
+
+    try {
+        const response = await fetch('/api/x/status', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (response.ok) {
+            return await response.json();
+        }
+    } catch (error) {
+        console.error('Failed to check X connection:', error);
+    }
+    
+    return { connected: false };
+}
+
+async function connectXAccount() {
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+        showNotification('Please log in first', 'error');
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/x/auth-url', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.detail || 'Failed to get auth URL');
+        }
+
+        const data = await response.json();
+        
+        // Open X auth in popup
+        const width = 600;
+        const height = 700;
+        const left = (window.innerWidth - width) / 2;
+        const top = (window.innerHeight - height) / 2;
+        
+        window.open(
+            data.url,
+            'Connect X Account',
+            `width=${width},height=${height},left=${left},top=${top}`
+        );
+
+        // Listen for callback message
+        window.addEventListener('message', async function handler(event) {
+            if (event.data.type === 'X_CONNECTED') {
+                window.removeEventListener('message', handler);
+                showNotification(`Connected as @${event.data.username}!`, 'ok');
+                updateXConnectionUI(true, event.data.username);
+            } else if (event.data.type === 'X_AUTH_ERROR') {
+                window.removeEventListener('message', handler);
+                showNotification('Failed to connect X account', 'error');
+            }
+        });
+
+    } catch (error) {
+        console.error('X connection error:', error);
+        showNotification(error.message || 'Failed to connect X account', 'error');
+    }
+}
+
+async function disconnectXAccount() {
+    const token = localStorage.getItem('access_token');
+    if (!token) return;
+
+    if (!confirm('Are you sure you want to disconnect your X account?')) {
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/x/disconnect', {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.ok) {
+            showNotification('X account disconnected', 'ok');
+            updateXConnectionUI(false);
+        } else {
+            throw new Error('Failed to disconnect');
+        }
+    } catch (error) {
+        console.error('Disconnect error:', error);
+        showNotification('Failed to disconnect X account', 'error');
+    }
+}
+
+function updateXConnectionUI(connected, username = null) {
+    const connectBtn = el('connect-x-btn');
+    const disconnectBtn = el('disconnect-x-btn');
+    const xStatus = el('x-connection-status');
+    const analyticsSection = el('analytics-section');
+
+    if (connectBtn) {
+        connectBtn.style.display = connected ? 'none' : 'inline-flex';
+    }
+    
+    if (disconnectBtn) {
+        disconnectBtn.style.display = connected ? 'inline-flex' : 'none';
+    }
+
+    if (xStatus) {
+        if (connected) {
+            xStatus.innerHTML = `<span class="status-connected">✓ Connected as @${username}</span>`;
+        } else {
+            xStatus.innerHTML = `<span class="status-disconnected">Not connected</span>`;
+        }
+    }
+
+    if (analyticsSection) {
+        analyticsSection.style.display = connected ? 'block' : 'none';
+    }
+}
+
+// ============================================
+// TWEET ANALYTICS
+// ============================================
+
+async function analyzeTweet(tweetUrl) {
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+        showNotification('Please log in first', 'error');
+        return null;
+    }
+
+    const analyzeBtn = el('analyze-btn');
+    const resultsDiv = el('analytics-results');
+    
+    if (analyzeBtn) {
+        analyzeBtn.disabled = true;
+        analyzeBtn.innerHTML = '<span class="spinner-small"></span> Analyzing...';
+    }
+
+    try {
+        const response = await fetch('/api/analytics/tweet', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ tweet_url: tweetUrl })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.detail || 'Failed to analyze tweet');
+        }
+
+        displayAnalyticsResults(data);
+        return data;
+
+    } catch (error) {
+        console.error('Analytics error:', error);
+        showNotification(error.message, 'error');
+        
+        if (resultsDiv) {
+            resultsDiv.innerHTML = `
+                <div class="analytics-error">
+                    <p>❌ ${error.message}</p>
+                    <p class="error-hint">Make sure you've connected your X account and the tweet URL is valid.</p>
+                </div>
+            `;
+        }
+        return null;
+    } finally {
+        if (analyzeBtn) {
+            analyzeBtn.disabled = false;
+            analyzeBtn.innerHTML = '📊 Analyze Tweet';
+        }
+    }
+}
+
+function displayAnalyticsResults(data) {
+    const resultsDiv = el('analytics-results');
+    if (!resultsDiv) return;
+
+    const { metrics, analysis, text, created_at } = data;
+    
+    const formattedDate = created_at 
+        ? new Date(created_at).toLocaleDateString('en-US', { 
+            month: 'short', day: 'numeric', year: 'numeric', 
+            hour: '2-digit', minute: '2-digit' 
+          })
+        : 'Unknown date';
+
+    resultsDiv.innerHTML = `
+        <div class="analytics-card">
+            <div class="tweet-preview">
+                <p class="tweet-text">${escapeHtml(text)}</p>
+                <span class="tweet-date">${formattedDate}</span>
+            </div>
+            
+            <div class="performance-badge ${getPerformanceClass(analysis.engagement_rate)}">
+                ${analysis.performance_level}
+            </div>
+            
+            <div class="metrics-grid">
+                <div class="metric-item">
+                    <span class="metric-icon">👁️</span>
+                    <span class="metric-value">${formatNumber(metrics.impressions)}</span>
+                    <span class="metric-label">Impressions</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-icon">❤️</span>
+                    <span class="metric-value">${formatNumber(metrics.likes)}</span>
+                    <span class="metric-label">Likes</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-icon">🔁</span>
+                    <span class="metric-value">${formatNumber(metrics.retweets)}</span>
+                    <span class="metric-label">Retweets</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-icon">💬</span>
+                    <span class="metric-value">${formatNumber(metrics.replies)}</span>
+                    <span class="metric-label">Replies</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-icon">🔖</span>
+                    <span class="metric-value">${formatNumber(metrics.bookmarks)}</span>
+                    <span class="metric-label">Bookmarks</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-icon">💭</span>
+                    <span class="metric-value">${formatNumber(metrics.quotes)}</span>
+                    <span class="metric-label">Quotes</span>
+                </div>
+            </div>
+            
+            <div class="engagement-stats">
+                <div class="stat-row">
+                    <span>Engagement Rate</span>
+                    <span class="stat-value">${analysis.engagement_rate}%</span>
+                </div>
+                <div class="stat-row">
+                    <span>Viral Score</span>
+                    <span class="stat-value">${analysis.viral_score}%</span>
+                </div>
+                <div class="stat-row">
+                    <span>Save Rate</span>
+                    <span class="stat-value">${analysis.save_rate}%</span>
+                </div>
+            </div>
+            
+            <div class="analytics-tip">
+                <span class="tip-icon">💡</span>
+                <p>${analysis.tip}</p>
+            </div>
+        </div>
+    `;
+}
+
+function getPerformanceClass(engagementRate) {
+    if (engagementRate >= 5) return 'performance-viral';
+    if (engagementRate >= 3) return 'performance-excellent';
+    if (engagementRate >= 1.5) return 'performance-good';
+    if (engagementRate >= 0.5) return 'performance-average';
+    return 'performance-low';
+}
+
+function formatNumber(num) {
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+    if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+    return num.toString();
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text || '';
+    return div.innerHTML;
+}
+
+// ============================================
+// INITIALIZE X CONNECTION
+// ============================================
+
+async function initXConnection() {
+    console.log('Initializing X connection status...');
+    const status = await checkXConnectionStatus();
+    console.log('X connection status:', status);
+    updateXConnectionUI(status.connected, status.x_username);
+}
+
+// ============================================
+// WIRE ALL UI ELEMENTS
+// ============================================
+
 function wireUI() {
   console.log('Wiring UI...');
   
@@ -516,8 +817,19 @@ function wireUI() {
     updateGenerateEnabled();
   }
 
-  // Screenshot download
+  // Screenshot events
+  const closeScreenshot = el('closeScreenshot');
+  const closeScreenshotBtn = el('closeScreenshotBtn');
+  const screenshotModal = el('screenshotModal');
   const downloadBtn = el('downloadScreenshot');
+  
+  if (closeScreenshot) closeScreenshot.addEventListener('click', hideScreenshotCard);
+  if (closeScreenshotBtn) closeScreenshotBtn.addEventListener('click', hideScreenshotCard);
+  if (screenshotModal) {
+    screenshotModal.addEventListener('click', (e) => {
+      if (e.target === screenshotModal) hideScreenshotCard();
+    });
+  }
   if (downloadBtn) downloadBtn.onclick = downloadScreenshot;
 
   // Account button & usage pill -> open account modal
@@ -752,30 +1064,50 @@ function wireUI() {
   const clearBtn = el('clear');
   if (clearBtn) {
     clearBtn.onclick = () => {
-      document.getElementById('today_context').value = '';
-      document.getElementById('current_mood').value = '';
-      document.getElementById('optional_angle').value = '';
-      document.getElementById('options').innerHTML = '';
-      document.getElementById('status').textContent = '';
-      
-      // Hide screenshot modal on clear
+      el('today_context').value = '';
+      el('current_mood').value = '';
+      el('optional_angle').value = '';
+      el('options').innerHTML = '';
+      el('status').textContent = '';
       hideScreenshotCard();
     };
+  }
+
+  // ============================================
+  // X CONNECTION UI WIRING
+  // ============================================
+  
+  // Connect X button handler
+  const connectXBtn = el('connect-x-btn');
+  if (connectXBtn) {
+      connectXBtn.addEventListener('click', connectXAccount);
+  }
+
+  // Disconnect X button handler
+  const disconnectXBtn = el('disconnect-x-btn');
+  if (disconnectXBtn) {
+      disconnectXBtn.addEventListener('click', disconnectXAccount);
+  }
+
+  // Analyze tweet form handler
+  const analyzeForm = el('analyze-tweet-form');
+  if (analyzeForm) {
+      analyzeForm.addEventListener('submit', async function(e) {
+          e.preventDefault();
+          const tweetUrl = el('tweet-url-input')?.value.trim();
+          if (tweetUrl) {
+              await analyzeTweet(tweetUrl);
+          }
+      });
   }
   
   console.log('UI wired successfully');
 }
 
-function getAuthHeaders() {
-  const token = localStorage.getItem('access_token');
-  const headers = { 'Content-Type': 'application/json' };
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-  return headers;
-}
+// ============================================
+// SINGLE INITIALIZATION POINT
+// ============================================
 
-// Initialize on DOM load
 document.addEventListener('DOMContentLoaded', async () => {
   console.log('DOM loaded, checking auth...');
   const ok = await ensureAuthed();
@@ -785,330 +1117,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   wireUI();
   await fetchConfig();
   await fetchUserInfo();
+  
+  // Initialize X connection status
+  await initXConnection();
+  
   console.log('Initialization complete');
 });
-
-// ============================================
-// X ACCOUNT CONNECTION
-// ============================================
-
-async function checkXConnectionStatus() {
-    const token = localStorage.getItem('access_token');
-    if (!token) return { connected: false };
-
-    try {
-        const response = await fetch('/api/x/status', {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        
-        if (response.ok) {
-            return await response.json();
-        }
-    } catch (error) {
-        console.error('Failed to check X connection:', error);
-    }
-    
-    return { connected: false };
-}
-
-async function connectXAccount() {
-    const token = localStorage.getItem('access_token');
-    if (!token) {
-        showNotification('Please log in first', 'error');
-        return;
-    }
-
-    try {
-        const response = await fetch('/api/x/auth-url', {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to get auth URL');
-        }
-
-        const data = await response.json();
-        
-        // Open X auth in popup
-        const width = 600;
-        const height = 700;
-        const left = (window.innerWidth - width) / 2;
-        const top = (window.innerHeight - height) / 2;
-        
-        const popup = window.open(
-            data.url,
-            'Connect X Account',
-            `width=${width},height=${height},left=${left},top=${top}`
-        );
-
-        // Listen for callback message
-        window.addEventListener('message', async function handler(event) {
-            if (event.data.type === 'X_CONNECTED') {
-                window.removeEventListener('message', handler);
-                showNotification(`Connected as @${event.data.username}!`, 'success');
-                updateXConnectionUI(true, event.data.username);
-            }
-        });
-
-    } catch (error) {
-        console.error('X connection error:', error);
-        showNotification('Failed to connect X account', 'error');
-    }
-}
-
-async function disconnectXAccount() {
-    const token = localStorage.getItem('access_token');
-    if (!token) return;
-
-    if (!confirm('Are you sure you want to disconnect your X account?')) {
-        return;
-    }
-
-    try {
-        const response = await fetch('/api/x/disconnect', {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-
-        if (response.ok) {
-            showNotification('X account disconnected', 'success');
-            updateXConnectionUI(false);
-        } else {
-            throw new Error('Failed to disconnect');
-        }
-    } catch (error) {
-        console.error('Disconnect error:', error);
-        showNotification('Failed to disconnect X account', 'error');
-    }
-}
-
-function updateXConnectionUI(connected, username = null) {
-    const connectBtn = document.getElementById('connect-x-btn');
-    const disconnectBtn = document.getElementById('disconnect-x-btn');
-    const xStatus = document.getElementById('x-connection-status');
-    const analyticsSection = document.getElementById('analytics-section');
-
-    if (connectBtn) {
-        connectBtn.style.display = connected ? 'none' : 'inline-flex';
-    }
-    
-    if (disconnectBtn) {
-        disconnectBtn.style.display = connected ? 'inline-flex' : 'none';
-    }
-
-    if (xStatus) {
-        if (connected) {
-            xStatus.innerHTML = `<span class="status-connected">✓ Connected as @${username}</span>`;
-        } else {
-            xStatus.innerHTML = `<span class="status-disconnected">Not connected</span>`;
-        }
-    }
-
-    if (analyticsSection) {
-        analyticsSection.style.display = connected ? 'block' : 'none';
-    }
-}
-
-// ============================================
-// TWEET ANALYTICS
-// ============================================
-
-async function analyzeTweet(tweetUrl) {
-    const token = localStorage.getItem('access_token');
-    if (!token) {
-        showNotification('Please log in first', 'error');
-        return null;
-    }
-
-    const analyzeBtn = document.getElementById('analyze-btn');
-    const resultsDiv = document.getElementById('analytics-results');
-    
-    if (analyzeBtn) {
-        analyzeBtn.disabled = true;
-        analyzeBtn.innerHTML = '<span class="spinner-small"></span> Analyzing...';
-    }
-
-    try {
-        const response = await fetch('/api/analytics/tweet', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ tweet_url: tweetUrl })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.detail || 'Failed to analyze tweet');
-        }
-
-        displayAnalyticsResults(data);
-        return data;
-
-    } catch (error) {
-        console.error('Analytics error:', error);
-        showNotification(error.message, 'error');
-        
-        if (resultsDiv) {
-            resultsDiv.innerHTML = `
-                <div class="analytics-error">
-                    <p>❌ ${error.message}</p>
-                    <p class="error-hint">Make sure you've connected your X account and the tweet URL is valid.</p>
-                </div>
-            `;
-        }
-        return null;
-    } finally {
-        if (analyzeBtn) {
-            analyzeBtn.disabled = false;
-            analyzeBtn.innerHTML = '📊 Analyze Tweet';
-        }
-    }
-}
-
-function displayAnalyticsResults(data) {
-    const resultsDiv = document.getElementById('analytics-results');
-    if (!resultsDiv) return;
-
-    const { metrics, analysis, text, created_at } = data;
-    
-    const formattedDate = created_at 
-        ? new Date(created_at).toLocaleDateString('en-US', { 
-            month: 'short', day: 'numeric', year: 'numeric', 
-            hour: '2-digit', minute: '2-digit' 
-          })
-        : 'Unknown date';
-
-    resultsDiv.innerHTML = `
-        <div class="analytics-card">
-            <div class="tweet-preview">
-                <p class="tweet-text">${escapeHtml(text)}</p>
-                <span class="tweet-date">${formattedDate}</span>
-            </div>
-            
-            <div class="performance-badge ${getPerformanceClass(analysis.engagement_rate)}">
-                ${analysis.performance_level}
-            </div>
-            
-            <div class="metrics-grid">
-                <div class="metric-item">
-                    <span class="metric-icon">👁️</span>
-                    <span class="metric-value">${formatNumber(metrics.impressions)}</span>
-                    <span class="metric-label">Impressions</span>
-                </div>
-                <div class="metric-item">
-                    <span class="metric-icon">❤️</span>
-                    <span class="metric-value">${formatNumber(metrics.likes)}</span>
-                    <span class="metric-label">Likes</span>
-                </div>
-                <div class="metric-item">
-                    <span class="metric-icon">🔁</span>
-                    <span class="metric-value">${formatNumber(metrics.retweets)}</span>
-                    <span class="metric-label">Retweets</span>
-                </div>
-                <div class="metric-item">
-                    <span class="metric-icon">💬</span>
-                    <span class="metric-value">${formatNumber(metrics.replies)}</span>
-                    <span class="metric-label">Replies</span>
-                </div>
-                <div class="metric-item">
-                    <span class="metric-icon">🔖</span>
-                    <span class="metric-value">${formatNumber(metrics.bookmarks)}</span>
-                    <span class="metric-label">Bookmarks</span>
-                </div>
-                <div class="metric-item">
-                    <span class="metric-icon">💭</span>
-                    <span class="metric-value">${formatNumber(metrics.quotes)}</span>
-                    <span class="metric-label">Quotes</span>
-                </div>
-            </div>
-            
-            <div class="engagement-stats">
-                <div class="stat-row">
-                    <span>Engagement Rate</span>
-                    <span class="stat-value">${analysis.engagement_rate}%</span>
-                </div>
-                <div class="stat-row">
-                    <span>Viral Score</span>
-                    <span class="stat-value">${analysis.viral_score}%</span>
-                </div>
-                <div class="stat-row">
-                    <span>Save Rate</span>
-                    <span class="stat-value">${analysis.save_rate}%</span>
-                </div>
-            </div>
-            
-            <div class="analytics-tip">
-                <span class="tip-icon">💡</span>
-                <p>${analysis.tip}</p>
-            </div>
-        </div>
-    `;
-}
-
-function getPerformanceClass(engagementRate) {
-    if (engagementRate >= 5) return 'performance-viral';
-    if (engagementRate >= 3) return 'performance-excellent';
-    if (engagementRate >= 1.5) return 'performance-good';
-    if (engagementRate >= 0.5) return 'performance-average';
-    return 'performance-low';
-}
-
-function formatNumber(num) {
-    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
-    if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
-    return num.toString();
-}
-
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
-// ============================================
-// INITIALIZE X CONNECTION ON PAGE LOAD
-// ============================================
-
-async function initXConnection() {
-    const status = await checkXConnectionStatus();
-    updateXConnectionUI(status.connected, status.x_username);
-}
-
-// Add to existing DOMContentLoaded or init function
-document.addEventListener('DOMContentLoaded', function() {
-    // ...existing code...
-    
-    // Initialize X connection status
-    if (localStorage.getItem('access_token')) {
-        initXConnection();
-    }
-
-    // Connect X button handler
-    const connectXBtn = document.getElementById('connect-x-btn');
-    if (connectXBtn) {
-        connectXBtn.addEventListener('click', connectXAccount);
-    }
-
-    // Disconnect X button handler
-    const disconnectXBtn = document.getElementById('disconnect-x-btn');
-    if (disconnectXBtn) {
-        disconnectXBtn.addEventListener('click', disconnectXAccount);
-    }
-
-    // Analyze tweet form handler
-    const analyzeForm = document.getElementById('analyze-tweet-form');
-    if (analyzeForm) {
-        analyzeForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const tweetUrl = document.getElementById('tweet-url-input').value.trim();
-            if (tweetUrl) {
-                await analyzeTweet(tweetUrl);
-            }
-        });
-    }
-});
-
-// ...existing code...
