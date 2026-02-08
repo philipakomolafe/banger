@@ -11,6 +11,8 @@ from fastapi.responses import RedirectResponse, FileResponse
 
 from app.api.routes import router as api_router
 from app.api.auth import router as auth_router
+from api.x_auth import router as x_auth_router
+from app.api.analytics import router as analytics_router
 from app.api.payments import router as payments_router
 
 
@@ -77,6 +79,8 @@ def create_app() -> FastAPI:
     app.include_router(api_router)
     app.include_router(auth_router)
     app.include_router(payments_router)
+    app.include_router(x_auth_router)
+    app.include_router(analytics_router)
     
     return app
 

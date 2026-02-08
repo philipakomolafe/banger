@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connecting X Account...</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: #0a0a0a;
+            color: white;
+        }
+        .container {
+            text-align: center;
+            padding: 2rem;
+            max-width: 400px;
+        }
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid #333;
+            border-top-color: #1d9bf0;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1.5rem;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        h2 {
+            margin: 0 0 0.5rem;
+            font-size: 1.25rem;
+        }
+        p {
+            color: #888;
+            margin: 0;
+        }
+        .success {
+            color: #22c55e;
+        }
+        .success h2 {
+            color: #22c55e;
+        }
+        .error {
+            color: #ef4444;
+        }
+        .error h2 {
+            color: #ef4444;
+        }
+        .x-logo {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 1rem;
+        }
+        .checkmark {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 1rem;
+            color: #22c55e;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="container">
+        <div class="spinner" id="spinner"></div>
+        <h2 id="title">Connecting your X account...</h2>
+        <p id="message">Please wait while we complete the connection.</p>
+    </div>
+
+    <script>
+        async function handleCallback() {
+            const container = document.getElementById('container');
+            const spinner = document.getElementById('spinner');
+            const title = document.getElementById('title');
+            const message = document.getElementById('message');
+
+            const params = new URLSearchParams(window.location.search);
+            const code = params.get('code');
+            const state = params.get('state');
+            const error = params.get('error');
+            const errorDescription = params.get('error_description');
+
+            // Handle OAuth errors
+            if (error) {
+                spinner.style.display = 'none';
+                container.classList.add('error');
+                title.textContent = '❌ Connection Failed';
+                message.textContent = errorDescription || 'Authorization was cancelled or failed.';
+                
+                setTimeout(() => {
+                    if (window.opener) {
+                        window.opener.postMessage({ type: 'X_AUTH_ERROR', error: error }, '*');
+                    }
+                    window.close();
+                }, 3000);
+                return;
+            }
+
+            // Validate required params
+            if (!code || !state) {
+                spinner.style.display = 'none';
+                container.classList.add('error');
+                title.textContent = '❌ Invalid Request';
+                message.textContent = 'Missing authorization parameters.';
+                return;
+            }
+
+            // Get auth token from parent window's localStorage
+            let token = null;
+            try {
+                token = localStorage.getItem('access_token');
+            } catch (e) {
+                // Try to get from opener
+                if (window.opener) {
+                    try {
+                        token = window.opener.localStorage.getItem('access_token');
+                    } catch (e2) {
+                        console.error('Could not access token');
+                    }
+                }
+            }
+
+            if (!token) {
+                spinner.style.display = 'none';
+                container.classList.add('error');
+                title.textContent = '❌ Not Logged In';
+                message.textContent = 'Please log in to your account first.';
+                return;
+            }
+
+            try {
+                message.textContent = 'Exchanging authorization code...';
+
+                const response = await fetch('/api/x/callback', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ 
+                        code: code, 
+                        state: state,
+                        code_verifier: '' // Server retrieves this from stored state
+                    })
+                });
+
+                const data = await response.json();
+
+                spinner.style.display = 'none';
+
+                if (response.ok && data.success) {
+                    container.classList.add('success');
+                    container.innerHTML = `
+                        <svg class="checkmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                            <polyline points="22 4 12 14.01 9 11.01"/>
+                        </svg>
+                        <h2>✓ Connected!</h2>
+                        <p>Successfully connected as <strong>@${data.x_username}</strong></p>
+                    `;
+                    
+                    // Notify parent window
+                    if (window.opener) {
+                        window.opener.postMessage({ 
+                            type: 'X_CONNECTED', 
+                            username: data.x_username 
+                        }, '*');
+                    }
+                    
+                    setTimeout(() => window.close(), 2500);
+                } else {
+                    container.classList.add('error');
+                    title.textContent = '❌ Connection Failed';
+                    message.textContent = data.detail || 'Failed to connect X account.';
+                    
+                    setTimeout(() => window.close(), 4000);
+                }
+            } catch (err) {
+                console.error('Callback error:', err);
+                spinner.style.display = 'none';
+                container.classList.add('error');
+                title.textContent = '❌ Connection Error';
+                message.textContent = 'Something went wrong. Please try again.';
+            }
+        }
+
+        // Run on page load
+        handleCallback();
+    </script>
+</body>
+</html>

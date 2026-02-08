@@ -195,6 +195,65 @@
       </div>
     </div>
 
+    <!-- Add this section after your main generator section -->
+
+    <!-- X Connection & Analytics Section -->
+    <section class="x-connection-section" id="x-section">
+        <div class="x-connection-header">
+            <h3>
+                <svg class="x-logo" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+                X Account
+            </h3>
+            <div id="x-connection-status">
+                <span class="status-disconnected">Not connected</span>
+            </div>
+        </div>
+        
+        <p style="color: #888; margin-bottom: 1rem;">
+            Connect your X account to analyze how your tweets are performing.
+        </p>
+        
+        <div class="x-connection-buttons">
+            <button id="connect-x-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+                Connect X Account
+            </button>
+            <button id="disconnect-x-btn" style="display: none;">
+                Disconnect
+            </button>
+        </div>
+    </section>
+
+    <!-- Analytics Section (hidden until X is connected) -->
+    <section id="analytics-section" style="display: none;">
+        <div class="analytics-container">
+            <h2>📊 Tweet Analytics</h2>
+            <p style="color: #888; margin-bottom: 1.5rem;">
+                Paste a tweet URL to see how it's performing and get tips to improve.
+            </p>
+            
+            <form id="analyze-tweet-form">
+                <input 
+                    type="url" 
+                    id="tweet-url-input" 
+                    placeholder="https://x.com/username/status/1234567890"
+                    required
+                >
+                <button type="submit" id="analyze-btn">
+                    📊 Analyze Tweet
+                </button>
+            </form>
+            
+            <div id="analytics-results">
+                <!-- Results will be displayed here -->
+            </div>
+        </div>
+    </section>
+
   </div>
 
   <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
