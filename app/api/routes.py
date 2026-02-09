@@ -166,6 +166,7 @@ class PostResponse(BaseModel):
 class EmailRequest(BaseModel):
     subject: str
     options: List[str]
+    to_email: str | None = None  # Optional override for recipient email
 
 class WaitlistRequest(BaseModel):
     email: str
@@ -392,8 +393,14 @@ def post_to_x_api(req: PostRequest, request: Request):
 @router.post("/email")
 def email_options(req: EmailRequest):
     """Send post options via email."""
-    body = ("\n\n---\n\n").join([o.strip() for o in req.options if o.strip()])
-    ok = send_email(req.subject, body)
+    recipient_email = req.to_email or os.environ.get("TO_EMAIL")
+    if not recipient_email:
+        raise HTTPException(status_code=500, detail="Recipient email not configured (set TO_EMAIL env var)")
+    
+    body = ("\n\n---\n\n").join(
+        [f"Option {i+1}: \n{opt}" for i, opt in enumerate(req.options)]
+    )
+    ok = send_email(req.subject, body, to_email=recipient_email)
     if not ok:
         raise HTTPException(
             status_code=500, 

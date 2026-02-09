@@ -15,12 +15,13 @@ logger = logging.getLogger(__name__)
 resend.api_key = os.getenv("RESEND_API_KEY")
 
 
-def send_email(subject: str, body: str) -> bool:
+def send_email(subject: str, body: str, to_email: str | None = None) -> bool:
     """
     Send email using Resend service.
     """
 
-    to_addr = os.environ.get("TO_EMAIL")
+    # provided only for registered ussers.
+    to_addr = to_email or os.environ.get("TO_EMAIL")
     from_addr = os.environ.get("FROM_USER")
 
     if not all([to_addr, from_addr]):

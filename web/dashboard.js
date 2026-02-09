@@ -255,6 +255,10 @@ async function fetchUserInfo() {
         if (!res.ok) return null;
 
         const user = await res.json();
+        if (user.email) {
+            localStorage.setItem("user_email", user.email)
+        }
+
         updateUserUI(user);
         return user;
     } catch (e) {
@@ -950,16 +954,24 @@ function wireUI() {
 
             const subject = (el('email_subject')?.value || 'Banger drafts').trim();
 
+            // fetch user email from state or localStorage.
+            const userEmail = currentUser?.email || localStorage.getItem("user_email");
+
+            if (!userEmail) {
+                showNotification('No email associated with account. Please Log in again', 'error');
+            } 
+
             setStatus('Sending email…');
             try {
                 const res = await fetch('/api/email', {
                     method: 'POST',
                     headers: getAuthHeaders(),
-                    body: JSON.stringify({ subject, options })
+                    body: JSON.stringify({ subject, options, to_email: userEmail })
                 });
 
                 if (!res.ok) {
-                    showNotification('Email failed.', 'error');
+                    const err = await res.json().catch(() => ({}));
+                    showNotification(err.detail || 'Email failed.', 'error');
                     return;
                 }
                 showNotification('Email sent.', 'ok');
