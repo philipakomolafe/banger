@@ -395,11 +395,12 @@ def email_options(req: EmailRequest):
     """Send post options via email."""
     recipient_email = req.to_email or os.environ.get("TO_EMAIL")
     if not recipient_email:
-        raise HTTPException(status_code=500, detail="Recipient email not configured (set TO_EMAIL env var)")
+        raise HTTPException(status_code=500, detail="Recipient email not configured.")
     
     body = ("\n\n---\n\n").join(
         [f"Option {i+1}: \n{opt}" for i, opt in enumerate(req.options)]
     )
+
     ok = send_email(req.subject, body, to_email=recipient_email)
     if not ok:
         raise HTTPException(
