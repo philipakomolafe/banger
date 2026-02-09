@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Banger - Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    
+    <!-- Favicon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
+    <link rel="manifest" href="./site.webmanifest">
+    <link rel="shortcut icon" href="./favicon.ico">
+    
+    <!-- SEO -->
+    <meta name="description" content="Your Banger workspace. Generate viral tweets with AI.">
+    <meta name="robots" content="noindex, nofollow">
+    
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./dashboard.css" />
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a href="./dashboard.html" class="sidebar-brand">
+                    <img src="./favicon-32x32.png" alt="Banger" class="brand-icon" width="24" height="24">
+                    <span class="brand-text">Banger</span>
+                </a>
+                <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Main</div>
+                    <a href="#generate" class="nav-item active" data-section="generate">
+                        <span class="nav-icon">✨</span>
+                        <span class="nav-label">Generate</span>
+                    </a>
+                    <a href="#history" class="nav-item" data-section="history">
+                        <span class="nav-icon">📜</span>
+                        <span class="nav-label">History</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Analytics</div>
+                    <a href="#analytics" class="nav-item" data-section="analytics">
+                        <span class="nav-icon">📊</span>
+                        <span class="nav-label">Tweet Analytics</span>
+                        <span class="nav-badge" id="analyticsLock">🔒</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Connections</div>
+                    <a href="#connections" class="nav-item" data-section="connections">
+                        <span class="nav-icon">🔗</span>
+                        <span class="nav-label">Connect X</span>
+                        <span class="nav-status" id="xStatusDot"></span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Account</div>
+                    <a href="#settings" class="nav-item" data-section="settings">
+                        <span class="nav-icon">⚙️</span>
+                        <span class="nav-label">Settings</span>
+                    </a>
+                    <a href="#upgrade" class="nav-item nav-upgrade" data-section="upgrade" id="upgradeNavItem">
+                        <span class="nav-icon">🚀</span>
+                        <span class="nav-label">Upgrade to Pro</span>
+                    </a>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-card" id="userCard">
+                    <div class="user-avatar" id="userAvatar">?</div>
+                    <div class="user-info">
+                        <div class="user-email" id="userEmail">Loading...</div>
+                        <div class="user-plan" id="userPlan">Free</div>
+                    </div>
+                </div>
+                <button class="btn btn-logout" id="logoutBtn">
+                    <span>↪</span> Log out
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <header class="topbar">
+                <button class="topbar-menu-btn" id="mobileMenuBtn" aria-label="Open menu">☰</button>
+                <div class="topbar-title" id="pageTitle">Generate</div>
+                <div class="topbar-actions">
+                    <span class="pill usage-pill" id="usagePill" title="Click for account details">
+                        <span id="usageIcon">⚡</span>
+                        <span id="usageDisplay">Loading...</span>
+                    </span>
+                </div>
+            </header>
+
+            <!-- Content Sections -->
+            <div class="content-area">
+                
+                <!-- Generate Section (Main) -->
+                <section class="content-section active" id="section-generate">
+                    <div class="section-header">
+                        <h2>Generate Bangers</h2>
+                        <p class="section-desc">Turn your messy build notes into engaging posts</p>
+                    </div>
+
+                    <div class="panel">
+                        <div class="bar">
+                            <div class="title">What did you build today?</div>
+                            <button class="btn ghost" id="clear">Clear</button>
+                        </div>
+
+                        <div class="content">
+                            <div class="generate-grid">
+                                <div class="input-group main-input">
+                                    <label for="today_context">Your notes <span class="required">*</span></label>
+                                    <textarea id="today_context" rows="4" placeholder="fixed auth bug, added stripe webhook, talked to 2 users about dark mode..."></textarea>
+                                </div>
+
+                                <div class="input-row">
+                                    <div class="input-group">
+                                        <label for="current_mood">Mood / vibe</label>
+                                        <input type="text" id="current_mood" placeholder="hyped, tired but happy..." />
+                                    </div>
+
+                                    <div class="input-group">
+                                        <label for="optional_angle">What's next?</label>
+                                        <input type="text" id="optional_angle" placeholder="shipping tomorrow..." />
+                                    </div>
+                                </div>
+
+                                <div class="input-row settings-row">
+                                    <div class="input-group small">
+                                        <label for="max_options">Options</label>
+                                        <select id="max_options">
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3" selected>3</option>
+                                        </select>
+                                    </div>
+                                    <div class="input-group small">
+                                        <label for="max_chars">Max chars</label>
+                                        <input type="number" id="max_chars" value="280" min="100" max="300" />
+                                    </div>
+                                    <div class="input-group">
+                                        <label for="email_subject">Email subject</label>
+                                        <input type="text" id="email_subject" value="Banger drafts" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="actions">
+                                <button class="btn primary" id="generate" disabled>✨ Generate</button>
+                            </div>
+
+                            <div class="status" id="status"></div>
+                        </div>
+                    </div>
+
+                    <!-- Options Output -->
+                    <div class="options-section">
+                        <div class="optionsHeader">
+                            <h3>Generated Options</h3>
+                            <div class="row end gap8">
+                                <button class="btn" id="emailAll" title="Send all options to email">📧 Email all</button>
+                                <button class="btn" id="copyAll" title="Copy all options to clipboard">📋 Copy all</button>
+                            </div>
+                        </div>
+                        <div class="options" id="options">
+                            <div class="options-empty">
+                                <span class="empty-icon">💡</span>
+                                <p>Your generated posts will appear here</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- History Section -->
+                <section class="content-section" id="section-history">
+                    <div class="section-header">
+                        <h2>Post History</h2>
+                        <p class="section-desc">Track your generated and posted content</p>
+                    </div>
+                    <div class="history-list" id="historyList">
+                        <div class="empty-state">
+                            <span class="empty-icon">📜</span>
+                            <p>No posts yet. Generate some bangers!</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Analytics Section -->
+                <section class="content-section" id="section-analytics">
+                    <div class="section-header">
+                        <h2>Tweet Analytics</h2>
+                        <p class="section-desc">Analyze how your tweets are performing</p>
+                    </div>
+
+                    <div class="analytics-requires-connection" id="analyticsRequiresConnection">
+                        <div class="connection-prompt">
+                            <span class="prompt-icon">🔗</span>
+                            <h3>Connect your X account first</h3>
+                            <p>To analyze tweets, you need to connect your X account.</p>
+                            <button class="btn primary" id="goToConnections">Connect X Account</button>
+                        </div>
+                    </div>
+
+                    <div class="analytics-container" id="analyticsContainer" style="display: none;">
+                        <form id="analyze-tweet-form" class="analyze-form">
+                            <input 
+                                type="url" 
+                                id="tweet-url-input" 
+                                placeholder="https://x.com/username/status/123..."
+                                required
+                            >
+                            <button type="submit" class="btn primary" id="analyze-btn">📊 Analyze</button>
+                        </form>
+                        <div id="analytics-results"></div>
+                    </div>
+                </section>
+
+                <!-- Connections Section -->
+                <section class="content-section" id="section-connections">
+                    <div class="section-header">
+                        <h2>Connections</h2>
+                        <p class="section-desc">Connect external accounts to enhance your workflow</p>
+                    </div>
+
+                    <div class="connections-grid">
+                        <!-- X Connection Card -->
+                        <div class="connection-card" id="xConnectionCard">
+                            <div class="connection-header">
+                                <div class="connection-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                                    </svg>
+                                </div>
+                                <div class="connection-info">
+                                    <h4>X (Twitter)</h4>
+                                    <p id="xConnectionStatus">Not connected</p>
+                                </div>
+                                <div class="connection-status-indicator" id="xStatusIndicator"></div>
+                            </div>
+                            <div class="connection-body">
+                                <p>Connect your X account to post directly and analyze tweet performance.</p>
+                            </div>
+                            <div class="connection-actions">
+                                <button class="btn primary" id="connect-x-btn">Connect</button>
+                                <button class="btn danger" id="disconnect-x-btn" style="display: none;">Disconnect</button>
+                            </div>
+                        </div>
+
+                        <!-- Future connections placeholder -->
+                        <div class="connection-card coming-soon">
+                            <div class="connection-header">
+                                <div class="connection-icon">🔵</div>
+                                <div class="connection-info">
+                                    <h4>LinkedIn</h4>
+                                    <p>Coming soon</p>
+                                </div>
+                            </div>
+                            <div class="connection-body">
+                                <p>Cross-post your content to LinkedIn for B2B reach.</p>
+                            </div>
+                            <div class="connection-actions">
+                                <button class="btn" disabled>Coming Soon</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Settings Section -->
+                <section class="content-section" id="section-settings">
+                    <div class="section-header">
+                        <h2>Settings</h2>
+                        <p class="section-desc">Manage your account and preferences</p>
+                    </div>
+
+                    <div class="settings-grid">
+                        <div class="settings-card">
+                            <h4>Account Information</h4>
+                            <div class="settings-row">
+                                <span class="settings-label">Email</span>
+                                <span class="settings-value" id="settingsEmail">Loading...</span>
+                            </div>
+                            <div class="settings-row">
+                                <span class="settings-label">Plan</span>
+                                <span class="settings-value">
+                                    <span class="plan-badge" id="settingsPlan">Free</span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="settings-card" id="usageCard">
+                            <h4>Usage</h4>
+                            <div class="usage-display">
+                                <div class="usage-bar-container">
+                                    <div class="usage-bar" id="settingsUsageBar" style="width: 0%;"></div>
+                                </div>
+                                <div class="usage-text" id="settingsUsage">0 / 3 generations today</div>
+                            </div>
+                            <p class="usage-note">Resets daily at midnight UTC</p>
+                        </div>
+
+                        <div class="settings-card danger-zone">
+                            <h4>Danger Zone</h4>
+                            <button class="btn danger" id="settingsLogout">Log out</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Upgrade Section -->
+                <section class="content-section" id="section-upgrade">
+                    <div class="section-header">
+                        <h2>Upgrade to Pro</h2>
+                        <p class="section-desc">Unlock unlimited generations and premium features</p>
+                    </div>
+
+                    <div class="upgrade-container">
+                        <div class="pricing-comparison">
+                            <div class="pricing-col free-col">
+                                <div class="pricing-header">
+                                    <h3>Free</h3>
+                                    <div class="pricing-price">$0</div>
+                                </div>
+                                <ul class="pricing-features">
+                                    <li>✓ 3 generations / day</li>
+                                    <li>✓ All post styles</li>
+                                    <li>✓ Copy to clipboard</li>
+                                    <li>✗ Direct posting to X</li>
+                                    <li>✗ Tweet analytics</li>
+                                    <li>✗ Priority support</li>
+                                </ul>
+                                <div class="current-plan-badge">Current Plan</div>
+                            </div>
+
+                            <div class="pricing-col pro-col">
+                                <div class="popular-badge">Most Popular</div>
+                                <div class="pricing-header">
+                                    <h3>Pro</h3>
+                                    <div class="pricing-price">$9<span>/mo</span></div>
+                                </div>
+                                <ul class="pricing-features">
+                                    <li>✓ Unlimited generations</li>
+                                    <li>✓ All post styles</li>
+                                    <li>✓ Copy to clipboard</li>
+                                    <li>✓ Direct posting to X</li>
+                                    <li>✓ Tweet analytics</li>
+                                    <li>✓ Priority support</li>
+                                </ul>
+                                <button class="btn primary btn-upgrade-main" id="upgradeBtnMain">Upgrade Now</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals (same as before) -->
+    <!-- Screenshot Modal -->
+    <div class="modal-overlay" id="screenshotModal" style="display: none;">
+        <div class="modal-box modal-screenshot">
+            <button class="modal-close" id="closeScreenshot">&times;</button>
+            <h2>Share your Banger! 🔥</h2>
+            <div class="screenshot-card" id="screenshotCard">
+                <div class="screenshot-card-inner" id="screenshotInner">
+                    <div class="screenshot-side before">
+                        <div class="screenshot-label">Raw input</div>
+                        <div id="screenshotBefore"></div>
+                    </div>
+                    <div class="screenshot-side after">
+                        <div class="screenshot-label">Banger output</div>
+                        <div id="screenshotAfter"></div>
+                    </div>
+                </div>
+                <div class="screenshot-branding">
+                    Made with <b>Banger</b> ✨ → <a href="https://getbanger.tech" target="_blank">getbanger.tech</a>
+                </div>
+            </div>
+            <div class="screenshot-actions">
+                <button class="btn" id="downloadScreenshot">📸 Download as Image</button>
+                <button class="btn primary" id="closeScreenshotBtn">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Paywall Modal -->
+    <div class="modal-overlay" id="paywallModal">
+        <div class="modal-box modal-paywall">
+            <button class="modal-close" id="closePaywall">&times;</button>
+            <div class="modal-icon">🚀</div>
+            <h2>Daily limit reached!</h2>
+            <p class="modal-subtitle">Free users get <b>3 generations/day</b>. Upgrade for unlimited.</p>
+            <div class="pricing-card">
+                <div class="pricing-badge">Pro</div>
+                <div class="pricing-price">
+                    <span class="price-amount">$9</span>
+                    <span class="price-period">/mo</span>
+                </div>
+                <ul class="pricing-features">
+                    <li>✓ Unlimited generations</li>
+                    <li>✓ Priority support</li>
+                    <li>✓ Early access features</li>
+                </ul>
+                <button class="btn primary btn-upgrade" id="upgradeBtn">Upgrade to Pro</button>
+            </div>
+            <p class="modal-footer-text">
+                Resets tomorrow at midnight UTC<br>
+                <a href="#" id="continueFreeTomorrow">Continue free</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Tweet URL Modal -->
+    <div class="modal-overlay" id="tweetUrlModal">
+        <div class="modal-box modal-tweet-url">
+            <button class="modal-close" id="closeTweetUrl">&times;</button>
+            <div class="modal-icon">🐦</div>
+            <h2>Track your post!</h2>
+            <p class="modal-subtitle">Paste your tweet URL to track engagement.</p>
+            <div class="tweet-url-input-group">
+                <label for="tweetUrlInput">Tweet URL</label>
+                <input type="text" id="tweetUrlInput" placeholder="https://x.com/username/status/123..." />
+            </div>
+            <div class="tweet-url-actions">
+                <button class="btn" id="skipTweetUrl">Skip</button>
+                <button class="btn primary" id="saveTweetUrl">Save & Track</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="./dashboard.js"></script>
+</body>
+</html>

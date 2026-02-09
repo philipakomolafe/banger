@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8" />
     <title>Banger - AI Tweet Generator for Indie Hackers</title>
@@ -17,12 +17,11 @@
     <meta name="keywords" content="tweet generator, AI tweets, indie hacker, X">
     <meta name="author" content="Banger">
     
-    <!-- Open Graph (Facebook, LinkedIn, Discord) -->
+    <!-- Open Graph -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://getbanger.tech/">
     <meta property="og:title" content="Banger - AI Tweet Generator">
     <meta property="og:description" content="Generate viral tweets with AI. Built for indie hackers.">
-    <!-- <meta property="og:image" content="https://getbanger.tech/web/og-image.png"> -->
     
     <!-- Twitter/X Card -->
     <meta name="twitter:card" content="summary_large_image" />
@@ -30,247 +29,58 @@
     <meta name="twitter:creator" content="@PhilipAkomolaf_" />
     <meta name="twitter:title" content="Banger — AI-Powered X Post Generator for Builders" />
     <meta name="twitter:description" content="Stop staring at a blank tweet. Paste your build notes, get polished posts in seconds." />
-    
-    <link rel="stylesheet" href="./styles.css" />
+
+    <style>
+        body {
+            margin: 0;
+            background: #0b0c0f;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .loader {
+            text-align: center;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(124, 92, 255, 0.2);
+            border-top-color: #7c5cff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        p {
+            color: rgba(255,255,255,0.6);
+            font-size: 14px;
+        }
+    </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <h1>Banger</h1>
-      <div class="meta">
-        <span class="pill usage-pill" id="usagePill" title="Click for account">
-          <span id="usageIcon">⚡</span>
-          <span id="usageDisplay">Loading...</span>
-        </span>
-        <span class="pill" id="quota">Loading quota…</span>
-        <span class="pill" id="modePill" style="display:none;"></span>
-        <button class="btn account-btn" id="accountBtn" title="Account">👤</button>
-      </div>
-    </header>
-
-    <div class="panel">
-      <div class="bar">
-        <div class="title">Generate drafts</div>
-        <button class="btn ghost" id="clear">Clear</button>
-      </div>
-
-      <div class="content">
-        <div class="grid">
-          <div>
-            <label for="today_context">What did you do today? <span class="required">*</span></label>
-            <textarea id="today_context" rows="4" placeholder="fixed auth bug, added stripe webhook, talked to 2 users about dark mode..."></textarea>
-          </div>
-
-          <div>
-            <label for="current_mood">Mood / vibe (optional)</label>
-            <input type="text" id="current_mood" placeholder="hyped, tired but happy, grinding..." />
-          </div>
-
-          <div>
-            <label for="optional_angle">What's next? (optional)</label>
-            <input type="text" id="optional_angle" placeholder="shipping tomorrow, more user interviews..." />
-          </div>
-
-          <div class="row gap8">
-            <div>
-              <label for="max_options">Options</label>
-              <select id="max_options">
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3" selected>3</option>
-              </select>
-            </div>
-            <div>
-              <label for="max_chars">Max chars</label>
-              <input type="number" id="max_chars" value="280" min="100" max="300" />
-            </div>
-          </div>
-
-          <div>
-            <label for="email_subject">Email subject</label>
-            <input type="text" id="email_subject" value="Banger drafts" />
-          </div>
-        </div>
-
-        <div class="actions">
-          <button class="btn primary" id="generate" disabled>Generate</button>
-        </div>
-
-        <div class="status" id="status"></div>
-      </div>
+    <div class="loader">
+        <div class="spinner"></div>
+        <p>Loading Banger...</p>
     </div>
 
-    <div class="optionsHeader">
-      <h2>Options</h2>
-      <div class="row end gap8">
-        <button class="btn" id="emailAll" title="Send all options to email">Email all</button>
-        <button class="btn" id="copyAll" title="Copy all options to clipboard">Copy all</button>
-      </div>
-    </div>
-
-    <div class="options" id="options"></div>
-
-    <!-- Screenshot Modal (hidden by default) -->
-    <div class="modal-overlay" id="screenshotModal" style="display: none;">
-      <div class="modal-box modal-screenshot">
-        <button class="modal-close" id="closeScreenshot">&times;</button>
-        <h2>Share your Banger! 🔥</h2>
-        
-        <div class="screenshot-card" id="screenshotCard">
-          <div class="screenshot-card-inner" id="screenshotInner">
-            <div class="screenshot-side before">
-              <div class="screenshot-label">Raw input</div>
-              <div id="screenshotBefore"></div>
-            </div>
-            <div class="screenshot-side after">
-              <div class="screenshot-label">Banger output</div>
-              <div id="screenshotAfter"></div>
-            </div>
-          </div>
-          <div class="screenshot-branding">
-            Made with <b>Banger</b> ✨ → <a href="https://getbanger.tech" target="_blank">getbanger.tech</a>
-          </div>
-        </div>
-        
-        <div class="screenshot-actions">
-          <button class="btn" id="downloadScreenshot">📸 Download as Image</button>
-          <button class="btn primary" id="closeScreenshotBtn">Done</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Paywall Modal -->
-    <div class="modal-overlay" id="paywallModal">
-      <div class="modal-box modal-paywall">
-        <button class="modal-close" id="closePaywall">&times;</button>
-        <div class="modal-icon">🚀</div>
-        <h2>Daily limit reached!</h2>
-        <p class="modal-subtitle">Free users get <b>3 generations/day</b>. Upgrade for unlimited.</p>
-        
-        <div class="pricing-card">
-          <div class="pricing-badge">Pro</div>
-          <div class="pricing-price">
-            <span class="price-amount">$9</span>
-            <span class="price-period">/mo</span>
-          </div>
-          <ul class="pricing-features">
-            <li>✓ Unlimited generations</li>
-            <li>✓ Priority support</li>
-            <li>✓ Early access features</li>
-          </ul>
-          <button class="btn primary btn-upgrade" id="upgradeBtn">Upgrade to Pro</button>
-        </div>
-        
-        <p class="modal-footer-text">
-          Resets tomorrow at midnight UTC<br>
-          <a href="#" id="continueFreeTomorrow">Continue free</a>
-        </p>
-      </div>
-    </div>
-
-    <!-- Account Modal -->
-    <div class="modal-overlay" id="accountModal">
-      <div class="modal-box modal-account">
-        <button class="modal-close" id="closeAccount">&times;</button>
-        <h2>Account</h2>
-        
-        <div class="account-section">
-          <div class="account-label">Email</div>
-          <div class="account-value" id="accountEmail">Loading...</div>
-        </div>
-        
-        <div class="account-section">
-          <div class="account-label">Plan</div>
-          <div class="account-value">
-            <span class="plan-badge free" id="accountPlan">Free</span>
-          </div>
-        </div>
-        
-        <div class="account-section" id="usageSection">
-          <div class="account-label">Today's Usage</div>
-          <div class="usage-bar-container">
-            <div class="usage-bar" id="usageBar" style="width: 0%;"></div>
-          </div>
-          <div class="usage-text" id="accountUsage">0 / 3 generations</div>
-        </div>
-        
-        <div class="account-actions">
-          <button class="btn primary" id="accountUpgradeBtn">Upgrade to Pro</button>
-          <button class="btn" id="manageSubscription" style="display: none;">Manage Subscription</button>
-          <button class="btn danger" id="logoutBtn">Log out</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Tweet URL Modal (for capturing tweet_id after posting) -->
-    <div class="modal-overlay" id="tweetUrlModal">
-      <div class="modal-box modal-tweet-url">
-        <button class="modal-close" id="closeTweetUrl">&times;</button>
-        <div class="modal-icon">🐦</div>
-        <h2>Track your post!</h2>
-        <p class="modal-subtitle">Paste your tweet URL to track engagement and save the tweet ID.</p>
-        
-        <div class="tweet-url-input-group">
-          <label for="tweetUrlInput">Tweet URL</label>
-          <input type="text" id="tweetUrlInput" placeholder="https://x.com/username/status/123456789..." />
-        </div>
-        
-        <div class="tweet-url-actions">
-          <button class="btn" id="skipTweetUrl">Skip</button>
-          <button class="btn primary" id="saveTweetUrl">Save & Track</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- X Connection & Analytics Section -->
-    <section class="x-connection-section" id="x-section">
-        <div class="x-connection-header">
-            <h3>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                </svg>
-                X Account
-            </h3>
-            <div id="x-connection-status">
-                <span class="status-disconnected">Not connected</span>
-            </div>
-        </div>
-        
-        <p style="color: #888; margin-bottom: 1rem;">
-            Connect your X account to analyze how your tweets are performing.
-        </p>
-        
-        <div class="x-connection-buttons">
-            <button class="btn primary" id="connect-x-btn">Connect X Account</button>
-            <button class="btn danger" id="disconnect-x-btn" style="display: none;">Disconnect</button>
-        </div>
-    </section>
-
-    <!-- Analytics Section -->
-    <section id="analytics-section" style="display: none;">
-        <div class="analytics-container">
-            <h2>📊 Tweet Analytics</h2>
-            <p style="color: #888; margin-bottom: 1.5rem;">
-                Paste a tweet URL to see how it's performing.
-            </p>
+    <script>
+        // Check if user is authenticated and redirect accordingly
+        (function() {
+            const token = localStorage.getItem('access_token');
             
-            <form id="analyze-tweet-form">
-                <input 
-                    type="url" 
-                    id="tweet-url-input" 
-                    placeholder="https://x.com/username/status/123..."
-                    required
-                >
-                <button type="submit" class="btn primary" id="analyze-btn">📊 Analyze</button>
-            </form>
-            
-            <div id="analytics-results"></div>
-        </div>
-    </section>
-
-  </div>
-
-  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-  <script src="./app.js"></script>
+            if (token) {
+                // User is logged in → go to dashboard
+                window.location.replace('./dashboard.html');
+            } else {
+                // Not logged in → go to landing page
+                window.location.replace('./landing.html');
+            }
+        })();
+    </script>
 </body>
 </html>
