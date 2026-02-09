@@ -201,7 +201,7 @@
     <section class="x-connection-section" id="x-section">
         <div class="x-connection-header">
             <h3>
-                <svg class="x-logo" viewBox="0 0 24 24" fill="currentColor">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                 </svg>
                 X Account
@@ -216,41 +216,30 @@
         </p>
         
         <div class="x-connection-buttons">
-            <button id="connect-x-btn">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                </svg>
-                Connect X Account
-            </button>
-            <button id="disconnect-x-btn" style="display: none;">
-                Disconnect
-            </button>
+            <button class="btn primary" id="connect-x-btn">Connect X Account</button>
+            <button class="btn danger" id="disconnect-x-btn" style="display: none;">Disconnect</button>
         </div>
     </section>
 
-    <!-- Analytics Section (hidden until X is connected) -->
+    <!-- Analytics Section -->
     <section id="analytics-section" style="display: none;">
         <div class="analytics-container">
             <h2>📊 Tweet Analytics</h2>
             <p style="color: #888; margin-bottom: 1.5rem;">
-                Paste a tweet URL to see how it's performing and get tips to improve.
+                Paste a tweet URL to see how it's performing.
             </p>
             
             <form id="analyze-tweet-form">
                 <input 
                     type="url" 
                     id="tweet-url-input" 
-                    placeholder="https://x.com/username/status/1234567890"
+                    placeholder="https://x.com/username/status/123..."
                     required
                 >
-                <button type="submit" id="analyze-btn">
-                    📊 Analyze Tweet
-                </button>
+                <button type="submit" class="btn primary" id="analyze-btn">📊 Analyze</button>
             </form>
             
-            <div id="analytics-results">
-                <!-- Results will be displayed here -->
-            </div>
+            <div id="analytics-results"></div>
         </div>
     </section>
 
