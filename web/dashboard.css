@@ -59,15 +59,22 @@
 .sidebar-brand {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     text-decoration: none;
     color: var(--fg);
     font-weight: 700;
-    font-size: 18px;
+    font-size: 16px;
+    overflow: hidden;
+}
+
+.brand-text {
+    white-space: nowrap;
 }
 
 .brand-icon {
-    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
 }
 
 .sidebar-toggle {
@@ -98,6 +105,7 @@
     flex: 1;
     padding: 16px 0;
     overflow-y: auto;
+    overflow-x: hidden; /* Prevent horizontal overflow */
 }
 
 .nav-section {
@@ -125,6 +133,8 @@
     transition: all 0.2s ease;
     border-left: 3px solid transparent;
     margin: 2px 0;
+    white-space: nowrap; /* Prevent text wrapping */
+    overflow: hidden; /* Hide overflow */
 }
 
 .nav-item:hover {
@@ -139,19 +149,27 @@
 }
 
 .nav-icon {
-    font-size: 18px;
-    width: 24px;
+    font-size: 16px; /* Reduced from 18px */
+    width: 20px; /* Reduced from 24px */
+    height: 20px;
     text-align: center;
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
 }
 
 .nav-label {
     flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .nav-badge {
-    font-size: 12px;
+    font-size: 10px; /* Reduced from 12px */
     opacity: 0.6;
+    flex-shrink: 0;
 }
 
 .nav-status {
@@ -159,6 +177,7 @@
     height: 8px;
     border-radius: 50%;
     background: var(--muted);
+    flex-shrink: 0;
 }
 
 .nav-status.connected {
@@ -178,30 +197,32 @@
 
 /* Sidebar Footer */
 .sidebar-footer {
-    padding: 16px;
+    padding: 12px; /* Reduced from 16px */
     border-top: 1px solid var(--border);
 }
 
 .user-card {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px;
+    gap: 10px; /* Reduced from 12px */
+    padding: 10px; /* Reduced from 12px */
     background: rgba(255, 255, 255, 0.03);
     border-radius: 10px;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
+    overflow: hidden;
 }
 
 .user-avatar {
-    width: 40px;
-    height: 40px;
+    width: 32px; /* Reduced from 40px */
+    height: 32px;
+    min-width: 32px; /* Prevent shrinking */
     border-radius: 50%;
     background: linear-gradient(135deg, var(--accent), #a855f7);
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    font-size: 16px;
+    font-size: 14px; /* Reduced from 16px */
     color: #fff;
     flex-shrink: 0;
 }
@@ -209,10 +230,11 @@
 .user-info {
     flex: 1;
     min-width: 0;
+    overflow: hidden;
 }
 
 .user-email {
-    font-size: 13px;
+    font-size: 12px; /* Reduced from 13px */
     color: var(--fg);
     white-space: nowrap;
     overflow: hidden;
@@ -220,7 +242,7 @@
 }
 
 .user-plan {
-    font-size: 11px;
+    font-size: 10px; /* Reduced from 11px */
     color: var(--muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -229,7 +251,9 @@
 .btn-logout {
     width: 100%;
     justify-content: center;
-    gap: 8px;
+    gap: 6px;
+    padding: 8px 12px; /* Smaller padding */
+    font-size: 13px;
 }
 
 /* ============================================
@@ -254,12 +278,13 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 24px;
+    padding: 12px 20px; /* Reduced padding */
     background: var(--panel);
     border-bottom: 1px solid var(--border);
     position: sticky;
     top: 0;
     z-index: 50;
+    gap: 12px;
 }
 
 .topbar-menu-btn {
@@ -267,22 +292,38 @@
     background: none;
     border: 1px solid var(--border);
     color: var(--fg);
-    font-size: 20px;
-    padding: 8px 12px;
+    font-size: 18px; /* Reduced from 20px */
+    padding: 6px 10px;
     border-radius: 8px;
     cursor: pointer;
+    flex-shrink: 0;
 }
 
 .topbar-title {
-    font-size: 18px;
+    font-size: 16px; /* Reduced from 18px */
     font-weight: 600;
     color: var(--fg);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .topbar-actions {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+/* Usage pill fix */
+.usage-pill {
+    font-size: 12px;
+    padding: 6px 12px;
+    white-space: nowrap;
+}
+
+#usageIcon {
+    font-size: 14px;
 }
 
 /* Content Area */
@@ -369,9 +410,9 @@
 }
 
 .empty-icon {
-    font-size: 48px;
+    font-size: 40px; /* Reduced from 48px */
     display: block;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
     opacity: 0.5;
 }
 
@@ -404,14 +445,20 @@
 }
 
 .connection-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
+    width: 40px; /* Reduced from 48px */
+    height: 40px;
+    min-width: 40px;
+    border-radius: 10px;
     background: rgba(255, 255, 255, 0.05);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 24px;
+    font-size: 20px; /* Reduced from 24px */
+}
+
+.connection-icon svg {
+    width: 20px;
+    height: 20px;
 }
 
 .connection-info {
@@ -631,9 +678,9 @@
 }
 
 .prompt-icon {
-    font-size: 64px;
+    font-size: 48px; /* Reduced from 64px */
     display: block;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
 }
 
 .connection-prompt h3 {
