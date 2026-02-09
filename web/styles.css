@@ -1044,3 +1044,14 @@ a:hover { text-decoration: underline; }
     color: #888;
     font-size: 0.9rem;
 }
+
+.analytics-error.rate-limited {
+    background: rgba(234, 179, 8, 0.1);
+    border: 1px solid rgba(234, 179, 8, 0.3);
+}
+
+.analytics-error.rate-limited p:first-child {
+    color: #facc15;
+    font-size: 1.2rem;
+    font-weight: 600;
+}

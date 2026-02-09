@@ -142,6 +142,14 @@ async def analyze_tweet(request: Request, body: TweetAnalyzeRequest):
                 "tweet.fields": "public_metrics,created_at,text",
             }
         )
+
+        # Handling Rate Limits and Token expiry.
+        if response.status_code == 429:
+            retry_after = response.headers.get("x-rate-limit-reset", 900)
+            raise HTTPException(
+                status_code=429,
+                detail=f"Rate limit exceeded. Please wait {retry_after} seconds before trying again."
+            )
         
         if response.status_code == 401:
             raise HTTPException(

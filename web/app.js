@@ -664,6 +664,20 @@ async function analyzeTweet(tweetUrl) {
 
         const data = await response.json();
 
+        // Handle rate limiting
+        if (response.status === 429) {
+            if (resultsDiv) {
+                resultsDiv.innerHTML = `
+                    <div class="analytics-error rate-limited">
+                        <p>⏳ Rate Limited</p>
+                        <p class="error-hint">X API free tier allows 1 request per 15 minutes.<br>Please wait and try again.</p>
+                    </div>
+                `;
+            }
+            showNotification('Rate limited. Wait 15 minutes.', 'error');
+            return null;
+        }
+
         if (!response.ok) {
             throw new Error(data.detail || 'Failed to analyze tweet');
         }
@@ -679,7 +693,7 @@ async function analyzeTweet(tweetUrl) {
             resultsDiv.innerHTML = `
                 <div class="analytics-error">
                     <p>❌ ${error.message}</p>
-                    <p class="error-hint">Make sure you've connected your X account and the tweet URL is valid.</p>
+                    <p class="error-hint">Make sure the tweet URL is valid.</p>
                 </div>
             `;
         }
