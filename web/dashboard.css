@@ -13,21 +13,24 @@
    ============================================ */
 
 .sidebar {
-    width: 260px;
+    width: 240px;
+    min-width: 240px;
+    height: 100vh;
     background: var(--panel);
     border-right: 1px solid var(--border);
     display: flex;
     flex-direction: column;
+    transition: all 0.3s ease;
     position: fixed;
-    top: 0;
     left: 0;
-    bottom: 0;
+    top: 0;
     z-index: 100;
-    transition: transform 0.3s ease, width 0.3s ease;
+    overflow: hidden; /* Prevent content overflow */
 }
 
 .sidebar.collapsed {
-    width: 72px;
+    width: 60px;
+    min-width: 60px;
 }
 
 .sidebar.collapsed .brand-text,
@@ -39,13 +42,36 @@
 }
 
 .sidebar.collapsed .sidebar-header {
+    padding: 16px 10px;
     justify-content: center;
-    padding: 16px 12px;
 }
 
 .sidebar.collapsed .nav-item {
+    padding: 10px 0;
     justify-content: center;
-    padding: 12px;
+}
+
+.sidebar.collapsed .nav-icon {
+    margin: 0 auto;
+}
+
+.sidebar.collapsed .user-card {
+    justify-content: center;
+    padding: 10px 5px;
+}
+
+.sidebar.collapsed .user-avatar {
+    margin: 0 auto;
+}
+
+.sidebar.collapsed .btn-logout {
+    padding: 8px;
+    font-size: 0; /* Hide text */
+}
+
+.sidebar.collapsed .btn-logout::before {
+    content: "🚪";
+    font-size: 14px;
 }
 
 .sidebar-header {
@@ -60,44 +86,17 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    text-decoration: none;
+    text-decoration: none; /* Remove underline */
     color: var(--fg);
     font-weight: 700;
     font-size: 16px;
     overflow: hidden;
 }
 
-.brand-text {
-    white-space: nowrap;
-}
-
-.brand-icon {
-    width: 24px;
-    height: 24px;
-    object-fit: contain;
-}
-
-.sidebar-toggle {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.sidebar-toggle span {
-    display: block;
-    width: 18px;
-    height: 2px;
-    background: var(--muted);
-    border-radius: 1px;
-    transition: all 0.2s ease;
-}
-
-.sidebar-toggle:hover span {
-    background: var(--fg);
+.sidebar-brand:hover,
+.sidebar-brand:focus,
+.sidebar-brand:active {
+    text-decoration: none; /* Remove underline on all states */
 }
 
 /* Sidebar Navigation */
@@ -109,49 +108,62 @@
 }
 
 .nav-section {
-    margin-bottom: 24px;
+    margin-bottom: 20px;
+    padding: 0 12px;
 }
 
 .nav-section-title {
     font-size: 10px;
     text-transform: uppercase;
-    letter-spacing: 1.5px;
+    letter-spacing: 1px;
     color: var(--muted);
-    padding: 0 16px;
-    margin-bottom: 8px;
-    font-weight: 600;
+    padding: 8px 16px;
+    white-space: nowrap;
 }
 
+/* Remove underlines from all nav links */
 .nav-item {
     display: flex;
     align-items: center;
     gap: 12px;
     padding: 10px 16px;
     color: var(--muted);
-    text-decoration: none;
+    text-decoration: none; /* Remove underline */
     font-size: 14px;
     transition: all 0.2s ease;
     border-left: 3px solid transparent;
     margin: 2px 0;
-    white-space: nowrap; /* Prevent text wrapping */
-    overflow: hidden; /* Hide overflow */
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 .nav-item:hover {
-    background: rgba(255, 255, 255, 0.05);
     color: var(--fg);
+    background: rgba(255, 255, 255, 0.05);
+    text-decoration: none; /* Remove underline on hover */
+}
+
+.nav-item:focus {
+    text-decoration: none; /* Remove underline on focus */
+    outline: none;
+}
+
+.nav-item:active {
+    text-decoration: none; /* Remove underline on active */
 }
 
 .nav-item.active {
-    background: rgba(124, 92, 255, 0.1);
     color: var(--accent);
+    background: rgba(99, 102, 241, 0.1);
     border-left-color: var(--accent);
+    text-decoration: none; /* Remove underline when active */
 }
 
 .nav-icon {
-    font-size: 16px; /* Reduced from 18px */
-    width: 20px; /* Reduced from 24px */
+    font-size: 16px;
+    width: 20px;
     height: 20px;
+    min-width: 20px; /* Prevent shrinking when collapsed */
     text-align: center;
     flex-shrink: 0;
     display: flex;
@@ -254,6 +266,34 @@
     gap: 6px;
     padding: 8px 12px; /* Smaller padding */
     font-size: 13px;
+    text-decoration: none; /* Remove underline */
+    transition: all 0.2s ease;
+    overflow: hidden;
+}
+
+.btn-logout:hover {
+    text-decoration: none;
+}
+
+/* Nav upgrade link */
+.nav-upgrade {
+    text-decoration: none;
+}
+
+.nav-upgrade:hover {
+    text-decoration: none;
+}
+
+/* Global link reset for sidebar */
+.sidebar a {
+    text-decoration: none;
+}
+
+.sidebar a:hover,
+.sidebar a:focus,
+.sidebar a:active,
+.sidebar a:visited {
+    text-decoration: none;
 }
 
 /* ============================================
