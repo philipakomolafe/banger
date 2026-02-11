@@ -28,7 +28,7 @@ banger/
 │   ├── post_ledger.json      # Record of posted content
 │   └── perf_log.jsonl        # Performance metrics
 │
-└── web/                      # Frontend static files
+└── web/                      # Frontend static files.
     ├── index.html
     ├── app.js
     └── styles.css
