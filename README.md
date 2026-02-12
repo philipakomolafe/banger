@@ -1,113 +1,83 @@
-# Banger - X/Twitter Post Generator
+# Banger
 
-AI-powered post generation for authentic builder content on X (Twitter).
+Banger is an AI-powered tool that helps indie hackers, developers, and creators turn messy daily build notes into engaging X (Twitter) posts. It combines a FastAPI backend with a modern web frontend for a seamless content generation experience.
+
+## Features
+
+- **AI Tweet/Post Generator:** Paste your rough notes and get polished, authentic posts optimized for X.
+- **Multiple Options:** Generate up to 3 variations per session (free tier), unlimited with Pro.
+- **Voice Preservation:** Posts sound like you, not generic AI.
+- **Direct Posting:** Pro users can connect their X account and post directly.
+- **Tweet Analytics:** Analyze tweet performance (Pro feature).
+- **Screenshot Sharing:** Create shareable before/after images.
+- **Usage Tracking:** Free users get 3 generations/day; Pro unlocks unlimited.
+- **Account Management:** Sign up, log in, and manage your plan.
 
 ## Project Structure
 
 ```
-banger/
-├── run.py                    # Main entry point
-├── requirements.txt          # Python dependencies
-├── .env                      # Environment variables (create from .env.example)
-│
-├── src/                      # Core application code
-│   ├── __init__.py
-│   ├── generator.py          # AI post generation logic
-│   ├── x_api.py              # X/Twitter API integration
-│   ├── email_utils.py        # Email notification utilities
-│   └── server.py             # FastAPI HTTP server
-│
-├── config/                   # Configuration files
-│   ├── style_profile.json    # Writing style parameters
-│   └── training_tweets.json  # Example tweets for tone matching
-│
-├── scripts/                  # Utility scripts
-│   └── tweet_scraper.py      # Fetch and analyze tweets for style
-│
-├── data/                     # Runtime data (auto-created)
-│   ├── post_ledger.json      # Record of posted content
-│   └── perf_log.jsonl        # Performance metrics
-│
-└── web/                      # Frontend static files.
-    ├── index.html
-    ├── app.js
-    └── styles.css
+app/           # FastAPI backend (API, core logic, utils)
+web/           # Frontend (HTML, CSS, JS)
+scripts/       # Utility scripts (Supabase export, tweet scraping)
+config/        # Style profile and training data
+data/          # Logs and ledgers
+run.py         # Main entry point
+requirements.txt
+README.md
 ```
 
-## Quick Start
+## Getting Started
 
-1. **Install dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
+### 1. Install Dependencies
 
-2. **Configure environment:**
-   Create a `.env` file with:
-   ```env
-   # Google AI
-   GOOGLE_API_KEY=your_key_here
-   MODEL_NAME=gemini-pro
-   
-   # X/Twitter API
-   X_API_KEY=your_key
-   X_API_SECRET=your_secret
-   X_ACCESS_TOKEN=your_token
-   X_ACCESS_SECRET=your_secret
-   X_BEARER_TOKEN=your_bearer
-   X_COMMUNITY_URL=https://twitter.com/i/communities/your_id
-   
-   # Email (optional)
-   SMTP_HOST=smtp.gmail.com
-   SMTP_PORT=587
-   SMTP_USER=your_email
-   SMTP_PASS=your_password
-   TO_EMAIL=recipient@email.com
-   
-   # Rate limiting
-   MAX_X_WRITES_PER_MONTH=280
-   ```
+```sh
+pip install -r requirements.txt
+```
 
-3. **Run the server:**
-   ```bash
-   python run.py
-   ```
-   
-   Open http://localhost:8000/web in your browser.
+### 2. Environment Setup
 
-## Usage Modes
+Copy `.env.example` to `.env` and fill in your keys (Supabase, X API, etc).
 
-### Web Server (default)
-```bash
+### 3. Run the Server
+
+```sh
 python run.py
-# or
-python run.py --port 8080
 ```
 
-### CLI Mode
-```bash
-python run.py --cli
-```
+The backend will start on [http://localhost:8000](http://localhost:8000).
 
-### Update Style Profile
-```bash
-python run.py --scrape
-```
+### 4. Access the Web App
 
-## API Endpoints
+Open [http://localhost:8000/web/landing.html](http://localhost:8000/web/landing.html) in your browser.
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/config` | GET | Get remaining writes and config |
-| `/api/generate` | POST | Generate post options |
-| `/api/post` | POST | Post to X or record manual post |
-| `/api/email` | POST | Email generated options |
-| `/api/perf` | GET | Get performance metrics |
+## Usage
 
-## Development
+- **Generate Posts:** Enter your build notes, mood, and what's next. Click "Generate" to get options.
+- **Copy/Email:** Copy options or email them to yourself.
+- **Post Directly:** Pro users can connect X and post with one click.
+- **Track Usage:** See your daily generation count and upgrade if needed.
 
-The codebase is organized for production:
+## Free vs Pro
 
-- **src/**: All application logic, cleanly separated
-- **config/**: External configuration, easy to modify
-- **scripts/**: One-off utilities, run independently
-- **data/**: Runtime state, gitignored in production
+| Feature                | Free           | Pro           |
+|------------------------|---------------|---------------|
+| Generations/day        | 3             | Unlimited     |
+| Direct X Posting       | yes           | Yes           |
+| Tweet Analytics        | No            | Yes           |
+| Priority Support       | No            | Yes           |
+
+Upgrade in the dashboard for unlimited access.
+
+## Scripts
+
+- **Tweet Scraper:** `python run.py --scrape` updates style profiles.
+- **Supabase Export:** Use scripts in `scripts/` to export ledgers and logs.
+
+## Contact & Support
+
+- Built by [Philip Akomolafe](https://x.com/PhilipAkomolaf_)
+- Email: info@getbanger.tech
+
+---
+
+No jargon, just ship your story. 🚀
