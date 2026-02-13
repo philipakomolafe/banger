@@ -106,8 +106,8 @@ async def get_x_auth_url(request: Request):
                                    os.environ.get("AUTH_REDIRECT_URL", "").replace("callback.html", "x-callback.html"))
 
     # DEBUG: Log client_id and redirect_uri for troubleshooting
-    logger.debug(f"X OAuth Client ID: {client_id[:3]} ***")
-    logger.debug(f"X OAuth Redirect URI: {redirect_uri}")
+    logger.info(f"X OAuth Client ID: {client_id[:3]} ***")
+    logger.info(f"X OAuth Redirect URI: {redirect_uri}")
     
     # Generate PKCE values
     code_verifier = generate_code_verifier()
