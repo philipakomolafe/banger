@@ -1,26 +1,33 @@
 User-agent: *
-Allow: /
+Disallow: ./dashboard.html
 
 # Allow AI Search Bots
 User-agent: GPTBot
 Allow: /
+Disallow: ./dashboard.html
 
 User-agent: ChatGPT-User
 Allow: /
+Disallow: ./dashboard.html
 
 User-agent: ClaudeBot
 Allow: /
+Disallow: ./dashboard.html
 
 User-agent: anthropic-ai
 Allow: /
+Disallow: ./dashboard.html
 
 User-agent: PerplexityBot
 Allow: /
+Disallow: ./dashboard.html
 
 User-agent: Googlebot
 Allow: /
+Disallow: ./dashboard.html
 
 User-agent: Bingbot
 Allow: /
+Disallow: ./dashboard.html
 
 Sitemap: https://getbanger.tech/sitemap.xml
