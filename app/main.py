@@ -69,6 +69,13 @@ def create_app() -> FastAPI:
             return FileResponse(bing_file, media_type="application/xml")
         return FileResponse(status_code=404)
 
+    @app.get("/7f2fa4ba0aa0442c833ef9145c9e4d85.txt", response_class=FileResponse)
+    async def serve_indexnow_key():
+        key_file = web_path / "7f2fa4ba0aa0442c833ef9145c9e4d85.txt"
+        if key_file.exists():
+            return FileResponse(key_file, media_type="text/plain")
+        return FileResponse(status_code=404)
+
 
     # Root redirect to web frontend
     @app.get("/")
