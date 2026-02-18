@@ -61,6 +61,14 @@ def create_app() -> FastAPI:
             return FileResponse(sitemap_file, media_type="application/xml")
         return FileResponse(status_code=404)
 
+    
+    @app.get("/bingsiteauth.xml", response_class=FileResponse)
+    async def serve_bing_site_auth():
+        bing_file = web_path / "BingSiteAuth.xml"
+        if bing_file.exists():
+            return FileResponse(bing_file, media_type="application/xml")
+        return FileResponse(status_code=404)
+
 
     # Root redirect to web frontend
     @app.get("/")
