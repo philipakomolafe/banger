@@ -372,6 +372,12 @@ function optionCard(initialText, idx) {
         const text = (ta.value || '').trim();
         if (!text) return showNotification('Empty draft.', 'error');
 
+        if (!xConnected) {
+            showNotification("Connect your X account.", "error");
+            const connectionNav = document.querySelector(".nav-item[data-section='connections']");
+            if (connectionNav) connectionNav.click();
+        }
+
         setStatus('Posting via API…');
         try {
             const res = await fetch('/api/post', {

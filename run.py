@@ -22,7 +22,6 @@ import argparse
 def run_server(port: int = 8000):
     """Start the FastAPI server."""
     import uvicorn
-    # from app.main import app
     
     uvicorn.run(
         "app.main:app",

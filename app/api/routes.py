@@ -11,6 +11,7 @@ from typing import List, Optional
 from datetime import datetime, timezone
 
 import anyio
+import requests
 from fastapi import APIRouter, HTTPException, Response, Request
 from pydantic import BaseModel
 
@@ -131,6 +132,27 @@ def _save_perf_to_supabase(
         ).execute()
     except Exception as e:
         logger.error(f"Failed to save perf to Supabase: {e}\n{traceback.format_exc()}")
+
+async def _fetch_x_user_info(request) -> dict | None:
+    """Fetch the connected X account info for the current user."""
+    user_id = _get_user_id_from_request(request)
+    if not user_id:
+        return None
+
+    try:
+        supabase = get_supabase(admin=True)
+        result = supabase.table("x_tokens").select("*").eq("user_id", user_id).execute()
+        data = result.data
+        if data and len(data) > 0:
+            return {
+                "x_user_id": data[0].get("x_user_id"),
+                "x_username": data[0].get("x_username"),
+                "access_token": data[0].get("access_token"),
+            }
+    except Exception as e:
+        logger.error(f"Failed to fetch X info from Supabase: {e}\n{traceback.format_exc()}")
+
+    return None
 
 
 class GenerateRequest(BaseModel):
@@ -334,10 +356,15 @@ async def generate(req: GenerateRequest, request: Request, response: Response):
         logger.error(f"Unexpected error in /api/generate: {e}\n{traceback.format_exc()}")
         raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
 
-
 @router.post("/post", response_model=PostResponse)
-def post_to_x_api(req: PostRequest, request: Request):
-    """Post content to X (Twitter)."""
+async def post_to_x_api(req: PostRequest, request: Request):
+    """
+    Post content to X (Twitter) and auto-match posted tweet.
+
+    - If method == 'api': posts via API and consumes write quota.
+    - If method == 'manual' or 'community': records locally/Supabase, does NOT post via API.
+    - If user has X account connected, attempts to match the posted tweet.
+    """
     text = (req.text or "").strip()
     if not text:
         raise HTTPException(status_code=400, detail="Empty text")
@@ -347,18 +374,18 @@ def post_to_x_api(req: PostRequest, request: Request):
         raise HTTPException(status_code=400, detail="method must be 'api', 'manual', or 'community'")
 
     user_id = _get_user_id_from_request(request)
+    x_user_info = await _fetch_x_user_info(request)
+    access_token = x_user_info["access_token"] if x_user_info else None
 
-    # API posting: consumes X write quota (and whatever your post_to_x tracks)
-    if method == "api" and request.headers.get("x-use-x-api") != "1":
-        raise HTTPException(status_code=400, detail="To post via API, set method='api' and include 'X-Use-X-API: 1' header")
-
+    # API posting: consumes X write quota
     if method == "api":
+        # Require explicit header for API posting
+        if request.headers.get("x-use-x-api") != "1":
+            raise HTTPException(status_code=400, detail="To post via API, set method='api' and include 'X-Use-X-API: 1' header")
         result = post_to_x(text)
         tweet_id = result.get("tweet_id")
-
-        # Save to Supabase
-        _save_post_to_supabase(user_id, text, method, tweet_id=tweet_id, tweet_url=_tweet_url(tweet_id) if tweet_id is not None else None)
-
+        # Save post to Supabase ledger
+        _save_post_to_supabase(user_id, text, method, tweet_id=tweet_id, tweet_url=_tweet_url(tweet_id) if tweet_id else None)
         if result.get("success"):
             return PostResponse(
                 success=True,
@@ -366,7 +393,6 @@ def post_to_x_api(req: PostRequest, request: Request):
                 remaining=result.get("remaining", remaining_posts_this_month()),
                 intent_url=build_intent_url(text),
             )
-
         return PostResponse(
             success=False,
             error=result.get("error", "Unknown error"),
@@ -377,18 +403,50 @@ def post_to_x_api(req: PostRequest, request: Request):
     # Manual/community: do NOT call the API at all (no write quota usage)
     tweet_url = req.tweet_url or ""
     tweet_id = extract_tweet_id_from_url(tweet_url)
-    
+    # Record locally and/or Supabase
     record_post_to_ledger(text, method=method, tweet_id=tweet_id, tweet_url=tweet_url)
-
-    # Save to Supabase with tweet_id if tweet_url is provided
     _save_post_to_supabase(user_id, text, method, tweet_id=tweet_id, tweet_url=tweet_url)
+
+    # If user has X account connected, try to fetch their recent tweets and match
+    matched_tweet_url = None
+    if access_token:
+        try:
+            # Get user info from X API
+            user_resp = requests.get(
+                "https://api.twitter.com/2/users/me",
+                headers={"Authorization": f"Bearer {access_token}"}
+            )
+            user_data = user_resp.json()
+            username = user_data["data"]["username"]
+
+            # Get recent tweets from X API
+            tweets_resp = requests.get(
+                "https://api.twitter.com/2/users/me/tweets",
+                headers={"Authorization": f"Bearer {access_token}"},
+                params={"max_results": 5}
+            )
+            tweets = tweets_resp.json().get("data", [])
+
+            # Try to match text using asyncio for IO-bound concurrency
+            async def match_tweet(tweet):
+                return tweet.get("text", "").strip() == text
+
+            match_results = await asyncio.gather(*[match_tweet(tweet) for tweet in tweets])
+            for idx, matched in enumerate(match_results):
+                if matched:
+                    matched_tweet_url = f"https://x.com/{username}/status/{tweets[idx]['id']}"
+                    break
+
+        except Exception as e:
+            logger.warning(f"Failed to fetch or match tweet: {e}")
 
     return PostResponse(
         success=True,
-        tweet_id=None,
+        tweet_id=tweet_id if matched_tweet_url is None else extract_tweet_id_from_url(matched_tweet_url),
         remaining=remaining_posts_this_month(),
-        intent_url=build_intent_url(text),
+        intent_url=matched_tweet_url if matched_tweet_url else build_intent_url(text),
     )
+
 
 @router.post("/email")
 def email_options(req: EmailRequest):
@@ -442,13 +500,14 @@ def record_tweet_url(req: RecordRequest, request: Request):
 
     user_id = _get_user_id_from_request(request)
     tid = extract_tweet_id_from_url((req.tweet_url or "").strip())
+    if os.environ.get("RENDER"):
+        # On Render: save to Supabase ledger
+        _save_post_to_supabase(user_id, text, method, tweet_id=tid, tweet_url=req.tweet_url)
+    else:
+        # Otherwise: save to local ledger
+        record_post_to_ledger(text, method=method, tweet_id=tid, tweet_url=req.tweet_url)
 
-    # Local ledger (existing behavior)
-    record_post_to_ledger(text, method=method, tweet_id=tid, tweet_url=req.tweet_url)
-
-    # Supabase ledger
-    _save_post_to_supabase(user_id, text, method, tweet_id=tid, tweet_url=req.tweet_url)
-
+    
     return {"ok": True, "tweet_id": tid}
 
 

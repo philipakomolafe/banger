@@ -9,12 +9,18 @@ import re
 import platform
 import subprocess
 import webbrowser
+import anyio
+import requests
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urlencode
 
 import tweepy
 from dotenv import load_dotenv
+from app.utils.supabase import get_supabase
+from fastapi import Request
+import asyncio
+
 
 load_dotenv()
 
@@ -38,14 +44,35 @@ def extract_tweet_id_from_url(tweet_url: str) -> str | None:
     return m.group(1) if m else None
 
 
+# ledger structure: This should also be synced with the SUPABASE table
+# so that i can properly know what was recorded per time
 def _load_ledger() -> dict:
-    """Load the post ledger from disk."""
+    """Load the post ledger from disk and sync with DB (if available)."""
+    TABLE_NAME = "post_ledger"
+
+    ledger = {}
+    # Load from local file first
     if LEDGER_PATH.exists():
         try:
-            return json.loads(LEDGER_PATH.read_text(encoding="utf-8"))
+            ledger = json.loads(LEDGER_PATH.read_text(encoding="utf-8"))
         except Exception:
-            return {}
-    return {}
+            ledger = {}
+
+    async def fetch_supabase_ledger():
+        try:
+            supabase = get_supabase(admin=True)
+            records = supabase.table(TABLE_NAME).select("*").execute().data
+            return {str(rec.get("ledger_key", idx)): rec for idx, rec in enumerate(records)}
+        except Exception:
+            return None
+
+    # Try to sync from Supabase if credentials are available
+    supabase_ledger = asyncio.run(fetch_supabase_ledger())
+    if supabase_ledger:
+        ledger = supabase_ledger
+
+    return ledger
+    
 
 
 def _save_ledger(data: dict) -> None:
@@ -138,7 +165,19 @@ def post_to_x(tweet_text: str) -> dict:
     Returns:
         {"success": bool, "tweet_id": str|None, "error": str|None, "remaining": int}
     """
+    from app.api.routes import _fetch_x_user_info
+
     tweet_text = (tweet_text or "").strip()
+    user_access_token = None
+    try:
+        # Create a dummy Request object if none is available
+        dummy_request = Request(scope={"type": "http"})
+        x_user_info = anyio.run(_fetch_x_user_info, dummy_request)
+        if not x_user_info:
+            return {"success": False, "tweet_id": None, "error": "X account not connected", "remaining": remaining_posts_this_month()}
+        user_access_token = x_user_info.get("access_token")
+    except Exception:
+        return {"success": False, "tweet_id": None, "error": "Failed to fetch X user info", "remaining": remaining_posts_this_month()}
     
     if not tweet_text:
         return {"success": False, "tweet_id": None, "error": "empty_text", "remaining": remaining_posts_this_month()}
@@ -157,8 +196,8 @@ def post_to_x(tweet_text: str) -> dict:
             bearer_token=os.environ.get("X_BEARER_TOKEN"),
             consumer_key=os.environ.get("X_API_KEY"),
             consumer_secret=os.environ.get("X_API_SECRET"),
-            access_token=os.environ.get("X_ACCESS_TOKEN"),
-            access_token_secret=os.environ.get("X_ACCESS_SECRET"),
+            access_token=user_access_token,
+            access_token_secret=None,  # Not needed for v2 endpoints with OAuth 1.0a user context
         )
         response = client.create_tweet(text=tweet_text)
         tid = response.data["id"]
