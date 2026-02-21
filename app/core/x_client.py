@@ -58,7 +58,7 @@ def _load_ledger() -> dict:
         except Exception:
             ledger = {}
 
-    async def fetch_supabase_ledger():
+    def fetch_supabase_ledger():
         try:
             supabase = get_supabase(admin=True)
             records = supabase.table(TABLE_NAME).select("*").execute().data
@@ -67,7 +67,7 @@ def _load_ledger() -> dict:
             return None
 
     # Try to sync from Supabase if credentials are available
-    supabase_ledger = asyncio.run(fetch_supabase_ledger())
+    supabase_ledger = fetch_supabase_ledger()
     if supabase_ledger:
         ledger = supabase_ledger
 
@@ -172,7 +172,7 @@ def post_to_x(tweet_text: str) -> dict:
     try:
         # Create a dummy Request object if none is available
         dummy_request = Request(scope={"type": "http"})
-        x_user_info = anyio.run(_fetch_x_user_info, dummy_request)
+        x_user_info = _fetch_x_user_info(dummy_request)
         if not x_user_info:
             return {"success": False, "tweet_id": None, "error": "X account not connected", "remaining": remaining_posts_this_month()}
         user_access_token = x_user_info.get("access_token")
