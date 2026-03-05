@@ -102,8 +102,7 @@ async def get_x_auth_url(request: Request):
     user_id = get_current_user_id(request)
     
     client_id, _ = get_client_credentials()
-    redirect_uri = os.environ.get("X_AUTH_REDIRECT_URL", 
-                                   os.environ.get("AUTH_REDIRECT_URL", "").replace("callback.html", "x-callback.html"))
+    redirect_uri = os.environ.get("X_AUTH_REDIRECT_URL", os.environ.get("AUTH_REDIRECT_URL", "").replace("callback.html", "x-callback.html"))
 
     # DEBUG: Log client_id and redirect_uri for troubleshooting
     logger.info(f"X OAuth Client ID: {client_id[:3]} ***")
