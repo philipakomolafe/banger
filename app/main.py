@@ -79,7 +79,8 @@ def create_app() -> FastAPI:
 
 
     # Root redirect to web frontend
-    @app.get("/")
+    @app.get("/", response_class=FileResponse)
+    @app.get("/landing", response_class=FileResponse)
     async def root_redirect():
         return FileResponse(web_path / "landing.html")    
 
