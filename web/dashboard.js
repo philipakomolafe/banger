@@ -274,7 +274,7 @@ async function fetchUserInfo() {
 async function ensureAuthed() {
     const token = localStorage.getItem('access_token');
     if (!token) {
-        window.location.href = './auth.html';
+        window.location.href = '/auth';
         return false;
     }
 
@@ -286,13 +286,13 @@ async function ensureAuthed() {
         if (!res.ok) {
             localStorage.removeItem('access_token');
             localStorage.removeItem('refresh_token');
-            window.location.href = './auth.html';
+            window.location.href = '/auth';
             return false;
         }
 
         return true;
     } catch (_) {
-        window.location.href = './auth.html';
+        window.location.href = '/auth';
         return false;
     }
 }
@@ -301,7 +301,7 @@ function logout() {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('user_email');
-    window.location.href = './auth.html';
+    window.location.href = '/auth';
 }
 
 // ============================================
