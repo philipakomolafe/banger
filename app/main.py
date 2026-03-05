@@ -81,8 +81,33 @@ def create_app() -> FastAPI:
     # Root redirect to web frontend
     @app.get("/")
     async def root_redirect():
-        return RedirectResponse(url="/web/landing.html")
+        return RedirectResponse(url="/web/landing.html")    
+
+    # Create cleaner url for frontend pages.
+    @app.get("/dashboard")
+    async def serve_dashboard():
+        return RedirectResponse(url="/web/dashboard.html")
     
+    @app.get("/auth")
+    async def serve_auth():
+        return RedirectResponse(url="/web/auth.html")
+    
+    @app.get("/terms")
+    async def serve_terms():
+        return RedirectResponse(url="/web/terms.html")
+    
+    @app.get("/about")
+    async def serve_about():
+        return RedirectResponse(url="/web/about.html")
+    
+    @app.get("/callback")
+    async def serve_callback():
+        return RedirectResponse(url="/web/callback.html")
+    
+    @app.get("/x-callback")
+    async def serve_x_callback():
+        return RedirectResponse(url="/web/x-callback.html")
+
     # Health check endpoint
     @app.get("/health")
     async def health_check():

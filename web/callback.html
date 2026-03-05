@@ -69,7 +69,7 @@
         await syncMe(hash.access_token);
 
         setStatus('Success! Redirecting...');
-        setTimeout(() => (window.location.href = './dashboard.html'), 400);
+        setTimeout(() => (window.location.href = '/dashboard'), 400);
         return;
       }
 
@@ -97,18 +97,18 @@
         await syncMe(accessToken);
 
         setStatus('Success! Redirecting...');
-        setTimeout(() => (window.location.href = './dashboard.html'), 400);
+        setTimeout(() => (window.location.href = '/dashboard'), 400);
         return;
       }
 
       // 3) Error fallback
       setStatus(hash.error || 'Authentication failed (no code/token returned).');
-      setTimeout(() => (window.location.href = './auth.html'), 1500);
+      setTimeout(() => (window.location.href = '/auth'), 1500);
     }
 
     main().catch((e) => {
       setStatus(e?.message || 'Authentication failed.');
-      setTimeout(() => (window.location.href = './auth.html'), 1500);
+      setTimeout(() => (window.location.href = '/auth'), 1500);
     });
   </script>
 </body>
