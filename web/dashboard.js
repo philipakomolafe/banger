@@ -317,6 +317,21 @@ function updateGenerateEnabled() {
     btn.disabled = !hasContext;
 }
 
+
+async function submitDraftFeedback(draftText, score) {
+    try {
+        const res = await fetch('/api/foundation/feedback', {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ draft_text: draftText, score })
+        });
+        if (!res.ok) throw new Error('feedback failed');
+        showNotification('Feedback saved. This will improve future drafts.', 'ok');
+    } catch (_) {
+        showNotification('Could not save feedback.', 'error');
+    }
+}
+
 function optionCard(initialText, idx) {
     const card = document.createElement('div');
     card.className = 'card';
@@ -425,9 +440,23 @@ function optionCard(initialText, idx) {
         }
     };
 
+    const btnGood = document.createElement('button');
+    btnGood.className = 'btn';
+    btnGood.textContent = '👍';
+    btnGood.title = 'Good draft';
+    btnGood.onclick = () => submitDraftFeedback((ta.value || '').trim(), 5);
+
+    const btnBad = document.createElement('button');
+    btnBad.className = 'btn';
+    btnBad.textContent = '👎';
+    btnBad.title = 'Needs work';
+    btnBad.onclick = () => submitDraftFeedback((ta.value || '').trim(), 2);
+
     actions.appendChild(btnCopy);
     actions.appendChild(btnPost);
     actions.appendChild(btnIntent);
+    actions.appendChild(btnGood);
+    actions.appendChild(btnBad);
 
     card.appendChild(top);
     card.appendChild(ta);
@@ -838,6 +867,77 @@ function escapeHtml(text) {
 }
 
 // ============================================
+// TIER 1 FOUNDATION
+// ============================================
+
+async function loadGitCommits() {
+    const target = el('gitCommits');
+    if (!target) return;
+    target.innerHTML = 'Loading commits...';
+    try {
+        const res = await fetch('/api/foundation/git/commits?limit=5');
+        const data = await res.json();
+        const items = data.items || [];
+        if (!items.length) {
+            target.innerHTML = '<div class="empty-state"><p>No commits found.</p></div>';
+            return;
+        }
+        target.innerHTML = items.map(c => `<div class="mini-item"><code>${c.hash.slice(0, 7)}</code> ${escapeHtml(c.message)}</div>`).join('');
+    } catch (_) {
+        target.innerHTML = '<div class="empty-state"><p>Unable to load commits.</p></div>';
+    }
+}
+
+async function autoTriggerDraft() {
+    const status = el('autoDraftResult');
+    if (status) status.textContent = 'Checking for new commits...';
+    try {
+        const res = await fetch('/api/foundation/git/auto-draft', {
+            method: 'POST',
+            headers: getAuthHeaders()
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Auto-trigger failed');
+
+        if (!data.triggered) {
+            if (status) status.textContent = data.reason || 'No new commit yet.';
+            return;
+        }
+
+        if (status) status.textContent = `Triggered from ${data.commit?.hash?.slice(0,7) || 'commit'}: ${data.reason}`;
+        const container = el('options');
+        if (container) {
+            container.innerHTML = '';
+            (data.options || []).forEach((o, idx) => {
+                const { card } = optionCard(o, idx);
+                container.appendChild(card);
+            });
+        }
+        showNotification('Auto draft generated from latest git commit.', 'ok');
+    } catch (e) {
+        if (status) status.textContent = e.message;
+        showNotification(e.message || 'Auto-trigger failed', 'error');
+    }
+}
+
+async function loadEngagementHistory() {
+    const target = el('engagementList');
+    if (!target) return;
+    try {
+        const res = await fetch('/api/foundation/engagement?limit=5', { headers: getAuthHeaders() });
+        const data = await res.json();
+        const items = data.items || [];
+        if (!items.length) {
+            target.innerHTML = '<div class="empty-state"><p>No engagement entries yet.</p></div>';
+            return;
+        }
+        target.innerHTML = items.map(i => `<div class="mini-item">${escapeHtml(i.tweet_url)} · ${i.engagement_rate}% ER</div>`).join('');
+    } catch (_) {
+        target.innerHTML = '<div class="empty-state"><p>Could not load engagement history.</p></div>';
+    }
+}
+
+// ============================================
 // WIRE ALL UI
 // ============================================
 
@@ -1068,6 +1168,39 @@ function wireUI() {
             }
         });
     }
+
+    const refreshFoundation = el('refreshFoundation');
+    if (refreshFoundation) refreshFoundation.onclick = loadGitCommits;
+
+    const autoDraftBtn = el('autoDraftBtn');
+    if (autoDraftBtn) autoDraftBtn.onclick = autoTriggerDraft;
+
+    const engagementForm = el('engagement-form');
+    if (engagementForm) {
+        engagementForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                tweet_url: el('engagement-url')?.value.trim() || '',
+                impressions: parseInt(el('engagement-impressions')?.value || '0', 10),
+                likes: parseInt(el('engagement-likes')?.value || '0', 10),
+                retweets: 0,
+                replies: 0,
+                bookmarks: 0,
+            };
+            try {
+                const res = await fetch('/api/foundation/engagement', {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify(payload)
+                });
+                if (!res.ok) throw new Error('Failed to save engagement');
+                showNotification('Engagement tracked.', 'ok');
+                await loadEngagementHistory();
+            } catch (_) {
+                showNotification('Failed to save engagement.', 'error');
+            }
+        });
+    }
 }
 
 // ============================================
@@ -1083,4 +1216,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     wireUI();
     await fetchUserInfo();
     await initXConnection();
+    await loadGitCommits();
+    await loadEngagementHistory();
 });

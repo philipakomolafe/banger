@@ -194,6 +194,25 @@
                         <h2>Post History</h2>
                         <p class="section-desc">Track your generated and posted content</p>
                     </div>
+                    <div class="panel foundation-panel">
+                        <div class="bar">
+                            <div class="title">Tier 1 Foundation</div>
+                            <button class="btn ghost" id="refreshFoundation">Refresh</button>
+                        </div>
+                        <div class="foundation-grid">
+                            <div class="foundation-card">
+                                <h4>Git integration</h4>
+                                <p>Pull your latest commits into Banger context.</p>
+                                <div id="gitCommits" class="mini-list"></div>
+                            </div>
+                            <div class="foundation-card">
+                                <h4>Auto-trigger drafts</h4>
+                                <p>Generate fresh drafts when a new commit lands.</p>
+                                <button class="btn primary" id="autoDraftBtn">⚡ Auto-trigger now</button>
+                                <div id="autoDraftResult" class="muted-note"></div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="history-list" id="historyList">
                         <div class="empty-state">
                             <span class="empty-icon">📜</span>
@@ -229,6 +248,16 @@
                             <button type="submit" class="btn primary" id="analyze-btn">📊 Analyze</button>
                         </form>
                         <div id="analytics-results"></div>
+                        <div class="engagement-manual">
+                            <h4>Manual engagement tracking</h4>
+                            <form id="engagement-form" class="analyze-form">
+                                <input type="url" id="engagement-url" placeholder="Tweet URL" required>
+                                <input type="number" id="engagement-impressions" placeholder="Impressions" min="0" value="0">
+                                <input type="number" id="engagement-likes" placeholder="Likes" min="0" value="0">
+                                <button type="submit" class="btn">Save engagement</button>
+                            </form>
+                            <div id="engagementList" class="mini-list"></div>
+                        </div>
                     </div>
                 </section>
 
