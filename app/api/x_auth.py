@@ -173,8 +173,8 @@ async def x_callback(request: Request, body: XCallbackRequest):
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"State verification failed: {e}")
-        raise HTTPException(status_code=400, detail="Invalid state")
+        logger.error(f"State verification failed: {e}", exc_info=True)
+        raise HTTPException(status_code=400, detail=f"Invalid state {str(e)}")
     
     # Exchange code for token
     token_data = {
