@@ -14,6 +14,7 @@ from app.api.auth import router as auth_router
 from app.api.x_auth import router as x_auth_router
 from app.api.analytics import router as analytics_router
 from app.api.payments import router as payments_router
+from app.api.foundation import router as foundation_router
 
 
 def create_app() -> FastAPI:
@@ -96,6 +97,7 @@ def create_app() -> FastAPI:
     app.include_router(payments_router)
     app.include_router(x_auth_router)
     app.include_router(analytics_router)
+    app.include_router(foundation_router)
 
     return app
 
