@@ -71,6 +71,20 @@
             margin: 24px 0;
             font-size: 0.93rem;
         }
+        .policy-nav {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin: 24px 0;
+            padding: 16px;
+            background: #f9f9f9;
+            border-radius: 6px;
+        }
+        .policy-nav a {
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -80,6 +94,15 @@
         <h1>Terms & Conditions</h1>
         <p class="last-updated">Last updated: March 5, 2026</p>
 
+        <!-- Paddle requirement: clearly accessible policy navigation -->
+        <div class="policy-nav">
+            <strong>Legal:</strong>
+            <a href="/web/terms.html">Terms & Conditions</a>
+            <a href="/web/privacy.html">Privacy Policy</a>
+            <a href="/web/refund.html">Refund Policy</a>
+            <a href="/web/pricing.html">Pricing</a>
+        </div>
+
         <div class="highlight-box">
             Please read these Terms carefully before using Banger. By creating an account or
             making a purchase, you agree to be bound by these Terms.
@@ -88,7 +111,8 @@
         <!-- 1 -->
         <h2>1. Who We Are</h2>
         <p>
-            Banger ("we", "us", "our") is an AI-powered writing tool available at
+            <strong>Banger</strong> ("we", "us", "our") is an AI-powered writing tool
+            operated by <strong>Banger</strong>, available at
             <a href="https://getbanger.tech">https://getbanger.tech</a>. We help builders,
             indie hackers, and creators turn daily notes into polished posts for X (Twitter).
         </p>
@@ -97,8 +121,26 @@
             <a href="mailto:info@getbanger.tech">info@getbanger.tech</a>
         </p>
 
-        <!-- 2 -->
-        <h2>2. Eligibility</h2>
+        <!-- 2 - Paddle: clear product description -->
+        <h2>2. About Banger</h2>
+        <p>
+            Banger is a SaaS (Software as a Service) product that provides:
+        </p>
+        <ul>
+            <li>AI-powered generation of X (Twitter) posts from your raw notes, ideas, and context.</li>
+            <li>Git repository integration to auto-trigger post drafts from your commits.</li>
+            <li>Engagement tracking and performance analytics for your X posts.</li>
+            <li>Feedback loop and narrative memory to improve content over time.</li>
+            <li>Cohort benchmarking and trend intelligence to optimize your posting strategy.</li>
+        </ul>
+        <p>
+            Banger is delivered entirely as a web-based service accessible at
+            <a href="https://getbanger.tech">https://getbanger.tech</a>. No physical product
+            is shipped.
+        </p>
+
+        <!-- 3 -->
+        <h2>3. Eligibility</h2>
         <p>By using Banger you confirm that:</p>
         <ul>
             <li>You are at least 18 years old.</li>
@@ -106,8 +148,8 @@
             <li>You are not located in a country subject to applicable trade sanctions or embargoes.</li>
         </ul>
 
-        <!-- 3 -->
-        <h2>3. Accounts</h2>
+        <!-- 4 -->
+        <h2>4. Accounts</h2>
         <p>
             You must create an account to use Banger. You are responsible for keeping your
             login credentials secure. You must notify us immediately at
@@ -116,44 +158,69 @@
             unauthorized use of your account.
         </p>
 
-        <!-- 4 -->
-        <h2>4. Subscriptions & Payments</h2>
+        <!-- 5 - Paddle: pricing details clearly stated -->
+        <h2>5. Subscriptions, Pricing & Payments</h2>
         <p>Banger offers the following plans:</p>
         <ul>
-            <li><strong>Free Plan:</strong> Limited to 3 AI generations per day.</li>
-            <li><strong>Pro Plan:</strong> Unlimited generations and access to advanced features,
-                billed on a recurring basis.</li>
+            <li>
+                <strong>Free Plan:</strong> Limited to 3 AI generations per day. No payment required.
+                Includes basic post generation and manual posting.
+            </li>
+            <li>
+                <strong>Pro Plan:</strong> Unlimited AI generations per day. Includes all advanced
+                features — Git integration, engagement tracking, narrative memory, performance-aware
+                style adaptation, cohort benchmarking, and trend intelligence. Billed monthly on a
+                recurring basis.
+            </li>
         </ul>
         <p>
-            Payments are processed by our third-party payment provider. By subscribing you
-            authorize us to charge your chosen payment method on a recurring basis until you cancel.
+            Current pricing is listed on our <a href="/web/pricing.html">Pricing page</a>.
+            All prices are in <strong>USD</strong>.
         </p>
         <p>
-            All prices are listed in USD. We reserve the right to change pricing at any time with
-            reasonable notice to active subscribers.
+            Payments are processed by <strong>Paddle</strong>, our Merchant of Record. Paddle
+            handles all billing, taxes, and payment processing on our behalf. By subscribing you
+            authorize Paddle to charge your chosen payment method on a recurring basis until you
+            cancel. Paddle's terms apply to your purchase at
+            <a href="https://www.paddle.com/legal/buyer-terms" target="_blank" rel="noopener">
+                paddle.com/legal/buyer-terms
+            </a>.
+        </p>
+        <p>
+            We reserve the right to change pricing at any time with reasonable notice to active
+            subscribers.
         </p>
 
-        <!-- 5 -->
-        <h2>5. Refund Policy</h2>
+        <!-- 6 - Paddle: refund policy clearly stated -->
+        <h2>6. Refund Policy</h2>
         <p>
             Due to the digital nature of Banger, all sales are generally final. However, if you
-            experience a technical issue that prevents you from using the service, contact us within
-            <strong>7 days</strong> of your charge at
+            experience a technical issue that prevents you from accessing or using the service,
+            contact us within <strong>14 days</strong> of your charge at
             <a href="mailto:info@getbanger.tech">info@getbanger.tech</a> and we will review
-            your case on a good-faith basis.
+            your case in accordance with Paddle's minimum 14-day refund window.
         </p>
-
-        <!-- 6 -->
-        <h2>6. Cancellation</h2>
         <p>
-            You may cancel your Pro subscription at any time through your account settings or by
-            contacting support. Cancellation takes effect at the end of your current billing period.
-            You will retain Pro access until that date. We do not offer prorated refunds for
-            partial billing periods.
+            Refund requests are handled through Paddle, our payment processor. Approved refunds
+            will be credited back to your original payment method. Processing times may vary.
+        </p>
+        <p>
+            For the full Refund Policy, see our dedicated
+            <a href="/web/refund.html">Refund Policy page</a>.
         </p>
 
         <!-- 7 -->
-        <h2>7. Acceptable Use</h2>
+        <h2>7. Cancellation</h2>
+        <p>
+            You may cancel your Pro subscription at any time through your account settings or by
+            contacting support at <a href="mailto:info@getbanger.tech">info@getbanger.tech</a>.
+            Cancellation takes effect at the end of your current billing period. You will retain
+            Pro access until that date. We do not offer prorated refunds for partial billing
+            periods.
+        </p>
+
+        <!-- 8 -->
+        <h2>8. Acceptable Use</h2>
         <p>You agree NOT to use Banger to:</p>
         <ul>
             <li>Generate content that is hateful, abusive, discriminatory, or harassing.</li>
@@ -161,14 +228,18 @@
             <li>Attempt to reverse-engineer, scrape, or copy the service's core AI logic.</li>
             <li>Use the service for any unlawful purpose.</li>
             <li>Resell or redistribute generated content as a competing AI writing service.</li>
+            <li>Circumvent usage limits or access controls.</li>
         </ul>
         <p>
             We reserve the right to suspend or terminate your account without notice for
-            violations of this section.
+            violations of this section. Our Acceptable Use Policy is aligned with
+            <a href="https://www.paddle.com/legal/acceptable-use" target="_blank" rel="noopener">
+                Paddle's Acceptable Use Policy
+            </a>.
         </p>
 
-        <!-- 8 -->
-        <h2>8. AI-Generated Content</h2>
+        <!-- 9 -->
+        <h2>9. AI-Generated Content</h2>
         <p>
             Banger uses AI to assist in drafting posts. You acknowledge that:
         </p>
@@ -181,8 +252,8 @@
                 license to process that data solely to provide the service.</li>
         </ul>
 
-        <!-- 9 -->
-        <h2>9. X (Twitter) Integration</h2>
+        <!-- 10 -->
+        <h2>10. X (Twitter) Integration</h2>
         <p>
             Banger optionally connects to your X account via OAuth 2.0 to enable tweet analytics
             and posting workflows. By connecting your X account you authorize Banger to:
@@ -197,51 +268,55 @@
             <a href="https://twitter.com/en/tos" target="_blank" rel="noopener">X's Terms of Service</a>.
         </p>
 
-        <!-- 10 -->
-        <h2>10. Privacy</h2>
+        <!-- 11 - Paddle: privacy policy clearly stated -->
+        <h2>11. Privacy</h2>
         <p>
-            Your privacy matters. By using Banger, you agree to the following data practices:
+            Your privacy matters. Our full Privacy Policy is available at
+            <a href="/web/privacy.html">getbanger.tech/privacy</a>. Key practices include:
         </p>
         <ul>
-            <li><strong>Data We Collect:</strong> We collect your email address, account activity, usage data, and any context inputs (notes, mood, angle) you provide to generate content.</li>
-            <li><strong>How We Use It:</strong> Your data is used solely to provide and improve the Banger service, process payments, and communicate with you about your account.</li>
-            <li><strong>Data Sharing:</strong> We do not sell your personal data. We may share data with trusted third-party providers (e.g., payment processors, AI infrastructure) strictly to operate the service.</li>
-            <li><strong>Data Retention:</strong> We retain your data for as long as your account is active. You may request deletion of your data by contacting us at <a href="mailto:info@getbanger.tech">info@getbanger.tech</a>.</li>
-            <li><strong>Cookies:</strong> We use cookies and similar technologies to maintain sessions and analyze usage. You can control cookie settings through your browser.</li>
-            <li><strong>Security:</strong> We implement reasonable technical and organizational measures to protect your data against unauthorized access or disclosure.</li>
-            <li><strong>Your Rights:</strong> Depending on your jurisdiction, you may have the right to access, correct, or delete your personal data. Contact us at <a href="mailto:info@getbanger.tech">info@getbanger.tech</a> to exercise these rights.</li>
+            <li><strong>Data We Collect:</strong> Email address, account activity, usage data,
+                and context inputs (notes, mood, angle) you provide.</li>
+            <li><strong>How We Use It:</strong> Solely to provide and improve the Banger service,
+                process payments, and communicate with you.</li>
+            <li><strong>Data Sharing:</strong> We do not sell your personal data. We share data
+                with trusted third-party providers (e.g., Paddle for payments, AI infrastructure)
+                strictly to operate the service.</li>
+            <li><strong>Data Retention:</strong> Retained while your account is active. Request
+                deletion at <a href="mailto:info@getbanger.tech">info@getbanger.tech</a>.</li>
+            <li><strong>Cookies:</strong> Used to maintain sessions and analyze usage.</li>
+            <li><strong>Security:</strong> We implement reasonable technical and organizational
+                measures to protect your data.</li>
+            <li><strong>Your Rights:</strong> Depending on your jurisdiction, you may have the
+                right to access, correct, or delete your personal data.</li>
         </ul>
-        <p>
-            For any privacy-related questions, contact us at
-            <a href="mailto:info@getbanger.tech">info@getbanger.tech</a>.
-        </p>
 
-        <!-- 11 -->
-        <h2>11. Intellectual Property</h2>
+        <!-- 12 -->
+        <h2>12. Intellectual Property</h2>
         <p>
             All trademarks, logos, product names, and the underlying software of Banger are owned
             by us or our licensors. Nothing in these Terms grants you any right to use our
             intellectual property without our prior written consent.
         </p>
 
-        <!-- 12 -->
-        <h2>12. Availability & Modifications</h2>
+        <!-- 13 -->
+        <h2>13. Availability & Modifications</h2>
         <p>
             We strive for high availability but do not guarantee uninterrupted service. We may
             modify, suspend, or discontinue any part of Banger at any time. We will provide
             reasonable notice for material changes that affect paid subscribers.
         </p>
 
-        <!-- 13 -->
-        <h2>13. Disclaimer of Warranties</h2>
+        <!-- 14 -->
+        <h2>14. Disclaimer of Warranties</h2>
         <p>
             Banger is provided <strong>"as is"</strong> and <strong>"as available"</strong> without
             warranties of any kind, either express or implied, including but not limited to
             merchantability, fitness for a particular purpose, or non-infringement.
         </p>
 
-        <!-- 14 -->
-        <h2>14. Limitation of Liability</h2>
+        <!-- 15 -->
+        <h2>15. Limitation of Liability</h2>
         <p>
             To the maximum extent permitted by law, Banger and its owners shall not be liable for
             any indirect, incidental, consequential, or punitive damages arising from your use of
@@ -250,8 +325,26 @@
             <strong>3 months</strong> preceding the claim.
         </p>
 
-        <!-- 15 -->
-        <h2>15. Governing Law</h2>
+        <!-- 16 - Paddle: Merchant of Record clause -->
+        <h2>16. Paddle as Merchant of Record</h2>
+        <p>
+            Banger uses <strong>Paddle</strong> as our Merchant of Record for all transactions.
+            This means:
+        </p>
+        <ul>
+            <li>Paddle is the seller of record for all purchases made through Banger.</li>
+            <li>Paddle handles payment processing, tax collection, and compliance on our behalf.</li>
+            <li>Your payment receipt will show Paddle as the charge descriptor.</li>
+            <li>For billing disputes or payment issues, you may contact Paddle directly at
+                <a href="https://www.paddle.com/legal/buyer-terms" target="_blank" rel="noopener">
+                    paddle.com
+                </a> or us at
+                <a href="mailto:info@getbanger.tech">info@getbanger.tech</a>.
+            </li>
+        </ul>
+
+        <!-- 17 -->
+        <h2>17. Governing Law</h2>
         <p>
             These Terms are governed by and construed in accordance with applicable law.
             Any disputes shall be resolved through good-faith negotiation first. If unresolved,
@@ -259,16 +352,17 @@
             jurisdiction.
         </p>
 
-        <!-- 16 -->
-        <h2>16. Changes to These Terms</h2>
+        <!-- 18 -->
+        <h2>18. Changes to These Terms</h2>
         <p>
             We may update these Terms from time to time. If changes are material, we will notify
-            active users by email or via an in-app notice. Continued use of Banger after updates
-            constitutes acceptance of the revised Terms.
+            active users by email or via an in-app notice at least <strong>14 days</strong> in
+            advance. Continued use of Banger after updates constitutes acceptance of the
+            revised Terms.
         </p>
 
-        <!-- 17 -->
-        <h2>17. Contact</h2>
+        <!-- 19 -->
+        <h2>19. Contact</h2>
         <p>
             Questions about these Terms? Reach us at:<br />
             📧 <a href="mailto:info@getbanger.tech">info@getbanger.tech</a><br />
@@ -276,6 +370,15 @@
         </p>
 
         <hr />
+
+        <!-- Paddle requirement: clearly accessible policy links in footer -->
+        <div class="policy-nav" style="justify-content: center;">
+            <a href="/web/terms.html">Terms & Conditions</a>
+            <a href="/web/privacy.html">Privacy Policy</a>
+            <a href="/web/refund.html">Refund Policy</a>
+            <a href="/web/pricing.html">Pricing</a>
+        </div>
+
         <p style="font-size: 13px; color: #aaa; text-align: center;">
             © 2026 Banger. All rights reserved.
         </p>

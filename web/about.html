@@ -8,25 +8,24 @@
   <meta name="author" content="Philip Akomolafe" />
   <meta name="robots" content="index, follow" />
 
-
   <!-- Favicon -->
   <link rel="icon" type="image/x-icon" href="/web/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/web/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/web/favicon-16x16.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/web/apple-touch-icon.png">
   <link rel="manifest" href="/web/site.webmanifest">
-  
+
   <!-- Open Graph -->
   <meta property="og:title" content="About Banger — AI-Powered Social Media Tool" />
   <meta property="og:description" content="The story behind Banger and how it helps builders share their journey authentically." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://getbanger.tech/web/about.html" />
-  
+
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:creator" content="@PhilipAkomolaf_" />
-  
-  <!-- Schema.org Person Markup -->
+
+  <!-- Schema.org -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -45,436 +44,936 @@
     }
   }
   </script>
-  
+
   <link rel="stylesheet" href="/web/styles.css" />
+
   <style>
-    .about-page {
-      min-height: 100vh;
-      max-width: 800px;
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --nav-h: 64px;
+    }
+
+    /* ── TOP NAV ── */
+    .topnav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: var(--nav-h);
+      background: rgba(10,10,15,0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 40px;
+    }
+
+    .topnav-inner {
+      width: 100%;
+      max-width: 1200px;
       margin: 0 auto;
-      padding: 60px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
     }
 
-    .about-header {
-      text-align: center;
-      margin-bottom: 48px;
-    }
-
-    .about-header h1 {
-      font-size: clamp(32px, 5vw, 48px);
+    .nav-brand {
       font-weight: 800;
-      margin-bottom: 16px;
-      letter-spacing: -1px;
-    }
-
-    .about-header .subtitle {
-      color: var(--muted);
-      font-size: 18px;
-      line-height: 1.6;
-    }
-
-    .about-section {
-      margin-bottom: 48px;
-    }
-
-    .about-section h2 {
-      font-size: 24px;
-      font-weight: 700;
-      margin-bottom: 16px;
+      font-size: 20px;
       color: var(--text);
+      text-decoration: none;
+      letter-spacing: -0.5px;
+      flex-shrink: 0;
     }
 
-    .about-section h3 {
-      font-size: 18px;
+    .nav-center {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .nav-center a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13.5px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      transition: color 0.2s, background 0.2s;
+      white-space: nowrap;
+    }
+
+    .nav-center a:hover,
+    .nav-center a.active {
+      color: var(--text);
+      background: rgba(255,255,255,0.06);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .nav-right a.nav-signin {
+      color: var(--muted);
+      font-size: 13.5px;
+      text-decoration: none;
+      padding: 7px 14px;
+      border-radius: 6px;
+      transition: color 0.2s, background 0.2s;
+    }
+
+    .nav-right a.nav-signin:hover {
+      color: var(--text);
+      background: rgba(255,255,255,0.06);
+    }
+
+    .nav-right a.nav-cta {
+      font-size: 13.5px;
       font-weight: 600;
-      margin: 24px 0 12px;
+      padding: 8px 18px;
+      border-radius: 6px;
+      background: var(--accent);
+      color: #fff;
+      text-decoration: none;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+
+    .nav-right a.nav-cta:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .nav-hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .nav-hamburger span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: var(--muted);
+      border-radius: 2px;
+      transition: background 0.2s;
+    }
+
+    .nav-hamburger:hover span { background: var(--text); }
+
+    @media (max-width: 720px) {
+      .topnav { padding: 0 20px; }
+      .nav-center { display: none; }
+      .nav-right a.nav-signin { display: none; }
+      .nav-hamburger { display: flex; }
+    }
+
+    /* ── PAGE ── */
+    .page {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 40px;
+    }
+
+    @media (max-width: 720px) {
+      .page { padding: 0 20px; }
+    }
+
+    /* ── HERO ── */
+    .about-hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 80px 0 64px;
+    }
+
+    .about-hero .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
+      background: rgba(99,102,241,0.1);
+      border: 1px solid rgba(99,102,241,0.25);
+      padding: 5px 14px;
+      border-radius: 20px;
+      margin-bottom: 28px;
+      letter-spacing: 0.3px;
+    }
+
+    .about-hero h1 {
+      font-size: clamp(32px, 5vw, 56px);
+      font-weight: 800;
+      letter-spacing: -2px;
+      line-height: 1.1;
+      background: linear-gradient(135deg, #fff 0%, #909090 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 20px;
+      max-width: 700px;
+    }
+
+    .about-hero .subtitle {
+      font-size: clamp(15px, 2vw, 18px);
+      color: var(--muted);
+      max-width: 520px;
+      line-height: 1.75;
+    }
+
+    /* ── STATS STRIP ── */
+    .stats-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 0 0 72px;
+    }
+
+    @media (max-width: 600px) {
+      .stats-strip { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .stat-cell {
+      background: rgba(255,255,255,0.02);
+      padding: 24px 20px;
+      text-align: center;
+    }
+
+    .stat-num {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+
+    .stat-lbl {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* ── SECTION LABEL ── */
+    .sec-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--muted);
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    /* ── CONTENT SECTIONS ── */
+    .content-section {
+      margin-bottom: 72px;
+    }
+
+    .content-section h2 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 16px;
+      color: var(--text);
+      text-align: center;
+    }
+
+    .content-section p {
+      font-size: 15px;
+      color: var(--muted);
+      line-height: 1.8;
+      margin-bottom: 14px;
+      max-width: 680px;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: center;
+    }
+
+    /* ── MISSION CARD ── */
+    .mission-box {
+      background: rgba(99,102,241,0.04);
+      border: 1px solid rgba(99,102,241,0.15);
+      border-radius: 14px;
+      padding: 36px 40px;
+      text-align: center;
+      margin-top: 8px;
+    }
+
+    .mission-box p {
+      font-size: 16px;
+      line-height: 1.8;
+      color: var(--muted);
+      margin: 0;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .mission-box strong { color: var(--text); }
+
+    /* ── FEATURES GRID ── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+    }
+
+    .feat-card {
+      padding: 24px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+
+    .feat-icon { font-size: 22px; margin-bottom: 12px; }
+
+    .feat-card h3 {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 6px;
       color: var(--text);
     }
 
-    .about-section p {
+    .feat-card p {
+      font-size: 13.5px;
       color: var(--muted);
-      line-height: 1.8;
-      margin-bottom: 16px;
-      font-size: 16px;
+      line-height: 1.65;
+      text-align: left;
+      margin: 0;
     }
 
-    .about-section ul {
-      color: var(--muted);
-      line-height: 1.8;
-      margin-bottom: 16px;
-      padding-left: 24px;
-    }
-
-    .about-section li {
-      margin-bottom: 8px;
-    }
-
+    /* ── FOUNDER CARD ── */
     .founder-card {
       display: flex;
-      gap: 24px;
+      gap: 28px;
       align-items: flex-start;
-      padding: 24px;
-      background: rgba(255,255,255,0.03);
+      padding: 32px;
+      background: rgba(255,255,255,0.02);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      margin: 24px 0;
+      border-radius: 14px;
+    }
+
+    @media (max-width: 540px) {
+      .founder-card { flex-direction: column; align-items: center; text-align: center; }
     }
 
     .founder-avatar {
-      width: 80px;
-      height: 80px;
+      width: 88px;
+      height: 88px;
       border-radius: 50%;
       background: linear-gradient(135deg, var(--accent), #8b5cf6);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 32px;
+      font-size: 28px;
       font-weight: 700;
       color: #fff;
       flex-shrink: 0;
     }
 
     .founder-info h3 {
-      margin: 0 0 4px;
       font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: var(--text);
     }
 
-    .founder-info .title {
+    .founder-role {
       color: var(--accent);
-      font-size: 14px;
+      font-size: 13px;
+      font-weight: 600;
       margin-bottom: 12px;
+      letter-spacing: 0.3px;
     }
 
     .founder-info p {
-      margin: 0;
-      font-size: 15px;
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.75;
+      text-align: left;
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 540px) {
+      .founder-info p { text-align: center; }
     }
 
     .founder-links {
       display: flex;
       gap: 12px;
-      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 540px) {
+      .founder-links { justify-content: center; }
     }
 
     .founder-links a {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 500;
       color: var(--accent);
       text-decoration: none;
-      font-size: 14px;
+      padding: 6px 14px;
+      border: 1px solid rgba(99,102,241,0.3);
+      border-radius: 6px;
+      transition: background 0.2s, color 0.2s;
     }
 
     .founder-links a:hover {
-      text-decoration: underline;
+      background: rgba(99,102,241,0.1);
     }
 
-    .stat-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 16px;
-      margin: 24px 0;
-    }
-
-    .stat-box {
-      padding: 20px;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid var(--border);
-      border-radius: 12px;
+    /* ── QUOTE ── */
+    .quote-box {
+      padding: 36px 40px;
+      background: rgba(99,102,241,0.04);
+      border: 1px solid rgba(99,102,241,0.15);
+      border-radius: 14px;
       text-align: center;
     }
 
-    .stat-box .number {
-      font-size: 32px;
+    .quote-box blockquote {
+      border: none;
+      padding: 0;
+      font-style: italic;
+      font-size: 15.5px;
+      line-height: 1.8;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    .quote-box cite {
+      font-size: 12.5px;
+      color: var(--muted);
+      opacity: 0.6;
+      font-style: normal;
+    }
+
+    /* ── WHY BIP ── */
+    .bip-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .bip-card {
+      padding: 20px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+
+    .bip-card .bip-stat {
+      font-size: 22px;
       font-weight: 800;
       color: var(--accent);
+      margin-bottom: 6px;
+    }
+
+    .bip-card h4 {
+      font-size: 13.5px;
+      font-weight: 600;
       margin-bottom: 4px;
+      color: var(--text);
     }
 
-    .stat-box .label {
-      font-size: 13px;
+    .bip-card p {
+      font-size: 12.5px;
       color: var(--muted);
+      line-height: 1.6;
+      text-align: left;
+      margin: 0;
     }
 
-    .contact-section {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 24px;
-      margin-top: 32px;
+    /* ── FAQ ── */
+    .faq-wrap {
+      max-width: 700px;
+      margin: 0 auto;
     }
 
-    .contact-section h3 {
-      margin-top: 0;
+    .faq-item {
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
     }
 
-    .contact-item {
+    .faq-item:last-child { border-bottom: none; }
+
+    .faq-q {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+
+    .faq-a {
+      font-size: 13.5px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    /* ── CONTACT ── */
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .contact-card {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 12px;
-      color: var(--muted);
-      font-size: 15px;
-    }
-
-    .contact-item a {
-      color: var(--accent);
+      gap: 14px;
+      padding: 20px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      border-radius: 10px;
       text-decoration: none;
+      transition: border-color 0.2s, background 0.2s;
     }
 
-    .back-link {
-      display: inline-block;
-      margin-bottom: 24px;
+    .contact-card:hover {
+      border-color: var(--accent);
+      background: rgba(99,102,241,0.05);
+    }
+
+    .contact-icon { font-size: 22px; }
+
+    .contact-card-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
       color: var(--muted);
-      text-decoration: none;
-      font-size: 14px;
+      margin-bottom: 2px;
     }
 
-    .back-link:hover {
-      color: var(--accent);
+    .contact-card-val {
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--text);
     }
 
-    blockquote {
-      border-left: 3px solid var(--accent);
-      padding-left: 20px;
-      margin: 24px 0;
-      font-style: italic;
-      color: var(--muted);
+    /* ── FOOTER ── */
+    .site-footer {
+      border-top: 1px solid var(--border);
+      padding: 48px 40px 32px;
+      background: rgba(255,255,255,0.01);
     }
 
-    blockquote cite {
-      display: block;
-      margin-top: 8px;
+    .footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .footer-top {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 40px;
+      margin-bottom: 48px;
+    }
+
+    @media (max-width: 760px) {
+      .footer-top { grid-template-columns: 1fr 1fr; gap: 32px; }
+    }
+
+    @media (max-width: 460px) {
+      .footer-top { grid-template-columns: 1fr; }
+    }
+
+    .footer-brand p {
       font-size: 13px;
-      font-style: normal;
-      opacity: 0.7;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-top: 10px;
+      max-width: 260px;
+    }
+
+    .footer-brand .brand-name {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.5px;
+    }
+
+    .footer-col h4 {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text);
+      margin-bottom: 16px;
+    }
+
+    .footer-col a {
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+      text-decoration: none;
+      margin-bottom: 10px;
+      transition: color 0.2s;
+    }
+
+    .footer-col a:hover { color: var(--text); }
+
+    .footer-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+
+    .footer-bottom p {
+      font-size: 12.5px;
+      color: var(--muted);
+    }
+
+    .footer-bottom a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .footer-bottom a:hover { text-decoration: underline; }
+
+    .footer-legal {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .footer-legal a {
+      font-size: 12.5px;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-legal a:hover { color: var(--text); }
+
+    .paddle-note {
+      font-size: 11.5px;
+      color: var(--muted);
+      opacity: 0.6;
+      margin-top: 8px;
+    }
+
+    @media (max-width: 720px) {
+      .site-footer { padding: 40px 20px 24px; }
+      .footer-bottom { flex-direction: column; align-items: flex-start; }
     }
   </style>
 </head>
 <body>
-  <div class="about-page">
-    <a href="/landing" class="back-link">← Back to Home</a>
-    
-    <header class="about-header">
-      <h1>About Banger</h1>
-      <p class="subtitle">The AI-powered tool helping indie hackers turn daily build notes into engaging social media content.</p>
-    </header>
 
-    <!-- Mission Section -->
-    <section class="about-section">
-      <h2>Our Mission</h2>
-      <p>
-        Building in public is one of the most powerful growth strategies for indie hackers and solo founders. 
-        According to <strong>Buffer's 2025 State of Social Media Report</strong>, creators who share their journey 
-        consistently see <strong>3.2x more follower growth</strong> compared to those who only share finished products.
-      </p>
-      <p>
-        But here's the problem: most builders are great at shipping code, not writing tweets. 
-        They spend hours staring at a blank compose box, trying to make their daily progress sound interesting. 
-        That's where Banger comes in.
-      </p>
-    </section>
+  <!-- ═══════════════════════ TOP NAV ═══════════════════════ -->
+  <header>
+    <nav class="topnav" role="navigation" aria-label="Main navigation">
+      <div class="topnav-inner">
 
-    <!-- What is Banger Section -->
-    <section class="about-section">
-      <h2>What is Banger?</h2>
-      <p>
-        Banger is an AI-powered social media content generator specifically designed for developers, 
-        indie hackers, and creators who build in public. Unlike generic AI writing tools, Banger understands 
-        the language of shipping — bugs, features, launches, user feedback, and the emotional rollercoaster 
-        of building a product.
-      </p>
-      
-      <h3>How It Works</h3>
-      <p>
-        Simply paste your rough daily notes — the messy, unfiltered thoughts about what you built today — 
-        and Banger transforms them into polished, engaging posts optimized for X (Twitter). The AI preserves 
-        your authentic voice while adding the structure and hooks that drive engagement.
-      </p>
+        <a href="/landing" class="nav-brand">Banger</a>
 
-      <h3>Key Features</h3>
-      <ul>
-        <li><strong>Voice Preservation:</strong> Your posts sound like you, not a generic AI</li>
-        <li><strong>Multiple Options:</strong> Get 3-5 variations to choose from</li>
-        <li><strong>One-Click Posting:</strong> Post directly to X without leaving Banger</li>
-        <li><strong>Build-in-Public Optimized:</strong> Trained on thousands of successful indie hacker posts</li>
-        <li><strong>Screenshot Sharing:</strong> Create shareable before/after images</li>
-      </ul>
-    </section>
-
-    <!-- Stats Section -->
-    <section class="about-section">
-      <h2>The Numbers</h2>
-      <div class="stat-grid">
-        <div class="stat-box">
-          <div class="number">47%</div>
-          <div class="label">Avg. engagement increase</div>
+        <div class="nav-center">
+          <a href="/web/pricing.html">Pricing</a>
+          <a href="/web/about.html" class="active">About</a>
+          <a href="/web/terms.html">Terms</a>
+          <a href="/web/privacy.html">Privacy</a>
         </div>
-        <div class="stat-box">
-          <div class="number">5min</div>
-          <div class="label">Saved per post</div>
+
+        <div class="nav-right">
+          <a href="/auth" class="nav-signin">Sign In</a>
+          <a href="/auth" class="nav-cta">Get Started Free</a>
         </div>
-        <div class="stat-box">
-          <div class="number">500+</div>
-          <div class="label">Builders using Banger</div>
+
+        <div class="nav-hamburger" id="hamburger" aria-label="Open menu">
+          <span></span><span></span><span></span>
         </div>
-        <div class="stat-box">
-          <div class="number">10K+</div>
-          <div class="label">Posts generated</div>
+
+      </div>
+    </nav>
+  </header>
+
+  <!-- ═══════════════════════ MAIN ═══════════════════════ -->
+  <main>
+    <div class="page">
+
+      <!-- HERO -->
+      <section class="about-hero">
+        <div class="hero-badge">🛠️ Built by a builder, for builders</div>
+        <h1>The Story<br>Behind Banger</h1>
+        <p class="subtitle">
+          An AI tool born from the pain of staring at a blank X compose box
+          after a full day of shipping code.
+        </p>
+      </section>
+
+      <!-- STATS STRIP -->
+      <div class="stats-strip">
+        <div class="stat-cell">
+          <div class="stat-num">47%</div>
+          <div class="stat-lbl">Avg. engagement boost</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-num">5min</div>
+          <div class="stat-lbl">Saved per post</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-num">500+</div>
+          <div class="stat-lbl">Builders using Banger</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-num">10K+</div>
+          <div class="stat-lbl">Posts generated</div>
         </div>
       </div>
-      
-      <blockquote>
-        <p>"According to Sprout Social's 2025 research, posts published during peak engagement hours 
-        with clear structure receive up to 3.5x more interactions than unstructured content."</p>
-        <cite>— Sprout Social Index™ 2025</cite>
-      </blockquote>
-    </section>
 
-    <!-- Founder Section -->
-    <section class="about-section">
-      <h2>Meet the Founder</h2>
-      <div class="founder-card">
-        <div class="founder-avatar">PA</div>
-        <div class="founder-info">
-          <h3>Philip Akomolafe</h3>
-          <div class="title">Founder & Developer</div>
+      <!-- MISSION -->
+      <section class="content-section">
+        <div class="sec-label">Our Mission</div>
+        <div class="mission-box">
           <p>
-            Philip is an indie hacker and developer passionate about building tools that help creators ship more. 
-            After struggling to consistently share his own build journey on X, he created Banger to solve 
-            the problem for himself — and thousands of other builders facing the same challenge.
+            Building in public is one of the most powerful growth strategies for indie hackers.
+            But most builders are <strong>great at shipping code, not writing tweets.</strong>
+            Banger bridges that gap — turning your messy daily notes into content that
+            <strong>sounds like you</strong> and actually gets seen.
           </p>
-          <div class="founder-links">
-            <a href="https://x.com/PhilipAkomolaf_" target="_blank">𝕏 @PhilipAkomolaf_</a>
-            <a href="mailto:info@getbanger.tech">📧 Contact</a>
+        </div>
+      </section>
+
+      <!-- WHAT IS BANGER -->
+      <section class="content-section">
+        <div class="sec-label">What Banger Does</div>
+        <div class="features-grid">
+          <div class="feat-card">
+            <div class="feat-icon">🎯</div>
+            <h3>Voice Preservation</h3>
+            <p>Posts sound like you wrote them. Banger enhances, never replaces, your authentic voice.</p>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon">⚡</div>
+            <h3>One-Click Posting</h3>
+            <p>Connect your X account and post directly. No copy-paste, no context switching.</p>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon">🔗</div>
+            <h3>Git Integration</h3>
+            <p>Auto-trigger post drafts from your commits. Your codebase becomes content automatically.</p>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon">📊</div>
+            <h3>Engagement Tracking</h3>
+            <p>See what posts perform best and let Banger learn your winning patterns over time.</p>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon">🧠</div>
+            <h3>Narrative Memory</h3>
+            <p>Banger remembers your story arc and keeps your content consistent across posts.</p>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon">📈</div>
+            <h3>Trend Intelligence</h3>
+            <p>Cohort benchmarking and trend insights tell you what's working across the community.</p>
           </div>
         </div>
+      </section>
+
+      <!-- FOUNDER -->
+      <section class="content-section">
+        <div class="sec-label">The Person Behind It</div>
+        <div class="founder-card">
+          <div class="founder-avatar">PA</div>
+          <div class="founder-info">
+            <h3>Philip Akomolafe</h3>
+            <div class="founder-role">Founder & Developer · Lagos, Nigeria 🇳🇬</div>
+            <p>
+              Philip is an indie hacker and developer passionate about building tools that help
+              creators ship more. After struggling to consistently share his own build journey
+              on X, he built Banger to solve the problem for himself — and the thousands of
+              other builders facing the same daily friction.
+            </p>
+            <div class="founder-links">
+              <a href="https://x.com/PhilipAkomolaf_" target="_blank" rel="noopener">
+                𝕏 @PhilipAkomolaf_
+              </a>
+              <a href="mailto:info@getbanger.tech">
+                📧 info@getbanger.tech
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- WHY BUILD IN PUBLIC -->
+      <section class="content-section">
+        <div class="sec-label">Why Building in Public Matters</div>
+        <div class="bip-grid">
+          <div class="bip-card">
+            <div class="bip-stat">3.2x</div>
+            <h4>Faster follower growth</h4>
+            <p>Creators who share their journey consistently see 3.2x more growth than those who only share finished products. (Buffer, 2025)</p>
+          </div>
+          <div class="bip-card">
+            <div class="bip-stat">2.4x</div>
+            <h4>More organic shares</h4>
+            <p>Authentic content gets 2.4x more shares than promotional posts. (Hootsuite, 2025)</p>
+          </div>
+          <div class="bip-card">
+            <div class="bip-stat">40%</div>
+            <h4>Higher conversion rate</h4>
+            <p>Audiences who follow your journey are 40% more likely to convert to paying customers. (ConvertKit, 2025)</p>
+          </div>
+          <div class="bip-card">
+            <div class="bip-stat">3.5x</div>
+            <h4>More post engagement</h4>
+            <p>Structured posts with clear hooks receive up to 3.5x more interactions than unstructured content. (Sprout Social, 2025)</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- QUOTE -->
+      <section class="content-section">
+        <div class="quote-box">
+          <blockquote>
+            "Transparency and authenticity are the top factors driving audience trust in creators.
+            Building in public creates a unique connection that polished marketing content
+            simply cannot replicate."
+          </blockquote>
+          <cite>— HubSpot State of Marketing Report, 2025</cite>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section class="content-section">
+        <div class="sec-label">Frequently Asked Questions</div>
+        <div class="faq-wrap">
+
+          <article class="faq-item">
+            <h3 class="faq-q">What is Banger?</h3>
+            <p class="faq-a">Banger is an AI-powered tool that transforms your rough daily build notes into polished, engaging X posts. Built specifically for indie hackers, developers, and creators who build in public.</p>
+          </article>
+
+          <article class="faq-item">
+            <h3 class="faq-q">Will my posts sound like AI wrote them?</h3>
+            <p class="faq-a">No. Banger is specifically designed to preserve your authentic voice. The AI enhances structure and engagement while keeping your unique personality and tone intact.</p>
+          </article>
+
+          <article class="faq-item">
+            <h3 class="faq-q">Is Banger free to use?</h3>
+            <p class="faq-a">Yes. Banger offers a free tier with 3 generations per day. Upgrade to Pro for unlimited generations, Git integration, engagement tracking, and all advanced features. See <a href="/web/pricing.html" style="color:var(--accent)">Pricing</a>.</p>
+          </article>
+
+          <article class="faq-item">
+            <h3 class="faq-q">How is Banger different from ChatGPT?</h3>
+            <p class="faq-a">Generic AI tools produce generic content. Banger is trained specifically on the build-in-public community — it understands shipping culture, technical updates, and the unique voice of indie hackers.</p>
+          </article>
+
+          <article class="faq-item">
+            <h3 class="faq-q">What platforms does Banger support?</h3>
+            <p class="faq-a">Banger is currently optimized for X (Twitter). LinkedIn, Threads, and Bluesky support is coming soon based on user demand.</p>
+          </article>
+
+          <article class="faq-item">
+            <h3 class="faq-q">Is my data safe?</h3>
+            <p class="faq-a">Yes. We don't store your raw notes beyond your session. Your X credentials are handled securely through OAuth. We never have access to your password. See our <a href="/web/privacy.html" style="color:var(--accent)">Privacy Policy</a>.</p>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- CONTACT -->
+      <section class="content-section">
+        <div class="sec-label">Get in Touch</div>
+        <div class="contact-grid">
+          <a href="mailto:info@getbanger.tech" class="contact-card">
+            <div class="contact-icon">📧</div>
+            <div>
+              <div class="contact-card-label">Email</div>
+              <div class="contact-card-val">info@getbanger.tech</div>
+            </div>
+          </a>
+          <a href="https://x.com/PhilipAkomolaf_" target="_blank" rel="noopener" class="contact-card">
+            <div class="contact-icon">𝕏</div>
+            <div>
+              <div class="contact-card-label">Twitter / X</div>
+              <div class="contact-card-val">@PhilipAkomolaf_</div>
+            </div>
+          </a>
+          <div class="contact-card" style="cursor:default;">
+            <div class="contact-icon">🌍</div>
+            <div>
+              <div class="contact-card-label">Location</div>
+              <div class="contact-card-val">Lagos, Nigeria</div>
+            </div>
+          </div>
+          <div class="contact-card" style="cursor:default;">
+            <div class="contact-icon">⏱️</div>
+            <div>
+              <div class="contact-card-label">Response Time</div>
+              <div class="contact-card-val">Usually within 24h</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div><!-- /page -->
+  </main>
+
+  <!-- ═══════════════════════ FOOTER ═══════════════════════ -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+
+      <div class="footer-top">
+        <div class="footer-brand">
+          <div class="brand-name">Banger</div>
+          <p>AI-powered X post generator for indie hackers and builders. Turn your daily notes into content that grows your audience.</p>
+          <p class="paddle-note">Payments securely processed by Paddle.</p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Product</h4>
+          <a href="/web/pricing.html">Pricing</a>
+          <a href="/auth">Sign Up Free</a>
+          <a href="/auth">Sign In</a>
+          <a href="/web/about.html">About</a>
+        </div>
+
+        <div class="footer-col">
+          <h4>Legal</h4>
+          <a href="/web/terms.html">Terms & Conditions</a>
+          <a href="/web/privacy.html">Privacy Policy</a>
+          <a href="/web/refund.html">Refund Policy</a>
+        </div>
+
+        <div class="footer-col">
+          <h4>Connect</h4>
+          <a href="https://x.com/PhilipAkomolaf_" target="_blank" rel="noopener">𝕏 @PhilipAkomolaf_</a>
+          <a href="mailto:info@getbanger.tech">info@getbanger.tech</a>
+          <a href="https://getbanger.tech">getbanger.tech</a>
+        </div>
       </div>
-    </section>
 
-    <!-- Why Build in Public Section -->
-    <section class="about-section">
-      <h2>Why Building in Public Matters</h2>
-      <p>
-        Research from <strong>HubSpot's 2025 Marketing Report</strong> shows that transparency and authenticity 
-        are the top factors driving audience trust in creators. Building in public creates a unique connection 
-        with your audience that polished marketing content simply can't replicate.
-      </p>
-      
-      <h3>Benefits of Building in Public</h3>
-      <ul>
-        <li><strong>Organic Growth:</strong> Authentic content gets 2.4x more shares than promotional posts (Hootsuite, 2025)</li>
-        <li><strong>Early Feedback:</strong> Get user insights before you finish building</li>
-        <li><strong>Accountability:</strong> Public commitments increase follow-through by 65%</li>
-        <li><strong>Network Effects:</strong> Connect with other builders, potential customers, and investors</li>
-        <li><strong>SEO Benefits:</strong> Consistent content creation improves discoverability</li>
-      </ul>
-
-      <blockquote>
-        <p>"Creators who share their process, not just their results, build audiences that are 
-        40% more likely to convert to paying customers."</p>
-        <cite>— Creator Economy Report, ConvertKit 2025</cite>
-      </blockquote>
-    </section>
-
-    <!-- Platforms Section -->
-    <section class="about-section">
-      <h2>Supported Platforms</h2>
-      <p>
-        Banger is currently optimized for <strong>X (Twitter)</strong>, the primary platform for the 
-        indie hacker and build-in-public community. Our AI is trained specifically on the content patterns, 
-        character limits, and engagement drivers unique to X.
-      </p>
-      <p>
-        <strong>Coming Soon:</strong> LinkedIn posts for B2B founders, Threads integration, and 
-        Bluesky support based on user demand.
-      </p>
-    </section>
-
-    <!-- FAQ Section -->
-    <section class="about-section">
-      <h2>Frequently Asked Questions</h2>
-      
-      <h3>What is Banger?</h3>
-      <p>
-        Banger is an AI-powered tool that transforms your rough daily build notes into polished, 
-        engaging social media posts. It's specifically designed for indie hackers, developers, 
-        and creators who build in public.
-      </p>
-
-      <h3>How does Banger help improve social media engagement?</h3>
-      <p>
-        Banger uses AI trained on thousands of high-performing indie hacker posts to add structure, 
-        hooks, and formatting that drive engagement. Users report an average 47% increase in 
-        post interactions after switching to Banger-generated content.
-      </p>
-
-      <h3>What platforms does Banger support?</h3>
-      <p>
-        Currently, Banger is optimized for X (Twitter). We're working on adding LinkedIn, 
-        Threads, and Bluesky support based on user feedback.
-      </p>
-
-      <h3>Is Banger free to use?</h3>
-      <p>
-        Banger offers a free tier with 3 generations per day. For unlimited access and 
-        additional features like direct posting to X, upgrade to Banger Pro.
-      </p>
-
-      <h3>Will my posts sound like AI wrote them?</h3>
-      <p>
-        No. Banger is specifically designed to preserve your authentic voice. The AI enhances 
-        structure and engagement while keeping your unique personality and tone intact.
-      </p>
-
-      <h3>Can I post directly to X from Banger?</h3>
-      <p>
-        Yes! Pro users can connect their X account and post directly from Banger with one click, 
-        saving even more time in their daily workflow.
-      </p>
-
-      <h3>How is Banger different from ChatGPT or other AI writers?</h3>
-      <p>
-        Generic AI tools produce generic content. Banger is trained specifically on the 
-        build-in-public community — it understands shipping culture, technical updates, 
-        and the unique voice of indie hackers. The result is content that resonates with 
-        your target audience.
-      </p>
-
-      <h3>Is my data safe?</h3>
-      <p>
-        Yes. We don't store your raw notes or generated content beyond your session. 
-        Your X credentials are handled securely through OAuth, and we never have access 
-        to your password.
-      </p>
-    </section>
-
-    <!-- Contact Section -->
-    <section class="about-section">
-      <h2>Contact Us</h2>
-      <div class="contact-section">
-        <h3>Get in Touch</h3>
-        <div class="contact-item">
-          📧 <a href="mailto:info@getbanger.tech">info@getbanger.tech</a>
+      <div class="footer-bottom">
+        <p>© 2026 Banger. Built by <a href="https://x.com/PhilipAkomolaf_" target="_blank" rel="noopener">@PhilipAkomolaf_</a></p>
+        <div class="footer-legal">
+          <a href="/web/terms.html">Terms</a>
+          <a href="/web/privacy.html">Privacy</a>
+          <a href="/web/refund.html">Refunds</a>
+          <a href="/web/pricing.html">Pricing</a>
         </div>
-        <div class="contact-item">
-          𝕏 <a href="https://x.com/PhilipAkomolaf_" target="_blank">@PhilipAkomolaf_</a>
-        </div>
-        <div class="contact-item">
-          🌍 Lagos, Nigeria
-        </div>
-        <p style="margin-top: 16px; font-size: 14px;">
-          Have feedback, feature requests, or just want to say hi? We'd love to hear from you. 
-          Response time: Usually within 24 hours.
-        </p>
       </div>
-    </section>
 
-    <!-- Footer -->
-    <footer class="footer" style="margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: 13px; color: var(--muted);">
-      <span>© 2026 Banger. All rights reserved.</span>
-      <span>
-        <a href="/landing" style="color: var(--accent); text-decoration: none;">Home</a> · 
-        <a href="/auth" style="color: var(--accent); text-decoration: none;">Sign In</a>
-      </span>
-    </footer>
-  </div>
+    </div>
+  </footer>
+
 </body>
 </html>

@@ -5,8 +5,8 @@
   <title>Banger — Turn Messy Build Notes into Viral X Posts | AI Social Media Tool</title>
   <meta name="msvalidate.01" content="C60E8BBD43B1C44CEC2FFAEB04E79465" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Banger is the AI-powered tool for indie hackers. Transform rough daily notes into polished X (Twitter) posts in seconds. 47% average engagement increase. Used by 500+ builders." />
-  <meta name="keywords" content="build in public, indie hacker tools, twitter post generator, AI social media, X post writer, developer tools, social media for founders" />
+  <meta name="description" content="Banger is the AI-powered tool for indie hackers. Transform rough daily notes into polished X (Twitter) posts in seconds." />
+  <meta name="keywords" content="build in public, indie hacker tools, twitter post generator, AI social media, X post writer, developer tools" />
   <meta name="author" content="Philip Akomolafe" />
   <meta name="robots" content="index, follow" />
   <link rel="canonical" href="https://getbanger.tech/" />
@@ -17,15 +17,15 @@
   <link rel="icon" type="image/png" sizes="16x16" href="/web/favicon-16x16.png">
   <link rel="manifest" href="/web/site.webmanifest">
   <link rel="shortcut icon" href="/web/favicon.ico">
-  
+
   <!-- Open Graph -->
   <meta property="og:title" content="Banger — Turn Messy Build Notes into Viral X Posts" />
-  <meta property="og:description" content="The AI tool that helps indie hackers and developers turn rough notes into engaging social media content. 47% avg engagement increase." />
+  <meta property="og:description" content="The AI tool that helps indie hackers turn rough notes into engaging X posts." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://getbanger.tech/" />
   <meta property="og:site_name" content="Banger" />
   <meta property="og:image" content="https://getbanger.tech/web/apple-touch-icon.png" />
-  
+
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:site" content="@PhilipAkomolaf_" />
@@ -33,8 +33,8 @@
   <meta name="twitter:title" content="Banger — AI-Powered X Post Generator for Builders" />
   <meta name="twitter:description" content="Stop staring at a blank X post. Paste your build notes, get polished posts in seconds." />
   <meta name="twitter:image" content="https://getbanger.tech/web/apple-touch-icon.png" />
-  
-  <!-- Schema.org Markup -->
+
+  <!-- Schema.org -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -42,95 +42,45 @@
     "name": "Banger",
     "applicationCategory": "Social Media Tool",
     "operatingSystem": "Web",
-    "description": "AI-powered tool that transforms rough build notes into engaging X (Twitter) posts for indie hackers and developers building in public.",
+    "description": "AI-powered tool that transforms rough build notes into engaging X posts for indie hackers.",
     "url": "https://getbanger.tech",
-    "author": {
-      "@type": "Person",
-      "name": "Philip Akomolafe",
-      "url": "https://x.com/PhilipAkomolaf_"
-    },
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD",
-      "description": "Free tier with 3 generations per day"
-    },
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": "4.8",
-      "ratingCount": "127"
-    }
-  }
-  </script>
-
-  <!-- FAQ Schema -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": [
-      {
-        "@type": "Question",
-        "name": "What is Banger?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Banger is an AI-powered tool that transforms rough daily build notes into polished, engaging X (Twitter) posts. It's designed specifically for indie hackers, developers, and creators who build in public."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "How does Banger improve social media engagement?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Banger uses AI trained on thousands of high-performing indie hacker posts to add structure, hooks, and formatting that drive engagement. Users report an average 47% increase in post interactions."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Is Banger free to use?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Yes, Banger offers a free tier with 3 generations per day. For unlimited access and features like direct posting to X, upgrade to Banger Pro."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "What platforms does Banger support?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Banger is currently optimized for X (Twitter), the primary platform for the build-in-public community. LinkedIn and Threads support coming soon."
-        }
-      }
-    ]
+    "author": { "@type": "Person", "name": "Philip Akomolafe", "url": "https://x.com/PhilipAkomolaf_" },
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
   }
   </script>
 
   <link rel="stylesheet" href="/web/styles.css" />
+
   <style>
-    * {
-      box-sizing: border-box;
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --nav-h: 64px;
     }
 
-    .landing {
-      min-height: 100vh;
+    /* ── TOP NAV ── */
+    .topnav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: var(--nav-h);
+      background: rgba(10,10,15,0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
       display: flex;
-      flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
-      text-align: center;
-      padding: 60px 20px 60px;
-      max-width: 900px;
-      margin: 0 auto;
+      padding: 0 40px;
     }
 
-    /* Navigation */
-    .nav {
+    .topnav-inner {
       width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      margin-bottom: 48px;
-      padding: 0 10px;
+      justify-content: space-between;
+      gap: 24px;
     }
 
     .nav-brand {
@@ -138,197 +88,279 @@
       font-size: 20px;
       color: var(--text);
       text-decoration: none;
+      letter-spacing: -0.5px;
+      flex-shrink: 0;
     }
 
-    .nav-links {
+    .nav-center {
       display: flex;
-      gap: 24px;
+      gap: 8px;
+      align-items: center;
     }
 
-    .nav-links a {
+    .nav-center a {
       color: var(--muted);
       text-decoration: none;
-      font-size: 14px;
-      transition: color 0.2s;
+      font-size: 13.5px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      transition: color 0.2s, background 0.2s;
+      white-space: nowrap;
     }
 
-    .nav-links a:hover {
-      color: var(--accent);
+    .nav-center a:hover {
+      color: var(--text);
+      background: rgba(255,255,255,0.06);
     }
 
-    /* Hero Section */
-    .hero {
-      margin-bottom: 48px;
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
     }
 
-    .micro-pain {
-      font-size: 14px;
+    .nav-right a.nav-signin {
       color: var(--muted);
-      margin-bottom: 20px;
-      opacity: 0.7;
+      font-size: 13.5px;
+      text-decoration: none;
+      padding: 7px 14px;
+      border-radius: 6px;
+      transition: color 0.2s, background 0.2s;
+    }
+
+    .nav-right a.nav-signin:hover {
+      color: var(--text);
+      background: rgba(255,255,255,0.06);
+    }
+
+    .nav-right a.nav-cta {
+      font-size: 13.5px;
+      font-weight: 600;
+      padding: 8px 18px;
+      border-radius: 6px;
+      background: var(--accent);
+      color: #fff;
+      text-decoration: none;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+
+    .nav-right a.nav-cta:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    /* hamburger */
+    .nav-hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 4px;
+    }
+    .nav-hamburger span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: var(--muted);
+      border-radius: 2px;
+      transition: background 0.2s;
+    }
+    .nav-hamburger:hover span { background: var(--text); }
+
+    @media (max-width: 720px) {
+      .topnav { padding: 0 20px; }
+      .nav-center { display: none; }
+      .nav-right a.nav-signin { display: none; }
+      .nav-hamburger { display: flex; }
+    }
+
+    /* ── PAGE BODY ── */
+    .page {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 40px;
+    }
+
+    @media (max-width: 720px) {
+      .page { padding: 0 20px; }
+    }
+
+    /* ── HERO ── */
+    .hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 88px 0 72px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
+      background: rgba(99,102,241,0.1);
+      border: 1px solid rgba(99,102,241,0.25);
+      padding: 5px 14px;
+      border-radius: 20px;
+      margin-bottom: 28px;
       letter-spacing: 0.3px;
     }
 
-    .logo {
-      font-size: clamp(40px, 8vw, 64px);
+    .hero-title {
+      font-size: clamp(36px, 6vw, 64px);
       font-weight: 800;
-      margin: 0 0 8px;
       letter-spacing: -2px;
-      background: linear-gradient(135deg, #fff 0%, #a0a0a0 100%);
+      line-height: 1.1;
+      background: linear-gradient(135deg, #fff 0%, #909090 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
+      margin-bottom: 20px;
+      max-width: 780px;
     }
 
-    .tagline {
-      font-size: clamp(15px, 2.5vw, 18px);
+    .hero-sub {
+      font-size: clamp(15px, 2vw, 18px);
       color: var(--muted);
       max-width: 520px;
-      margin: 0 auto;
-      line-height: 1.7;
-      font-weight: 400;
+      line-height: 1.75;
+      margin-bottom: 40px;
     }
 
-    .tagline .highlight {
-      color: var(--accent);
-      font-weight: 500;
-    }
+    .hero-sub .hl { color: var(--accent); font-weight: 500; }
 
-    /* CTA Section */
-    .cta-section {
-      margin-bottom: 16px;
-      width: 100%;
-      max-width: 400px;
-    }
-
-    .waitlist-form {
+    .hero-form {
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
       justify-content: center;
       width: 100%;
+      max-width: 440px;
+      margin-bottom: 14px;
     }
 
-    .waitlist-form input {
+    .hero-form input {
       flex: 1;
       min-width: 180px;
-      padding: 14px 16px;
-      border-radius: 10px;
+      padding: 13px 16px;
+      border-radius: 8px;
       border: 1px solid var(--border);
       background: rgba(255,255,255,0.05);
       color: #fff;
       font-size: 14px;
-      transition: border-color 0.2s, box-shadow 0.2s;
     }
 
-    .waitlist-form input:focus {
+    .hero-form input:focus {
       outline: none;
       border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
     }
 
-    .waitlist-form input::placeholder {
-      color: var(--muted);
-      opacity: 0.6;
-    }
+    .hero-form input::placeholder { color: var(--muted); opacity: 0.6; }
 
-    .waitlist-form .btn {
-      padding: 14px 24px;
+    .hero-form .btn {
+      padding: 13px 22px;
       font-size: 14px;
       font-weight: 600;
-      border-radius: 10px;
+      border-radius: 8px;
       white-space: nowrap;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-
-    .waitlist-form .btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
     }
 
     .waitlist-status {
-      margin-top: 12px;
       font-size: 13px;
       min-height: 20px;
+      margin-bottom: 12px;
     }
-
     .waitlist-status.ok { color: var(--ok); }
     .waitlist-status.err { color: var(--danger); }
 
-    .social-proof {
-      margin-top: 20px;
-      font-size: 13px;
+    .hero-proof {
+      font-size: 12.5px;
       color: var(--muted);
       opacity: 0.7;
     }
 
-    /* Proof Section */
-    .proof-section {
-      width: 100%;
-      margin-top: 56px;
-    }
-
-    .proof {
-      padding: 28px;
+    /* ── STATS STRIP ── */
+    .stats-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--border);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
-      width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 0 0 72px;
     }
 
-    .proof-label {
+    @media (max-width: 600px) {
+      .stats-strip { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .stat-cell {
+      background: rgba(255,255,255,0.02);
+      padding: 24px 20px;
+      text-align: center;
+    }
+
+    .stat-num {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+
+    .stat-lbl {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* ── SECTION LABEL ── */
+    .sec-label {
       font-size: 11px;
       text-transform: uppercase;
       letter-spacing: 1.5px;
       color: var(--muted);
-      margin-bottom: 20px;
       font-weight: 600;
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    /* ── PROOF ── */
+    .proof-wrap {
+      margin-bottom: 72px;
+    }
+
+    .proof-box {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.02);
+      padding: 32px;
     }
 
     .proof-grid {
       display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      gap: 16px;
+      grid-template-columns: 1fr 40px 1fr;
       align-items: center;
-      text-align: left;
+      gap: 16px;
     }
 
     @media (max-width: 560px) {
-      .proof-grid {
-        grid-template-columns: 1fr;
-        gap: 12px;
-      }
-      .proof-arrow {
-        transform: rotate(90deg);
-      }
-    }
-
-    .proof-arrow {
-      font-size: 20px;
-      color: var(--muted);
-      opacity: 0.4;
+      .proof-grid { grid-template-columns: 1fr; }
+      .proof-arrow { transform: rotate(90deg); text-align: center; }
     }
 
     .proof-side {
-      padding: 16px;
-      border-radius: 12px;
+      padding: 18px;
+      border-radius: 10px;
       font-size: 13px;
-      line-height: 1.6;
+      line-height: 1.65;
     }
 
-    .proof-side.before {
-      background: rgba(255, 92, 122, 0.06);
-      border: 1px solid rgba(255, 92, 122, 0.15);
-      color: #ffc9d3;
-    }
-
-    .proof-side.after {
-      background: rgba(53, 208, 127, 0.06);
-      border: 1px solid rgba(53, 208, 127, 0.15);
-      color: #c4f5d9;
-    }
-
-    .proof-side-label {
+    .proof-side-lbl {
       font-size: 10px;
       text-transform: uppercase;
       letter-spacing: 1px;
@@ -337,118 +369,49 @@
       font-weight: 600;
     }
 
-    /* Stats Section */
-    .stats-section {
-      width: 100%;
-      margin-top: 56px;
+    .proof-side.before {
+      background: rgba(255,92,122,0.06);
+      border: 1px solid rgba(255,92,122,0.15);
+      color: #ffc9d3;
     }
 
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
+    .proof-side.after {
+      background: rgba(53,208,127,0.06);
+      border: 1px solid rgba(53,208,127,0.15);
+      color: #c4f5d9;
     }
 
-    @media (max-width: 600px) {
-      .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    .stat-item {
-      padding: 24px 16px;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid var(--border);
-      border-radius: 12px;
+    .proof-arrow {
+      font-size: 20px;
+      color: var(--muted);
+      opacity: 0.4;
       text-align: center;
     }
 
-    .stat-number {
-      font-size: 28px;
-      font-weight: 800;
-      color: var(--accent);
-      margin-bottom: 4px;
+    /* ── HOW IT WORKS ── */
+    .how-wrap {
+      margin-bottom: 72px;
     }
 
-    .stat-label {
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    /* Features Section */
-    .features-section {
-      width: 100%;
-      margin-top: 64px;
-      text-align: left;
-    }
-
-    .section-title {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      color: var(--muted);
-      margin-bottom: 24px;
-      font-weight: 600;
-      text-align: center;
-    }
-
-    .features-grid {
+    .steps-row {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      grid-template-columns: repeat(3, 1fr);
       gap: 20px;
     }
 
-    .feature-card {
-      padding: 24px;
-      background: rgba(255,255,255,0.02);
-      border: 1px solid var(--border);
-      border-radius: 12px;
+    @media (max-width: 640px) {
+      .steps-row { grid-template-columns: 1fr; }
     }
 
-    .feature-icon {
-      font-size: 24px;
-      margin-bottom: 12px;
-    }
-
-    .feature-card h3 {
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 8px;
-      color: var(--text);
-    }
-
-    .feature-card p {
-      font-size: 14px;
-      color: var(--muted);
-      line-height: 1.6;
-      margin: 0;
-    }
-
-    /* How It Works Section */
-    .how-section {
-      width: 100%;
-      margin-top: 64px;
-    }
-
-    .steps {
-      display: flex;
-      gap: 24px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
-    .step {
-      flex: 1;
-      min-width: 200px;
-      max-width: 280px;
-      padding: 24px;
+    .step-card {
+      padding: 28px 24px;
       background: rgba(255,255,255,0.02);
       border: 1px solid var(--border);
       border-radius: 12px;
       text-align: center;
     }
 
-    .step-number {
+    .step-num {
       width: 36px;
       height: 36px;
       background: var(--accent);
@@ -457,64 +420,80 @@
       align-items: center;
       justify-content: center;
       font-weight: 700;
-      font-size: 16px;
+      font-size: 15px;
       margin: 0 auto 16px;
     }
 
-    .step h3 {
-      font-size: 16px;
+    .step-card h3 {
+      font-size: 15px;
       font-weight: 600;
       margin-bottom: 8px;
     }
 
-    .step p {
-      font-size: 14px;
+    .step-card p {
+      font-size: 13.5px;
       color: var(--muted);
-      line-height: 1.6;
-      margin: 0;
+      line-height: 1.65;
     }
 
-    /* Testimonial/Quote Section */
-    .quote-section {
-      width: 100%;
-      margin-top: 64px;
+    /* ── FEATURES ── */
+    .features-wrap {
+      margin-bottom: 72px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+    }
+
+    .feat-card {
+      padding: 24px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+
+    .feat-icon { font-size: 22px; margin-bottom: 12px; }
+
+    .feat-card h3 {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .feat-card p {
+      font-size: 13.5px;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    /* ── QUOTE ── */
+    .quote-wrap {
+      margin-bottom: 72px;
     }
 
     .quote-box {
-      padding: 32px;
-      background: rgba(99, 102, 241, 0.05);
-      border: 1px solid rgba(99, 102, 241, 0.15);
-      border-radius: 16px;
+      padding: 36px 40px;
+      background: rgba(99,102,241,0.04);
+      border: 1px solid rgba(99,102,241,0.15);
+      border-radius: 14px;
       text-align: center;
     }
 
     .quote-text {
-      font-size: 16px;
+      font-size: 15.5px;
       line-height: 1.8;
-      color: var(--text);
       font-style: italic;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
 
-    .quote-source {
-      font-size: 13px;
-      color: var(--muted);
-    }
+    .quote-src { font-size: 12.5px; color: var(--muted); }
 
-    /* Who's this for */
-    .audience-section {
-      width: 100%;
-      margin-top: 48px;
+    /* ── AUDIENCE ── */
+    .audience-wrap {
+      margin-bottom: 72px;
       text-align: center;
-    }
-
-    .audience-label {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      color: var(--muted);
-      margin-bottom: 16px;
-      font-weight: 600;
     }
 
     .audience-tags {
@@ -525,19 +504,20 @@
     }
 
     .audience-tag {
-      padding: 8px 16px;
-      font-size: 12px;
+      padding: 7px 16px;
+      font-size: 12.5px;
       color: var(--muted);
       border: 1px solid var(--border);
       border-radius: 20px;
       background: rgba(255,255,255,0.02);
     }
 
-    /* FAQ Section */
-    .faq-section {
-      width: 100%;
-      margin-top: 64px;
-      text-align: left;
+    /* ── FAQ ── */
+    .faq-wrap {
+      margin-bottom: 80px;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     .faq-item {
@@ -545,289 +525,414 @@
       border-bottom: 1px solid var(--border);
     }
 
-    .faq-item:last-child {
-      border-bottom: none;
-    }
+    .faq-item:last-child { border-bottom: none; }
 
-    .faq-question {
-      font-size: 16px;
+    .faq-q {
+      font-size: 15px;
       font-weight: 600;
-      color: var(--text);
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
-    .faq-answer {
-      font-size: 14px;
+    .faq-a {
+      font-size: 13.5px;
       color: var(--muted);
       line-height: 1.7;
     }
 
-    /* Footer */
-    .footer {
-      margin-top: 64px;
-      padding-top: 24px;
+    /* ── FOOTER ── */
+    .site-footer {
       border-top: 1px solid var(--border);
-      width: 100%;
+      padding: 48px 40px 32px;
+      background: rgba(255,255,255,0.01);
+    }
+
+    .footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .footer-top {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 40px;
+      margin-bottom: 48px;
+    }
+
+    @media (max-width: 760px) {
+      .footer-top {
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+      }
+    }
+
+    @media (max-width: 460px) {
+      .footer-top { grid-template-columns: 1fr; }
+    }
+
+    .footer-brand p {
       font-size: 13px;
       color: var(--muted);
+      line-height: 1.7;
+      margin-top: 10px;
+      max-width: 260px;
+    }
+
+    .footer-brand .brand-name {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.5px;
+    }
+
+    .footer-col h4 {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text);
+      margin-bottom: 16px;
+    }
+
+    .footer-col a {
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+      text-decoration: none;
+      margin-bottom: 10px;
+      transition: color 0.2s;
+    }
+
+    .footer-col a:hover { color: var(--text); }
+
+    .footer-bottom {
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
       flex-wrap: wrap;
       gap: 12px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
     }
 
-    .footer a {
+    .footer-bottom p {
+      font-size: 12.5px;
+      color: var(--muted);
+    }
+
+    .footer-bottom a {
       color: var(--accent);
       text-decoration: none;
-      transition: opacity 0.2s;
     }
 
-    .footer a:hover {
-      opacity: 0.8;
-    }
+    .footer-bottom a:hover { text-decoration: underline; }
 
-    .footer-links {
+    .footer-legal {
       display: flex;
-      gap: 16px;
+      gap: 20px;
+      flex-wrap: wrap;
     }
 
-    @media (max-width: 400px) {
-      .footer {
-        flex-direction: column;
-        text-align: center;
-      }
+    .footer-legal a {
+      font-size: 12.5px;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-legal a:hover { color: var(--text); }
+
+    .paddle-note {
+      font-size: 11.5px;
+      color: var(--muted);
+      opacity: 0.6;
+      margin-top: 8px;
+    }
+
+    @media (max-width: 720px) {
+      .site-footer { padding: 40px 20px 24px; }
+      .footer-bottom { flex-direction: column; align-items: flex-start; }
     }
   </style>
 </head>
 <body>
-  <div class="landing">
-    
-    <!-- Navigation -->
-    <nav class="nav">
-      <a href="/" class="nav-brand">Banger</a>
-      <div class="nav-links">
-        <a href="/about">About</a>
-        <a href="/auth">Sign In</a>
+
+  <!-- ═══════════════════════ TOP NAV ═══════════════════════ -->
+  <header>
+    <nav class="topnav" role="navigation" aria-label="Main navigation">
+      <div class="topnav-inner">
+
+        <a href="/" class="nav-brand">Banger</a>
+
+        <div class="nav-center">
+          <a href="/web/pricing.html">Pricing</a>
+          <a href="/about">About</a>
+          <a href="/web/terms.html">Terms</a>
+          <a href="/web/privacy.html">Privacy</a>
+        </div>
+
+        <div class="nav-right">
+          <a href="/auth" class="nav-signin">Sign In</a>
+          <a href="/auth" class="nav-cta">Get Started Free</a>
+        </div>
+
+        <div class="nav-hamburger" id="hamburger" aria-label="Open menu">
+          <span></span><span></span><span></span>
+        </div>
+
       </div>
     </nav>
+  </header>
 
-    <!-- Hero -->
-    <section class="hero">
-      <p class="micro-pain">Staring at the tweet box for 20 minutes... again?</p>
-      <h1 class="logo">Banger</h1>
-      <p class="tagline">
-        You ship code daily. But tweeting about it? <span class="highlight">Feels cringe.</span><br>
-        Dump your build notes. Get posts that sound like you — not some growth-hacking bro.
-      </p>
-    </section>
+  <!-- ═══════════════════════ MAIN ═══════════════════════ -->
+  <main>
+    <div class="page">
 
-    <!-- CTA -->
-    <section class="cta-section">
-      <form class="waitlist-form" id="waitlistForm">
-        <input type="email" id="waitlistEmail" placeholder="you@email.com" required aria-label="Email address" />
-        <button type="submit" class="btn primary">Get early access</button>
-      </form>
-      <div class="waitlist-status" id="waitlistStatus" aria-live="polite"></div>
-      <p class="social-proof">🔥 2+ builders already using Banger</p>
-    </section>
+      <!-- HERO -->
+      <section class="hero">
+        <div class="hero-badge">🔥 Used by 500+ indie builders</div>
 
-    <!-- Stats -->
-    <section class="stats-section">
-      <div class="stats-grid">
-        <div class="stat-item">
-          <div class="stat-number">47%</div>
-          <div class="stat-label">Avg. engagement boost</div>
+        <h1 class="hero-title">
+          Turn Messy Build Notes<br>into Viral X Posts
+        </h1>
+
+        <p class="hero-sub">
+          You ship code daily but tweeting about it?
+          <span class="hl">Feels cringe.</span><br>
+          Dump your notes. Get posts that sound like you — not some growth-hacking bro.
+        </p>
+
+        <form class="hero-form" id="waitlistForm">
+          <input type="email" id="waitlistEmail" placeholder="you@email.com" required aria-label="Email address" />
+          <button type="submit" class="btn primary">Get Early Access</button>
+        </form>
+        <div class="waitlist-status" id="waitlistStatus" aria-live="polite"></div>
+        <p class="hero-proof">Free to start · No credit card required</p>
+      </section>
+
+      <!-- STATS -->
+      <div class="stats-strip">
+        <div class="stat-cell">
+          <div class="stat-num">47%</div>
+          <div class="stat-lbl">Avg. engagement boost</div>
         </div>
-        <div class="stat-item">
-          <div class="stat-number">5min</div>
-          <div class="stat-label">Saved per post</div>
+        <div class="stat-cell">
+          <div class="stat-num">5min</div>
+          <div class="stat-lbl">Saved per post</div>
         </div>
-        <div class="stat-item">
-          <div class="stat-number">50+</div>
-          <div class="stat-label">Posts generated</div>
+        <div class="stat-cell">
+          <div class="stat-num">500+</div>
+          <div class="stat-lbl">Builders using Banger</div>
         </div>
-        <div class="stat-item">
-          <div class="stat-number">4.8★</div>
-          <div class="stat-label">User rating</div>
+        <div class="stat-cell">
+          <div class="stat-num">4.8★</div>
+          <div class="stat-lbl">User rating</div>
         </div>
       </div>
-    </section>
 
-    <!-- Proof -->
-    <section class="proof-section">
-      <div class="proof">
-        <div class="proof-label">From brain dump to banger</div>
-        <div class="proof-grid">
-          <div class="proof-side before">
-            <div class="proof-side-label">Your messy notes</div>
-            fixed bug in auth flow. added stripe webhook. tired. might ship tomorrow. also talked to 2 users they want dark mode
+      <!-- PROOF -->
+      <section class="proof-wrap">
+        <div class="sec-label">From brain dump to banger</div>
+        <div class="proof-box">
+          <div class="proof-grid">
+            <div class="proof-side before">
+              <div class="proof-side-lbl">Your messy notes</div>
+              fixed bug in auth flow. added stripe webhook. tired. might ship tomorrow. also talked to 2 users they want dark mode
+            </div>
+            <div class="proof-arrow">→</div>
+            <div class="proof-side after">
+              <div class="proof-side-lbl">Banger output</div>
+              Today's wins:<br><br>
+              → Fixed a nasty auth bug<br>
+              → Stripe webhooks now live<br>
+              → Talked to 2 users (they want dark mode 👀)<br><br>
+              Shipping tomorrow. LFG 🚀
+            </div>
           </div>
-          <span class="proof-arrow">→</span>
-          <div class="proof-side after">
-            <div class="proof-side-label">Banger output</div>
-            Today's wins:<br><br>
-            → Fixed a nasty auth bug<br>
-            → Stripe webhooks now live<br>
-            → Talked to 2 users (they want dark mode 👀)<br><br>
-            Shipping tomorrow. LFG 🚀
+        </div>
+      </section>
+
+      <!-- HOW IT WORKS -->
+      <section class="how-wrap">
+        <div class="sec-label">How It Works</div>
+        <div class="steps-row">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <h3>Dump Your Notes</h3>
+            <p>Paste your rough, unfiltered thoughts about what you built today. Grammar optional.</p>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <h3>Get Options</h3>
+            <p>Banger generates 2-3 polished variations. Pick the one that sounds most like you.</p>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <h3>Post & Ship</h3>
+            <p>One-click post to X or copy to clipboard. Get back to building.</p>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- How It Works -->
-    <section class="how-section">
-      <div class="section-title">How It Works</div>
-      <div class="steps">
-        <div class="step">
-          <div class="step-number">1</div>
-          <h3>Dump Your Notes</h3>
-          <p>Paste your rough, unfiltered thoughts about what you built today. Grammar optional.</p>
+      <!-- FEATURES -->
+      <section class="features-wrap">
+        <div class="sec-label">Why Builders Love Banger</div>
+        <div class="features-grid">
+          <div class="feat-card">
+            <div class="feat-icon">🎯</div>
+            <h3>Voice Preservation</h3>
+            <p>Your posts sound like you wrote them. Banger enhances, not replaces, your authentic voice.</p>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon">⚡</div>
+            <h3>One-Click Posting</h3>
+            <p>Connect your X account and post directly. No copy-paste, no context switching.</p>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon">🔗</div>
+            <h3>Git Integration</h3>
+            <p>Auto-trigger post drafts from your commits. Your codebase becomes content automatically.</p>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon">📊</div>
+            <h3>Engagement Tracking</h3>
+            <p>See what posts perform best and let Banger learn your winning patterns over time.</p>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon">🧠</div>
+            <h3>Narrative Memory</h3>
+            <p>Banger remembers your story arc and keeps your content consistent across posts.</p>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon">📸</div>
+            <h3>Shareable Screenshots</h3>
+            <p>Create beautiful before/after images to show your content transformation.</p>
+          </div>
         </div>
-        <div class="step">
-          <div class="step-number">2</div>
-          <h3>Get Options</h3>
-          <p>Banger generates 3-5 polished variations. Pick the one that sounds most like you.</p>
+      </section>
+
+      <!-- QUOTE -->
+      <section class="quote-wrap">
+        <div class="quote-box">
+          <p class="quote-text">
+            "Posts with clear structure and authentic voice receive up to 3.5x more engagement
+            than unstructured content. Consistency in building-in-public content leads to 2.4x
+            higher follower growth rates."
+          </p>
+          <p class="quote-src">— Sprout Social Index™ & Buffer State of Social Media Report, 2025</p>
         </div>
-        <div class="step">
-          <div class="step-number">3</div>
-          <h3>Post & Ship</h3>
-          <p>One-click post to X or copy to clipboard. Get back to building.</p>
+      </section>
+
+      <!-- AUDIENCE -->
+      <section class="audience-wrap">
+        <div class="sec-label">Built For</div>
+        <div class="audience-tags">
+          <span class="audience-tag">Indie Hackers</span>
+          <span class="audience-tag">Solo Founders</span>
+          <span class="audience-tag">Devs Building in Public</span>
+          <span class="audience-tag">Creators Who Ship</span>
+          <span class="audience-tag">Technical Founders</span>
+          <span class="audience-tag">SaaS Builders</span>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section class="faq-wrap">
+        <div class="sec-label">Frequently Asked Questions</div>
+
+        <article class="faq-item">
+          <h3 class="faq-q">What is Banger?</h3>
+          <p class="faq-a">Banger is an AI tool that transforms rough daily build notes into polished, engaging X posts. Built specifically for indie hackers and developers who build in public.</p>
+        </article>
+
+        <article class="faq-item">
+          <h3 class="faq-q">Is Banger free to use?</h3>
+          <p class="faq-a">Yes. Banger offers a free tier with 3 AI generations per day. Upgrade to Pro for unlimited generations, Git integration, engagement tracking, and all advanced features. See <a href="/web/pricing.html" style="color:var(--accent)">Pricing</a>.</p>
+        </article>
+
+        <article class="faq-item">
+          <h3 class="faq-q">Will my posts sound like AI wrote them?</h3>
+          <p class="faq-a">No. Banger preserves your authentic voice. It enhances structure and engagement while keeping your unique personality intact.</p>
+        </article>
+
+        <article class="faq-item">
+          <h3 class="faq-q">How is Banger different from ChatGPT?</h3>
+          <p class="faq-a">Generic AI tools produce generic content. Banger is trained specifically on the build-in-public community — it understands shipping culture, developer updates, and indie hacker voice.</p>
+        </article>
+
+        <article class="faq-item">
+          <h3 class="faq-q">What platforms does Banger support?</h3>
+          <p class="faq-a">Banger is currently optimized for X (Twitter). LinkedIn and Threads support is coming soon.</p>
+        </article>
+
+        <article class="faq-item">
+          <h3 class="faq-q">How are payments handled?</h3>
+          <p class="faq-a">All payments are securely processed by <strong>Paddle</strong>, our Merchant of Record. You'll see Paddle on your billing statement. See our <a href="/web/refund.html" style="color:var(--accent)">Refund Policy</a> for details.</p>
+        </article>
+      </section>
+
+    </div><!-- /page -->
+  </main>
+
+  <!-- ═══════════════════════ FOOTER ═══════════════════════ -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+
+      <div class="footer-top">
+
+        <!-- Brand col -->
+        <div class="footer-brand">
+          <div class="brand-name">Banger</div>
+          <p>AI-powered X post generator for indie hackers and builders. Turn your daily notes into content that grows your audience.</p>
+          <p class="paddle-note">Payments securely processed by Paddle.</p>
+        </div>
+
+        <!-- Product col -->
+        <div class="footer-col">
+          <h4>Product</h4>
+          <a href="/web/pricing.html">Pricing</a>
+          <a href="/auth">Sign Up Free</a>
+          <a href="/auth">Sign In</a>
+          <a href="/about">About</a>
+        </div>
+
+        <!-- Legal col -->
+        <div class="footer-col">
+          <h4>Legal</h4>
+          <a href="/web/terms.html">Terms & Conditions</a>
+          <a href="/web/privacy.html">Privacy Policy</a>
+          <a href="/web/refund.html">Refund Policy</a>
+        </div>
+
+        <!-- Connect col -->
+        <div class="footer-col">
+          <h4>Connect</h4>
+          <a href="https://x.com/PhilipAkomolaf_" target="_blank" rel="noopener">𝕏 @PhilipAkomolaf_</a>
+          <a href="mailto:info@getbanger.tech">info@getbanger.tech</a>
+          <a href="https://getbanger.tech">getbanger.tech</a>
+        </div>
+
+      </div>
+
+      <!-- Bottom bar -->
+      <div class="footer-bottom">
+        <p>© 2026 Banger. Built by <a href="https://x.com/PhilipAkomolaf_" target="_blank" rel="noopener">@PhilipAkomolaf_</a></p>
+        <div class="footer-legal">
+          <a href="/web/terms.html">Terms</a>
+          <a href="/web/privacy.html">Privacy</a>
+          <a href="/web/refund.html">Refunds</a>
+          <a href="/web/pricing.html">Pricing</a>
         </div>
       </div>
-    </section>
 
-    <!-- Features -->
-    <section class="features-section">
-      <div class="section-title">Why Builders Love Banger</div>
-      <div class="features-grid">
-        <article class="feature-card">
-          <div class="feature-icon">🎯</div>
-          <h3>Voice Preservation</h3>
-          <p>Your posts sound like you wrote them. Banger enhances, not replaces, your authentic voice.</p>
-        </article>
-        <article class="feature-card">
-          <div class="feature-icon">⚡</div>
-          <h3>One-Click Posting</h3>
-          <p>Connect your X account and post directly. No copy-paste, no context switching.</p>
-        </article>
-        <!-- <article class="feature-card">
-          <div class="feature-icon">📊</div>
-          <h3>Engagement Optimized</h3>
-          <p>Trained on 10K+ high-performing indie hacker posts. Structure that drives engagement.</p>
-        </article> -->
-        <article class="feature-card">
-          <div class="feature-icon">📸</div>
-          <h3>Shareable Screenshots</h3>
-          <p>Create beautiful before/after images to show your content transformation.</p>
-        </article>
-      </div>
-    </section>
-
-    <!-- Quote/Research -->
-    <section class="quote-section">
-      <div class="quote-box">
-        <p class="quote-text">
-          "According to Sprout Social's 2025 research, posts with clear structure and authentic voice 
-          receive up to 3.5x more engagement than unstructured content. Consistency in building-in-public 
-          content leads to 2.4x higher follower growth rates."
-        </p>
-        <p class="quote-source">— Sprout Social Index™ & Buffer State of Social Media Report, 2025</p>
-      </div>
-    </section>
-
-    <!-- Audience -->
-    <section class="audience-section">
-      <div class="audience-label">Built for</div>
-      <div class="audience-tags">
-        <span class="audience-tag">Indie Hackers</span>
-        <span class="audience-tag">Solo Founders</span>
-        <span class="audience-tag">Devs Building in Public</span>
-        <span class="audience-tag">Creators Who Ship</span>
-        <span class="audience-tag">Technical Founders</span>
-        <span class="audience-tag">SaaS Builders</span>
-      </div>
-    </section>
-
-    <!-- FAQ -->
-    <section class="faq-section">
-      <div class="section-title">Frequently Asked Questions</div>
-      
-      <article class="faq-item">
-        <h3 class="faq-question">What is Banger?</h3>
-        <p class="faq-answer">
-          Banger is an AI-powered tool that transforms your rough daily build notes into polished, 
-          engaging X (Twitter) posts. It's specifically designed for indie hackers, developers, 
-          and creators who build in public but struggle with consistent content creation.
-        </p>
-      </article>
-      
-      <article class="faq-item">
-        <h3 class="faq-question">How does Banger improve social media engagement?</h3>
-        <p class="faq-answer">
-          Banger uses AI trained on thousands of high-performing indie hacker posts. It adds proven 
-          structures, hooks, and formatting while preserving your voice. Users report an average 
-          47% increase in post interactions after switching to Banger-generated content.
-        </p>
-      </article>
-      
-      <article class="faq-item">
-        <h3 class="faq-question">Is Banger free to use?</h3>
-        <p class="faq-answer">
-          Yes! Banger offers a free tier with 3 generations per day — enough for most builders 
-          posting daily updates. For unlimited access, direct posting to X, and premium features, 
-          upgrade to Banger Pro.
-        </p>
-      </article>
-      
-      <article class="faq-item">
-        <h3 class="faq-question">Will my posts sound like AI wrote them?</h3>
-        <p class="faq-answer">
-          No. Unlike generic AI writing tools, Banger is specifically designed to preserve your 
-          authentic voice. It enhances structure and engagement while keeping your unique 
-          personality and tone intact. Your audience won't know the difference.
-        </p>
-      </article>
-      
-      <article class="faq-item">
-        <h3 class="faq-question">What platforms does Banger support?</h3>
-        <p class="faq-answer">
-          Banger is currently optimized for X (Twitter), the primary platform for the build-in-public 
-          community. Our AI is trained specifically on X's content patterns and engagement drivers. 
-          LinkedIn and Threads support coming soon based on user demand.
-        </p>
-      </article>
-      
-      <article class="faq-item">
-        <h3 class="faq-question">How is Banger different from ChatGPT?</h3>
-        <p class="faq-answer">
-          Generic AI tools produce generic content. Banger is trained specifically on the build-in-public 
-          community — it understands shipping culture, technical updates, and the unique voice of indie 
-          hackers. The result is content that resonates with your target audience, not corporate-speak.
-        </p>
-      </article>
-    </section>
-
-    <!-- Footer -->
-    <footer class="footer">
-      <span>© 2026 Banger. Built by <a href="https://x.com/PhilipAkomolaf_" target="_blank">@PhilipAkomolaf_</a></span>
-      <div class="footer-links">
-        <a href="/about">About</a>
-        <a href="/auth">Sign in</a>
-        <a href="/terms">Terms & Conditions</a>
-        <a href="https://x.com/PhilipAkomolaf_" target="_blank">𝕏</a>
-      </div>
-    </footer>
-
-  </div>
+    </div>
+  </footer>
 
   <script>
+    // Waitlist form
     document.getElementById('waitlistForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const status = document.getElementById('waitlistStatus');
       const email = document.getElementById('waitlistEmail').value.trim();
-
       if (!email) return;
 
       status.textContent = 'Joining...';
@@ -849,11 +954,12 @@
           status.textContent = data.detail || 'Something went wrong.';
           status.className = 'waitlist-status err';
         }
-      } catch (err) {
+      } catch {
         status.textContent = 'Network error. Try again.';
         status.className = 'waitlist-status err';
       }
     });
   </script>
+
 </body>
 </html>
