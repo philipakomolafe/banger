@@ -56,7 +56,7 @@ def run_scraper():
     """Run the tweet scraper to update style profile."""
     from scripts.tweet_scraper import main as scraper_main
     scraper_main()
-
+    
 
 def main():
     parser = argparse.ArgumentParser(

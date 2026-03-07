@@ -216,6 +216,11 @@ async def x_callback(request: Request, body: XCallbackRequest):
             headers={"Authorization": f"Bearer {access_token}"},
             params={"user.fields": "username,name,profile_image_url"}
         )
+
+        if user_response.status_code == 503:
+            logger.error(f"X API is unavailable (503): {user_response.text}")
+            raise HTTPException(status_code=503, 
+                                detail="X API is temporarily unavailable. Please try again in few minutes.")
         
         if user_response.status_code != 200:
             logger.error(f"Failed to get X user: {user_response.text}")

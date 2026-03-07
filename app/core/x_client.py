@@ -51,12 +51,13 @@ def _load_ledger() -> dict:
     TABLE_NAME = "post_ledger"
 
     ledger = {}
-    # Load from local file first
-    if LEDGER_PATH.exists():
-        try:
-            ledger = json.loads(LEDGER_PATH.read_text(encoding="utf-8"))
-        except Exception:
-            ledger = {}
+    # Don't load ledger record from the Local file.
+    # # Load from local file first
+    # if LEDGER_PATH.exists():
+    #     try:
+    #         ledger = json.loads(LEDGER_PATH.read_text(encoding="utf-8"))
+    #     except Exception:
+    #         ledger = {}
 
     def fetch_supabase_ledger():
         try:
@@ -168,14 +169,14 @@ def post_to_x(tweet_text: str) -> dict:
     from app.api.routes import _fetch_x_user_info
 
     tweet_text = (tweet_text or "").strip()
-    user_access_token = None
+    # user_access_token = None
     try:
         # Create a dummy Request object if none is available
         dummy_request = Request(scope={"type": "http"})
         x_user_info = _fetch_x_user_info(dummy_request)
         if not x_user_info:
             return {"success": False, "tweet_id": None, "error": "X account not connected", "remaining": remaining_posts_this_month()}
-        user_access_token = x_user_info.get("access_token")
+        # user_access_token = x_user_info.get("access_token")
     except Exception:
         return {"success": False, "tweet_id": None, "error": "Failed to fetch X user info", "remaining": remaining_posts_this_month()}
     
@@ -196,8 +197,8 @@ def post_to_x(tweet_text: str) -> dict:
             bearer_token=os.environ.get("X_BEARER_TOKEN"),
             consumer_key=os.environ.get("X_API_KEY"),
             consumer_secret=os.environ.get("X_API_SECRET"),
-            access_token=user_access_token,
-            access_token_secret=None,  # Not needed for v2 endpoints with OAuth 1.0a user context
+            access_token=os.environ.get("X_ACCESS_TOKEN"),
+            access_token_secret=os.environ.get("X_ACCESS_SECRET"),
         )
         response = client.create_tweet(text=tweet_text)
         tid = response.data["id"]
