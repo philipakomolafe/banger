@@ -4,6 +4,7 @@ Allows users to connect their X account to analyze tweet performance.
 """
 
 import os
+import time
 import secrets
 import hashlib
 import base64
@@ -210,24 +211,30 @@ async def x_callback(request: Request, body: XCallbackRequest):
     refresh_token = tokens.get("refresh_token")
     
     # Get X user info
-    async with httpx.AsyncClient() as client:
-        user_response = await client.get(
-            X_USER_URL,
-            headers={"Authorization": f"Bearer {access_token}"},
-            params={"user.fields": "username,name,profile_image_url"}
-        )
+    # Addiing retry logic for 503 error 
+    retries = 3
+    delay = 2   # seconds
 
-        if user_response.status_code == 503:
-            logger.error(f"X API is unavailable (503): {user_response.text}")
-            raise HTTPException(status_code=503, 
-                                detail="X API is temporarily unavailable. Please try again in few minutes.")
+    for attempt in range(retries):
+        async with httpx.AsyncClient() as client:
+            user_response = await client.get(
+                X_USER_URL,
+                headers={"Authorization": f"Bearer {access_token}"},
+                params={"user.fields": "username,name,profile_image_url"}
+            )
+            if user_response.status_code == 200:
+                x_user = user_response.json().get("data", {})
+                break
+
+            elif user_response.status_code == 503 and attempt < retries - 1:
+                time.sleep(delay)
+                continue
+            else:
+                logger.error(f"Failed to get X user: {user_response.text}")
+                raise HTTPException(status_code=400, detail="Failed to get X user info")
+            
+           
         
-        if user_response.status_code != 200:
-            logger.error(f"Failed to get X user: {user_response.text}")
-            raise HTTPException(status_code=400, detail="Failed to get X user info")
-        
-        x_user = user_response.json().get("data", {})
-    
     # Store tokens and X user info
     try:
         admin = get_supabase(admin=True)
