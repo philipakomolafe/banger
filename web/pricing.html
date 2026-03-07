@@ -28,11 +28,11 @@
         .back-link {
             display: inline-block;
             margin-bottom: 32px;
-            color: #555;
+            color: #888;
             text-decoration: none;
             font-size: 14px;
         }
-        .back-link:hover { color: #000; }
+        .back-link:hover { opacity: 0.8; }
         h1 {
             font-size: 2rem;
             font-weight: 700;
@@ -40,7 +40,7 @@
         }
         .subtitle {
             font-size: 1rem;
-            color: #555;
+            color: #888;
             margin-bottom: 48px;
         }
         .plans {
@@ -53,13 +53,13 @@
             .plans { grid-template-columns: 1fr; }
         }
         .plan-card {
-            border: 1.5px solid #e0e0e0;
+            border: 1.5px solid rgba(255,255,255,0.12);
             border-radius: 10px;
             padding: 28px 24px;
         }
         .plan-card.pro {
-            border-color: #000;
-            background: #fafafa;
+            border-color: rgba(255,255,255,0.4);
+            background: rgba(255,255,255,0.04);
         }
         .plan-name {
             font-size: 1.1rem;
@@ -74,11 +74,11 @@
         .plan-price span {
             font-size: 0.95rem;
             font-weight: 400;
-            color: #777;
+            opacity: 0.6;
         }
         .plan-desc {
             font-size: 0.88rem;
-            color: #666;
+            opacity: 0.6;
             margin-bottom: 20px;
         }
         .plan-features {
@@ -88,9 +88,8 @@
         }
         .plan-features li {
             font-size: 0.92rem;
-            color: #333;
             padding: 5px 0;
-            border-bottom: 1px solid #f0f0f0;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
             display: flex;
             align-items: center;
             gap: 8px;
@@ -98,19 +97,18 @@
         .plan-features li::before {
             content: "✓";
             font-weight: 700;
-            color: #000;
         }
         .plan-features li.no::before {
             content: "✕";
-            color: #ccc;
+            opacity: 0.3;
         }
         .plan-features li.no {
-            color: #aaa;
+            opacity: 0.4;
         }
         .plan-badge {
             display: inline-block;
-            background: #000;
-            color: #fff;
+            background: rgba(255,255,255,0.9);
+            color: #000;
             font-size: 0.72rem;
             font-weight: 600;
             padding: 2px 8px;
@@ -127,36 +125,34 @@
             font-weight: 600;
             text-align: center;
             cursor: pointer;
-            border: 1.5px solid #000;
+            border: 1.5px solid rgba(255,255,255,0.4);
             text-decoration: none;
             box-sizing: border-box;
         }
         .cta-btn.primary {
-            background: #000;
-            color: #fff;
-        }
-        .cta-btn.secondary {
             background: #fff;
             color: #000;
+        }
+        .cta-btn.secondary {
+            background: transparent;
         }
         .policy-nav {
             display: flex;
             gap: 16px;
             flex-wrap: wrap;
             padding: 16px;
-            background: #f9f9f9;
+            background: rgba(255,255,255,0.05);
             border-radius: 6px;
             margin-bottom: 32px;
         }
         .policy-nav a {
             font-size: 0.9rem;
             font-weight: 500;
-            color: #000;
             text-decoration: underline;
         }
         .highlight-box {
-            background: #f9f9f9;
-            border-left: 3px solid #000;
+            background: rgba(255,255,255,0.05);
+            border-left: 3px solid currentColor;
             padding: 14px 18px;
             border-radius: 4px;
             margin: 24px 0;
@@ -164,7 +160,7 @@
         }
         hr {
             border: none;
-            border-top: 1px solid #eee;
+            border-top: 1px solid rgba(255,255,255,0.1);
             margin: 40px 0;
         }
         .faq h2 {
@@ -182,7 +178,7 @@
         }
         .faq-item p {
             font-size: 0.93rem;
-            color: #555;
+            opacity: 0.7;
             margin: 0;
         }
     </style>
@@ -271,7 +267,7 @@
 
             <div class="faq-item">
                 <strong>Do you offer refunds?</strong>
-                <p>We offer refunds within 7 days if you experience a technical issue that
+                <p>We offer refunds within 14 days if you experience a technical issue that
                 prevents you from using the service. See our
                 <a href="/web/refund.html">Refund Policy</a> for details.</p>
             </div>

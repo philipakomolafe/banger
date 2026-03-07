@@ -70,12 +70,14 @@
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
-      padding: 0 40px;
+      width: 100%;
+      padding: 0;
     }
 
     .topnav-inner {
       width: 100%;
-      max-width: 1200px;
+      max-width: 100%;
+      padding: 0 40px;
       margin: 0 auto;
       display: flex;
       align-items: center;
@@ -169,7 +171,8 @@
     .nav-hamburger:hover span { background: var(--text); }
 
     @media (max-width: 720px) {
-      .topnav { padding: 0 20px; }
+      .topnav { padding: 0; }
+      .topnav-inner { padding: 0 20px; }
       .nav-center { display: none; }
       .nav-right a.nav-signin { display: none; }
       .nav-hamburger { display: flex; }
@@ -689,7 +692,7 @@
 
       <!-- HERO -->
       <section class="hero">
-        <div class="hero-badge">🔥 Used by 500+ indie builders</div>
+        <div class="hero-badge">🔥 Now in early access</div>
 
         <h1 class="hero-title">
           Turn Messy Build Notes<br>into Viral X Posts
@@ -712,20 +715,20 @@
       <!-- STATS -->
       <div class="stats-strip">
         <div class="stat-cell">
-          <div class="stat-num">47%</div>
-          <div class="stat-lbl">Avg. engagement boost</div>
+          <div class="stat-num">3</div>
+          <div class="stat-lbl">Posts generated / day (free)</div>
         </div>
         <div class="stat-cell">
-          <div class="stat-num">5min</div>
-          <div class="stat-lbl">Saved per post</div>
+          <div class="stat-num">&lt;60s</div>
+          <div class="stat-lbl">From notes to post</div>
         </div>
         <div class="stat-cell">
-          <div class="stat-num">500+</div>
-          <div class="stat-lbl">Builders using Banger</div>
+          <div class="stat-num">$0</div>
+          <div class="stat-lbl">To get started</div>
         </div>
         <div class="stat-cell">
-          <div class="stat-num">4.8★</div>
-          <div class="stat-lbl">User rating</div>
+          <div class="stat-num">$19</div>
+          <div class="stat-lbl">Pro / month</div>
         </div>
       </div>
 
